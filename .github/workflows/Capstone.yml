@@ -1,0 +1,42 @@
+name: Capstone
+on: [push]
+jobs:
+  dependencies:
+    runs-on:  ubuntu-latest
+    steps:
+      - name: install cmake
+        run:  sudo apt install cmake
+
+  runs:
+    needs:    dependencies
+    runs-on:  ubuntu-latest
+    steps:
+      - name: install google logging library
+        run:  sudo apt install -y libgoogle-glog-dev
+      - uses: actions/checkout@v2
+      - name: configure cmake
+        run:  cmake -H. -Bbuild
+      - name: Build src and lib files
+        run:  cmake --build build --target Capstone
+      - name: Run the benchmarks
+        run: ./build/Capstone
+
+  tests:
+    needs:    dependencies
+    runs-on:  ubuntu-latest
+    steps:
+      - name: install google logging library
+        run:  sudo apt install -y libgoogle-glog-dev
+      - name: download catch2 v2
+        run:  git clone -b v2.x https://github.com/catchorg/Catch2.git
+      - name: setup catch2
+        run:  cmake -BCatch2/build -HCatch2 -DBUILD_TESTING=OFF
+      - name: build and install catch2
+        run: sudo cmake --build Catch2/build --target install
+      - uses: actions/checkout@v2
+      - name: configure cmake
+        run:  cmake -H. -Bbuild
+      - name: Build test files
+        run:  cmake --build build --target Test
+      - name: Run the tests
+        run: ./build/Test

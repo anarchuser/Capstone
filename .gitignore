@@ -1,0 +1,7 @@
+# Exclude IDE config files
+/.idea
+
+# Exclude temporary / build directories
+/*build*
+/*tmp*
+
