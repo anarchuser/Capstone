@@ -6,6 +6,8 @@ jobs:
     steps:
       - name: install cmake
         run:  sudo apt install cmake
+      - name: install SDL2
+        run:  sudo apt install libsdl2-dev
 
   runs:
     needs:    dependencies
