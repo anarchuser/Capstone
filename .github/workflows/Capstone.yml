@@ -6,8 +6,6 @@ jobs:
     steps:
       - name: install cmake
         run:  sudo apt install cmake
-      - name: install SDL2
-        run:  sudo apt install libsdl2-dev
 
   runs:
     needs:    dependencies
@@ -15,6 +13,8 @@ jobs:
     steps:
       - name: install google logging library
         run:  sudo apt install -y libgoogle-glog-dev
+      - name: install SDL2
+        run:  sudo apt install libsdl2-dev
       - uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -31,6 +31,8 @@ jobs:
     steps:
       - name: install google logging library
         run:  sudo apt install -y libgoogle-glog-dev
+      - name: install SDL2
+        run:  sudo apt install libsdl2-dev
       - name: download catch2 v2
         run:  git clone -b v2.x https://github.com/catchorg/Catch2.git
       - name: setup catch2
