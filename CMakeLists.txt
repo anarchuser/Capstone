@@ -3,7 +3,7 @@ project(Capstone)
 
 # Language specs
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_COMPILER /usr/bin/g++)
+#set(CMAKE_CXX_COMPILER /usr/bin/g++)
 
 # Linker & compiler flags
 set(CMAKE_REQUIRED_LIBRARIES "-lglog")
