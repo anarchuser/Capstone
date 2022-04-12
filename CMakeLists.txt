@@ -47,6 +47,8 @@ IF (Catch2_FOUND)
 
     add_compile_definitions(Test PRIVATE ERRORS_AS_WARNINGS)
 
+    target_link_libraries(Test PRIVATE ${OXYGINE_CORE_LIBS})
+
     target_link_libraries(Test PRIVATE Catch2::Catch2)
     include(CTest)
     include(Catch)
