@@ -19,6 +19,10 @@
 }; true
 #endif
 
+#include <filesystem>
+namespace fs = std::filesystem;
+fs::path const DATA_DIR = PROJECT_ROOT "/data";
+
 #endif //Capstone_CONFIG_H
 
 /* Copyright (C) 2022 Aaron Alef */
