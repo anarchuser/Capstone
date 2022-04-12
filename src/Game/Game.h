@@ -23,8 +23,10 @@ namespace kt {
     using namespace oxygine;
 
     /// Set of static methods to initialise oxygine and start the game
-    class Game {
+    class Game final {
     public:
+        Game() = delete;
+
         /// Initialise oxygine (set window properties, create root node)
         static void init ();
 
