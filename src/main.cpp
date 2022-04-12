@@ -1,13 +1,26 @@
-/**
-    Attention!
-    This file initializes the Oxygine engine.
-    If you just started here and don't understand the code completely, feel free to come back later.
-    You can start from example.cpp and example.h, which main functions are called from here.
-*/
+/* Copyright (C) 2022 Aaron Alef <aaron.alef@code.berlin>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (e.g., ./LICENSE).
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "ox/oxygine.hpp"
 #include "ox/Stage.hpp"
 #include "ox/DebugActor.hpp"
 #include "example/example.h"
+
+#include <iostream>
 
 #include "config.h"
 
