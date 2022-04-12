@@ -6,13 +6,13 @@ jobs:
     steps:
       - name: install cmake
         run:  sudo apt install cmake
+      - name: install google logging library
+        run:  sudo apt install -y libgoogle-glog-dev
 
   runs:
     needs:    dependencies
     runs-on:  ubuntu-latest
     steps:
-      - name: install google logging library
-        run:  sudo apt install -y libgoogle-glog-dev
       - uses: actions/checkout@v2
       - name: configure cmake
         run:  cmake -H. -Bbuild
@@ -25,8 +25,6 @@ jobs:
     needs:    dependencies
     runs-on:  ubuntu-latest
     steps:
-      - name: install google logging library
-        run:  sudo apt install -y libgoogle-glog-dev
       - name: download catch2 v2
         run:  git clone -b v2.x https://github.com/catchorg/Catch2.git
       - name: setup catch2

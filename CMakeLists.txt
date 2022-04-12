@@ -25,7 +25,7 @@ target_link_libraries(Capstone glog)
 set(OpenGL_GL_PREFERENCE GLVND)
 
 # Oxygine Config
-add_subdirectory(/opt/oxygine/oxygine-framework/ oxygine-framework)
+add_subdirectory(oxygine-framework oxygine-framework)
 add_definitions(${OXYGINE_DEFINITIONS})
 include_directories(${OXYGINE_INCLUDE_DIRS})
 link_directories(${OXYGINE_LIBRARY_DIRS})
