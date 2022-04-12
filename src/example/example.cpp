@@ -1,12 +1,11 @@
 #include "oxygine-framework.h"
 #include "example.h"
-#include <functional>
 
 using namespace oxygine;
 
 //it is our resources
 //in real project you would have more than one Resources declarations.
-//It is important on mobile devices with limited memory and you would load/unload them
+//It is important on mobile devices with limited memory, and you would load/unload them
 Resources gameResources;
 
 
@@ -20,7 +19,6 @@ public:
     {
         //create button Sprite
         spSprite button = new Sprite();
-
 
         //setup it:
         //set button.png image. Resource 'button' defined in 'res.xml'
@@ -73,7 +71,7 @@ public:
     {
         //user clicked to button
 
-        //animate button by chaning color
+        //animate button by changing color
         _button->setColor(Color::White);
         _button->addTween(Sprite::TweenColor(Color::Green), 500, 1, true);
 
@@ -84,7 +82,7 @@ public:
         //and change text
         _text->setText("Clicked!");
 
-        //lets create and run sprite with simple animation
+        //let's create and run sprite with simple animation
         runSprite();
     }
 
@@ -151,7 +149,7 @@ void example_init()
     gameResources.loadXML(DATA_DIR / "res.xml");
 
 
-    //lets create our client code simple actor
+    //let's create our client code simple actor
     //spMainActor was defined above as smart intrusive pointer (read more: http://www.boost.org/doc/libs/1_60_0/libs/smart_ptr/intrusive_ptr.html)
     spMainActor actor = new MainActor;
 
