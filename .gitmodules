@@ -1,6 +1,6 @@
+[submodule "oxygine-framework"]
+	path = oxygine-framework
+	url = https://github.com/oxygine/oxygine-framework
 [submodule "SDL"]
 	path = SDL
 	url = https://github.com/oxygine/SDL
-[submodule "oxygine-framework"]
-	path = oxygine-framework
-	url = https://github.com/oxygine/oxygine-framework.git
