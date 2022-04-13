@@ -13,10 +13,8 @@
 
 using namespace oxygine;
 
-int Main (int argc, char * argv[]) {
+int setupGlog (int argc, char * argv[]) {
     google::InitGoogleLogging (argv[0]);
-
-    LOG (INFO) << "Hello World";
 }
 
 // This function is called each frame
@@ -140,7 +138,7 @@ extern "C"
 
     int main(int argc, char* argv[])
     {
-        Main (argc, argv);
+        setupGlog (argc, argv);
         run();
 
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR
