@@ -11,8 +11,8 @@ set(CMAKE_CXX_FLAGS "-fconcepts")
 
 # List source files and define target
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
-list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp.old)
-add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp.old ${PROJECT_SOURCE_DIR}/config.h ${SRCS})
+list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp)
+add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS})
 
 add_compile_definitions(Capstone PROJECT_ROOT="${PROJECT_SOURCE_DIR}")
 
