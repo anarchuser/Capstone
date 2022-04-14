@@ -18,14 +18,8 @@ typedef oxygine::intrusive_ptr<sw::MainActor> spMainActor;
 void sw::actor_preinit() {}
 
 //called from main.cpp
-void sw::actor_init()
-{
-    //let's create our client code simple actor
-    //spMainActor was defined above as smart intrusive pointer (read more: http://www.boost.org/doc/libs/1_60_0/libs/smart_ptr/intrusive_ptr.html)
-    spMainActor actor = new sw::MainActor;
-
-    //and add it to Stage as child
-    ox::getStage()->addChild(actor);
+void sw::actor_init() {
+    sw::MainActor::gameResources.loadXML (PROJECT_ROOT "/src/swipable/data");
 }
 
 

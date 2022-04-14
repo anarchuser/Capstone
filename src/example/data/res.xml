@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <resources>
-	<set path = ".images" />
+	<set path = "./images" />
 	<atlas>
 		<image file="anim.png" cols = "8" />
 		<image file="button.png"/>
