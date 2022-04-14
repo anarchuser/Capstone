@@ -31,7 +31,7 @@ using namespace ph;
 
 using namespace oxygine;
 
-int setupGlog (int argc, char * argv[]) {
+void setupGlog (int argc, char * argv[]) {
     google::InitGoogleLogging (argv[0]);
 }
 

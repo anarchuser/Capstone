@@ -33,6 +33,11 @@ include_directories(${OXYGINE_INCLUDE_DIRS})
 link_directories(${OXYGINE_LIBRARY_DIRS})
 target_link_libraries(Capstone ${OXYGINE_CORE_LIBS})
 
+# Box2d
+file(GLOB_RECURSE BOX2D_SRC box2d/*.cpp box2d/*.h)
+source_group(box2d FILES ${BOX2D_SRC})
+include_directories(box2d)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS}")
 
 if (EMSCRIPTEN)
