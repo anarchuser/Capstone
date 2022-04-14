@@ -22,8 +22,8 @@ jobs:
         run:  cmake -H. -Bbuild
       - name: Build src and lib files
         run:  cmake --build build --target Capstone
-      - name: Run the benchmarks
-        run: ./build/Capstone
+#      - name: Run the benchmarks
+#        run: ./build/Capstone
 
   tests:
     needs: dependencies
