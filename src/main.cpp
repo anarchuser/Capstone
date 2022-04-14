@@ -1,13 +1,29 @@
-/**
-    Attention!
-    This file initializes the Oxygine engine.
-    If you just started here and don't understand the code completely, feel free to come back later.
-    You can start from example.cpp and example.h, which main functions are called from here.
-*/
+/* Copyright (C) 2022 Aaron Alef <aaron.alef@code.berlin>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program (e.g., ./LICENSE).
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "ox/oxygine.hpp"
 #include "ox/Stage.hpp"
 #include "ox/DebugActor.hpp"
-#include "example/example.h"
+
+//#include "example/example.h"
+#include "click_box/click_box.h"
+using namespace cb;
+
+#include <iostream>
 
 #include "config.h"
 
@@ -25,8 +41,8 @@ int mainloop()
     // If the function returns true, it means that the user requested the application to terminate
     bool done = core::update();
 
-    // It gets passed to our example game implementation
-    example_update();
+    // It gets passed to our click_box game implementation
+    click_box_update();
 
     // Update our stage
     // Update all actors. Actor::update will also be called for all its children
@@ -59,7 +75,7 @@ void run()
     desc.h = 640;
 
 
-    example_preinit();
+    click_box_preinit();
     core::init(&desc);
 
 
@@ -71,8 +87,8 @@ void run()
     // DebugActor is a helper actor node. It shows FPS, memory usage and other useful stuff
     DebugActor::show();
 
-    // Initializes our example game. See example.cpp
-    example_init();
+    // Initializes our click_box game. See click_box.cpp
+    click_box_init();
 
 #ifdef EMSCRIPTEN
     /*
@@ -109,8 +125,8 @@ void run()
     But now we want to delete it by hand.
     */
 
-    // See example.cpp for the shutdown function implementation
-    example_destroy();
+    // See click_box.cpp for the shutdown function implementation
+    click_box_destroy();
 
 
     //renderer.cleanup();
