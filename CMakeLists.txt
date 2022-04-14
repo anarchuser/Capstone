@@ -27,16 +27,15 @@ target_link_libraries(Capstone glog)
 set(OpenGL_GL_PREFERENCE GLVND)
 
 # Oxygine Config
-add_subdirectory(oxygine-framework oxygine-framework)
+add_subdirectory(oxygine-framework)
 add_definitions(${OXYGINE_DEFINITIONS})
 include_directories(${OXYGINE_INCLUDE_DIRS})
 link_directories(${OXYGINE_LIBRARY_DIRS})
 target_link_libraries(Capstone ${OXYGINE_CORE_LIBS})
 
 # Box2d
-file(GLOB_RECURSE BOX2D_SRC box2d/*.cpp box2d/*.h)
-source_group(box2d FILES ${BOX2D_SRC})
-include_directories(box2d)
+include_directories(box2d/include/box2d)
+target_link_libraries(Capstone box2d)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS}")
 
@@ -55,6 +54,8 @@ IF (Catch2_FOUND)
     add_compile_definitions(Test PRIVATE ERRORS_AS_WARNINGS)
 
     target_link_libraries(Test PRIVATE ${OXYGINE_CORE_LIBS})
+
+    target_link_libraries(Test PRIVATE box2d)
 
     target_link_libraries(Test PRIVATE Catch2::Catch2)
     include(CTest)

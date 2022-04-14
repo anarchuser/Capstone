@@ -15,6 +15,9 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+#include "game_config.h"
+
 #include "ox/oxygine.hpp"
 #include "ox/Stage.hpp"
 #include "ox/DebugActor.hpp"
@@ -25,14 +28,10 @@
 #include "physics/physics.h"
 using namespace ph;
 
-#include <iostream>
-
-#include "config.h"
-
 using namespace oxygine;
 
-void setupGlog (int argc, char * argv[]) {
-    google::InitGoogleLogging (argv[0]);
+void setupGlog (char * program_name) {
+    google::InitGoogleLogging (program_name);
 }
 
 // This function is called each frame
@@ -73,13 +72,11 @@ void run()
     desc.title = "Oxygine Application";
 
     // The initial window size can be set up here on SDL builds, ignored on Mobile devices
-    desc.w = 960;
-    desc.h = 640;
-
+    desc.w = WINDOW_WIDTH;
+    desc.h = WINDOW_HEIGHT;
 
     actor_preinit();
     core::init(&desc);
-
 
     // Create the stage. Stage is a root node for all updateable and drawable objects
     Stage::instance = new Stage();
@@ -134,14 +131,13 @@ void run()
 #include "SDL_main.h"
 #include "SDL.h"
 
-extern "C"
-{
+extern "C" {
     void one(void* param) { mainloop(); }
     void oneEmsc() { mainloop(); }
 
     int main(int argc, char* argv[])
     {
-        setupGlog (argc, argv);
+        setupGlog (argv[0]);
         run();
 
 #if TARGET_OS_IPHONE || TARGET_OS_SIMULATOR

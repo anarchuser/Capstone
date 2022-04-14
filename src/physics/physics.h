@@ -1,24 +1,17 @@
 #ifndef CP_PHYSICS_H
 #define CP_PHYSICS_H
 
-#include "oxygine-framework.h"
-
 #include "config.h"
+
+#include <memory>
+
+#include "oxygine-framework.h"
+#include "box2d.h"
+
+#include "MainActor/MainActor.h"
 
 namespace ph {
     using namespace oxygine;
-
-    class MainActor : public Actor {
-    public:
-        static Resources gameResources;
-
-        MainActor ();
-    };
-
-    //declare spMainActor as intrusive_ptr holder of MainActor
-    typedef oxygine::intrusive_ptr<MainActor> spMainActor;
-    //you could use DECLARE_SMART preprocessor definition it does the same:
-    //DECLARE_SMART(MainActor, spMainActor)
 
     void actor_preinit();
     void actor_init();
