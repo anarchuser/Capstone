@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <resources>
 	<set path = "./images" />
+	<set scale_factor = "3.0f"/>
 	<atlas>
 		<image file="img1.png"/>
 		<image file="img2.png"/>

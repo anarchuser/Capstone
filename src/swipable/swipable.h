@@ -10,18 +10,9 @@ namespace sw {
 
     class MainActor : public Actor {
     public:
-        spTextField _text;
-        spSprite _button;
-
         static Resources gameResources;
 
         MainActor ();
-
-        void buttonClicked (Event * event);
-
-        void buttonOverOut (Event * e) const;
-
-        void runSprite ();
     };
 
     //declare spMainActor as intrusive_ptr holder of MainActor
@@ -34,7 +25,6 @@ namespace sw {
     void actor_destroy();
     void actor_update();
     void actor_flush();
-
 }
 
 #endif//CP_SWIPABLE_H
