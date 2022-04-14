@@ -6,6 +6,8 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
+#include "physics/Spaceship/Spaceship.h"
+
 namespace ph {
     using namespace oxygine;
 
@@ -18,6 +20,8 @@ namespace ph {
 
         MainActor();
         ~MainActor() noexcept override;
+
+        void doUpdate (const UpdateState& us) override;
     };
 
     DECLARE_SMART(MainActor, spMainActor);

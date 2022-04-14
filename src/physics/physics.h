@@ -11,6 +11,7 @@
 #include "MainActor/MainActor.h"
 
 namespace ph {
+
     using namespace oxygine;
 
     void actor_preinit();
@@ -18,6 +19,8 @@ namespace ph {
     void actor_destroy();
     void actor_update();
     void actor_flush();
+
+    void onEvent (Event * ev);
 }
 
 #endif//CP_PHYSICS_H

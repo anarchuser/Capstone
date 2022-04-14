@@ -69,7 +69,7 @@ void run()
 
     // Initialize Oxygine's internal stuff
     core::init_desc desc;
-    desc.title = "Oxygine Application";
+    desc.title = "Physics test";
 
     // The initial window size can be set up here on SDL builds, ignored on Mobile devices
     desc.w = WINDOW_WIDTH;
