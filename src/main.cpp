@@ -112,24 +112,9 @@ void run()
         if (done)
             break;
     }
-    /*
-     If we get here, the user has requested the Application to terminate.
-     We dump and log all our created objects that have not been freed yet
-    */
-    ObjectBase::dumpCreatedObjects();
-
-    /*
-    Let's clean up everything right now and call ObjectBase::dumpObjects() again.
-    We need to free all allocated resources and delete all created actors.
-    All actors/sprites are smart-pointer objects and don't need to be removed by hand.
-    But now we want to delete it by hand.
-    */
 
     // See click_box.cpp for the shutdown function implementation
     click_box_destroy();
-
-
-    //renderer.cleanup();
 
     // Releases all internal components and the stage
     core::release();
