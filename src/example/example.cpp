@@ -124,7 +124,6 @@ namespace ex {
             tweenQueue->detachWhenDone ();
         }
     };
-}
 
 //declare spMainActor as intrusive_ptr holder of MainActor
 typedef oxygine::intrusive_ptr<ex::MainActor> spMainActor;
@@ -164,4 +163,5 @@ void example_destroy()
 {
     //free previously loaded resources
     ex::MainActor::gameResources.free();
+}
 }

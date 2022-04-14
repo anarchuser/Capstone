@@ -5,7 +5,7 @@
 
 #include "config.h"
 
-namespace cb {
+namespace sw {
     using namespace oxygine;
 
     class MainActor : public Actor {
@@ -24,23 +24,16 @@ namespace cb {
         void runSprite ();
     };
 
-    struct Root : public ColorRectSprite {
-        void boxClick(Event *);
-        void rootClick(Event *);
-        void stageClick(Event *);
-        Root();
-    };
-
     //declare spMainActor as intrusive_ptr holder of MainActor
-    typedef oxygine::intrusive_ptr<cb::MainActor> spMainActor;
+    typedef oxygine::intrusive_ptr<sw::MainActor> spMainActor;
     //you could use DECLARE_SMART preprocessor definition it does the same:
     //DECLARE_SMART(MainActor, spMainActor)
 
-    void swipable_preinit();
-    void swipable_init();
-    void swipable_destroy();
-    void swipable_update();
-    void swipable_flush();
+    void actor_preinit();
+    void actor_init();
+    void actor_destroy();
+    void actor_update();
+    void actor_flush();
 
 }
 

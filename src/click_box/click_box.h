@@ -36,11 +36,11 @@ namespace cb {
     //you could use DECLARE_SMART preprocessor definition it does the same:
     //DECLARE_SMART(MainActor, spMainActor)
 
-    void click_box_preinit();
-    void click_box_init();
-    void click_box_destroy();
-    void click_box_update();
-    void click_box_flush();
+    void actor_preinit();
+    void actor_init();
+    void actor_destroy();
+    void actor_update();
+    void actor_flush();
 
 }
 
