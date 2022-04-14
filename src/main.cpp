@@ -22,7 +22,8 @@
 #include "example/example.h"
 #include "click_box/click_box.h"
 #include "swipable/swipable.h"
-using namespace sw;
+#include "physics/physics.h"
+using namespace ph;
 
 #include <iostream>
 

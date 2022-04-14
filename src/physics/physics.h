@@ -1,11 +1,11 @@
-#ifndef CP_SWIPABLE_H
-#define CP_SWIPABLE_H
+#ifndef CP_PHYSICS_H
+#define CP_PHYSICS_H
 
 #include "oxygine-framework.h"
 
 #include "config.h"
 
-namespace sw {
+namespace ph {
     using namespace oxygine;
 
     class MainActor : public Actor {
@@ -27,4 +27,4 @@ namespace sw {
     void actor_flush();
 }
 
-#endif//CP_SWIPABLE_H
+#endif//CP_PHYSICS_H
