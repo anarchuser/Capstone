@@ -19,7 +19,11 @@ void sw::actor_preinit() {}
 
 //called from main.cpp
 void sw::actor_init() {
-    sw::MainActor::gameResources.loadXML (PROJECT_ROOT "/src/swipable/data");
+    sw::MainActor::gameResources.loadXML (PROJECT_ROOT "/src/swipable/data/res.xml");
+
+    ox::spSprite sprite = new ox::Sprite;
+    sprite->setResAnim (sw::MainActor::gameResources.getResAnim ("img1"));
+    sprite->attachTo (ox::getStage());
 }
 
 

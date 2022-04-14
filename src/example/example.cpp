@@ -133,15 +133,15 @@ typedef oxygine::intrusive_ptr<ex::MainActor> spMainActor;
 
 Resources ex::MainActor::gameResources = Resources();
 
-void example_preinit()
+void actor_preinit()
 {
 }
 
 //called from main.cpp
-void example_init()
+void actor_init()
 {
     //load xml file with resources definition
-    ex::MainActor::gameResources.loadXML(PROJECT_ROOT "/example/res.xml");
+    ex::MainActor::gameResources.loadXML(PROJECT_ROOT "/src/example/data/res.xml");
 
 
     //let's create our client code simple actor
@@ -154,12 +154,12 @@ void example_init()
 
 
 //called each frame from main.cpp
-void example_update()
+void actor_update()
 {
 }
 
 //called each frame from main.cpp
-void example_destroy()
+void actor_destroy()
 {
     //free previously loaded resources
     ex::MainActor::gameResources.free();
