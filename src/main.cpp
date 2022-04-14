@@ -19,9 +19,10 @@
 #include "ox/Stage.hpp"
 #include "ox/DebugActor.hpp"
 
-//#include "example/example.h"
+#include "example/example.h"
 #include "click_box/click_box.h"
-using namespace cb;
+#include "swipable/swipable.h"
+using namespace sw;
 
 #include <iostream>
 
@@ -42,7 +43,7 @@ int mainloop()
     bool done = core::update();
 
     // It gets passed to our click_box game implementation
-    click_box_update();
+    actor_update();
 
     // Update our stage
     // Update all actors. Actor::update will also be called for all its children
@@ -75,7 +76,7 @@ void run()
     desc.h = 640;
 
 
-    click_box_preinit();
+    actor_preinit();
     core::init(&desc);
 
 
@@ -88,7 +89,7 @@ void run()
     DebugActor::show();
 
     // Initializes our click_box game. See click_box.cpp
-    click_box_init();
+    actor_init();
 
 #ifdef EMSCRIPTEN
     /*
@@ -112,24 +113,9 @@ void run()
         if (done)
             break;
     }
-    /*
-     If we get here, the user has requested the Application to terminate.
-     We dump and log all our created objects that have not been freed yet
-    */
-    ObjectBase::dumpCreatedObjects();
-
-    /*
-    Let's clean up everything right now and call ObjectBase::dumpObjects() again.
-    We need to free all allocated resources and delete all created actors.
-    All actors/sprites are smart-pointer objects and don't need to be removed by hand.
-    But now we want to delete it by hand.
-    */
 
     // See click_box.cpp for the shutdown function implementation
-    click_box_destroy();
-
-
-    //renderer.cleanup();
+    actor_destroy();
 
     // Releases all internal components and the stage
     core::release();

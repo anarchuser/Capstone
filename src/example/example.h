@@ -3,10 +3,16 @@
 
 #include "config.h"
 
-void example_preinit();
-void example_init();
-void example_destroy();
-void example_update();
-void example_flush();
+namespace ex {
+    void actor_preinit ();
+
+    void actor_init ();
+
+    void actor_destroy ();
+
+    void actor_update ();
+
+    void actor_flush ();
+}
 
 #endif//CP_EXAMPLE_H
