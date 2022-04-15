@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <resources>
 	<set path = "./images" />
-	<set scale_factor = "4.0f"/>
+	<set scale_factor = "0.05f"/>
 	<atlas>
 		<image file="spaceship.png"/>
 	</atlas>

@@ -7,6 +7,7 @@
 #include "box2d.h"
 
 #include "physics/Spaceship/Spaceship.h"
+#include "physics/box2d/Box2DDebugDraw.h"
 
 namespace ph {
     using namespace oxygine;
@@ -14,6 +15,7 @@ namespace ph {
     class MainActor : public Actor {
     private:
         b2World world;
+        spBox2DDraw _debugDraw;
 
     public:
         static Resources gameResources;
@@ -22,6 +24,8 @@ namespace ph {
         ~MainActor() noexcept override;
 
         void doUpdate (const UpdateState& us) override;
+
+        void toggleDebugDraw();
     };
 
     DECLARE_SMART(MainActor, spMainActor);

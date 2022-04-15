@@ -8,6 +8,16 @@ ph::MainActor::MainActor(): world(b2Vec2_zero) {
     auto res = ph::MainActor::gameResources.getResAnim ("spaceship");
     spSpaceship ship = new Spaceship (& world, res, getSize() / 2, 1);
     addChild (ship);
+
+    ox::getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
+        auto * _event = safeCast <KeyEvent *> (event);
+
+        switch (_event->data->keysym.scancode) {
+            case SDL_SCANCODE_GRAVE:
+                this->toggleDebugDraw();
+                break;
+        }
+    });
 }
 
 ph::MainActor::~MainActor () noexcept = default;
@@ -30,6 +40,25 @@ void ph::MainActor::doUpdate (const UpdateState & us) {
 
         body = next;
     }
+}
+
+void ph::MainActor::toggleDebugDraw () {
+    if (_debugDraw) {
+        logs::messageln ("disable debug draw");
+
+        _debugDraw->detach();
+        _debugDraw = nullptr;
+        return;
+    }
+
+    logs::messageln ("enable debug draw");
+
+    _debugDraw = new Box2DDraw;
+    //TODO: put flags somewhere else
+    _debugDraw->SetFlags (b2Draw::e_shapeBit | b2Draw::e_jointBit | b2Draw::e_pairBit | b2Draw::e_centerOfMassBit);
+    _debugDraw->attachTo (this);
+    _debugDraw->setWorld (SCALE, & world);
+    _debugDraw->setPriority (1);
 }
 
 /* Copyright © 2022 Aaron Alef */

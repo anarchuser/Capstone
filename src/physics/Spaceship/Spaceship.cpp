@@ -18,34 +18,43 @@ ph::Spaceship::Spaceship (b2World * world, oxygine::ResAnim * animation, Vector2
 
     setScale (scale);
 
-    b2PolygonShape triangle;
-    b2Vec2 corners[3];
-    corners[0].Set ( 0.0,  5.0);
-    corners[1].Set (-2.5, -5.0);
-    corners[2].Set ( 2.5, -5.0);
-    triangle.Set(corners, sizeof (corners) / 8);
 
-    b2FixtureDef fixtureDef;
-    fixtureDef.shape = & triangle;
-    fixtureDef.density = 1.0;
-    fixtureDef.friction = 1.0;
+    b2PolygonShape cone;
+    b2Vec2 triangle[3];
+    triangle[0].Set (-0.25, -0.25);
+    triangle[1].Set ( 0.50,  0.00);
+    triangle[2].Set (-0.25,  0.25);
+    cone.Set(triangle, sizeof (triangle) / 8);
 
-    body->CreateFixture (& fixtureDef);
+    b2FixtureDef coneFixture;
+    coneFixture.shape = & cone;
+    coneFixture.density = 1.0;
+    coneFixture.friction = 1.0;
+    body->CreateFixture (& coneFixture);
 
-    body->ApplyForceToCenter (b2Vec2(10, 10), false);
+    b2PolygonShape rear;
+    b2Vec2 trapezoid[4];
+    trapezoid[0].Set (-0.50,  0.50);
+    trapezoid[1].Set (-0.25,  0.25);
+    trapezoid[2].Set (-0.25, -0.25);
+    trapezoid[3].Set (-0.50, -0.50);
+    rear.Set(trapezoid, sizeof (trapezoid) / 8);
 
-    ph::instance = this;
+    b2FixtureDef rearFixture;
+    rearFixture.shape = & rear;
+    rearFixture.density = 1.0;
+    rearFixture.friction = 1.0;
+    body->CreateFixture (& rearFixture);
 
     ox::getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
         ph::instance->onSteeringEvent ((ox::KeyEvent *) event);
     });
+
+    ph::instance = this;
 }
 
 void ph::Spaceship::onSteeringEvent (ox::KeyEvent * event) {
-    if (event->type != ox::KeyEvent::KEY_DOWN) return;
-
     auto keysym = event->data->keysym;
-
     auto * body = (b2Body *) getUserData();
     auto angle = body->GetAngle();
     auto direction = b2Vec2 (cos (angle), sin (angle));
