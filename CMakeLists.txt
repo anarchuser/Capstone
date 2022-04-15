@@ -12,11 +12,13 @@ set(CMAKE_CXX_FLAGS "-fconcepts")
 # List source files and define target
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
 list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp)
-add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS})
+file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
+add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
 # Include every header
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/src/)
+include_directories(${PROJECT_SOURCE_DIR}/lib/)
 
 # Constants injected at compile time
 add_compile_definitions(Capstone PROJECT_ROOT="${PROJECT_SOURCE_DIR}")
