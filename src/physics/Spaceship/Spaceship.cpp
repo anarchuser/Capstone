@@ -87,18 +87,32 @@ void ph::Spaceship::update (oxygine::UpdateState const & us) {
     direction.Normalize();
 
     if (decelerate) {
-        //TODO: Figure out a break mechanic
+#if BRAKE_TYPE == BRAKE_TYPE_UNDIRECTED
+        auto velocity = body->GetLinearVelocity();
+        velocity.Normalize();
+        body->ApplyLinearImpulseToCenter (-FORCE * velocity, true);
+#elif BRAKE_TYPE == BRAKE_TYPE_DIRECTED
         body->ApplyLinearImpulseToCenter (-FORCE * direction, true);
+#endif
     } else if (accelerate) {
         body->ApplyLinearImpulseToCenter (FORCE * direction, true);
     }
+#if TORQUE_TYPE == TORQUE_TYPE_CENTERED
     if (rotateLeft && !rotateRight) {
-        //TODO: Don't rotate but apply impulse to left half of ship instead
         body->ApplyAngularImpulse (-TORQUE, true);
-    } else if (rotateRight && ! rotateLeft) {
-        //TODO: Don't rotate but apply impulse to right half of ship instead
+    } else if (rotateRight && !rotateLeft) {
         body->ApplyAngularImpulse (TORQUE, true);
     }
+#elif TORQUE_TYPE == TORQUE_TYPE_SIDE_IMPULSE
+    if (rotateLeft) {
+        auto leftRear = body->GetWorldPoint (b2Vec2 (-0.5, 0.25));
+        body->ApplyLinearImpulse (TORQUE * direction, leftRear, true);
+    }
+    if (rotateRight) {
+        auto rightRear = body->GetWorldPoint (b2Vec2 (-0.5, -0.25));
+        body->ApplyLinearImpulse (TORQUE * direction, rightRear, true);
+    }
+#endif
 
     Actor::update (us);
 }
