@@ -6,8 +6,8 @@
 
 #define SCALE           100.0f
 
-#define FORCE           0.1
-#define TORQUE          0.01
+#define FORCE           0.01
+#define TORQUE          0.001
 
 #endif //CAPSTONE_GAME_CONFIG_H
 

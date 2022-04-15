@@ -13,10 +13,20 @@ namespace ph {
     using namespace oxygine;
 
     class Spaceship: public Sprite {
+    private:
+        b2Body * body = nullptr;
+
+        bool accelerate  = false;
+        bool decelerate  = false;
+        bool rotateLeft  = false;
+        bool rotateRight = false;
+
     public:
         Spaceship (b2World * world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
 
         void onSteeringEvent (ox::KeyEvent * event);
+
+        void update (UpdateState const & us) override;
     };
 
     DECLARE_SMART(Spaceship, spSpaceship);
