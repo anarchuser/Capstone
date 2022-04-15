@@ -35,6 +35,7 @@ link_directories(${OXYGINE_LIBRARY_DIRS})
 target_link_libraries(Capstone ${OXYGINE_CORE_LIBS})
 
 # Box2d
+find_package(box2d REQUIRED)
 include_directories(box2d/include/box2d)
 target_link_libraries(Capstone box2d)
 
