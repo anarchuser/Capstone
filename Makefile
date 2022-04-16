@@ -1,8 +1,10 @@
 # Simple Makefile providing an interface for cmake. Oh, sweet irony
 
-BUILD_DIR = cmake-build-debug
+BUILD_DIR = build
 
-.PHONY = all setup build run test clean
+.PHONY = all build clean default run setup test
+
+default:	run
 
 # Clean, build, test, and run
 all:	clean	test	run
@@ -13,7 +15,7 @@ setup:	CMakeLists.txt
 
 # Build the project (lib and src)
 build:	setup
-	cmake --build $(BUILD_DIR) --target Capstone > /dev/zero
+	cmake --build $(BUILD_DIR) --target Capstone
 
 # Build the benchmarking tool
 run:	build
@@ -21,9 +23,9 @@ run:	build
 
 # Build and run the tests
 test:	build
-	cmake --build $(BUILD_DIR) --target Test > /dev/zero
+	cmake --build $(BUILD_DIR) --target Test
 	./$(BUILD_DIR)/Test
 
 # Clean all build files
 clean:
-	rm -r $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<resources>
+	<set path = "./images" />
+	<atlas>
+		<set scale_factor = "0.05f"/>
+		<image file="spaceship.png"/>
+		<set scale_factor = "0.114f"/>
+		<image file="venus.png"/>
+	</atlas>
+</resources>

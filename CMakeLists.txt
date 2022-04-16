@@ -12,13 +12,16 @@ set(CMAKE_CXX_FLAGS "-fconcepts")
 # List source files and define target
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
 list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp)
-add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS})
+file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
+add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
-add_compile_definitions(Capstone PROJECT_ROOT="${PROJECT_SOURCE_DIR}")
-
+# Include every header
+include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/src/)
-include_directories(${PROJECT_SOURCE_DIR}/test/)
-include_directories(${PROJECT_SOURCE_DIR}/)
+include_directories(${PROJECT_SOURCE_DIR}/lib/)
+
+# Constants injected at compile time
+add_compile_definitions(Capstone PROJECT_ROOT="${PROJECT_SOURCE_DIR}")
 
 # Google Logging Library
 target_link_libraries(Capstone glog)
@@ -27,11 +30,16 @@ target_link_libraries(Capstone glog)
 set(OpenGL_GL_PREFERENCE GLVND)
 
 # Oxygine Config
-add_subdirectory(oxygine-framework oxygine-framework)
+add_subdirectory(oxygine-framework)
 add_definitions(${OXYGINE_DEFINITIONS})
 include_directories(${OXYGINE_INCLUDE_DIRS})
 link_directories(${OXYGINE_LIBRARY_DIRS})
 target_link_libraries(Capstone ${OXYGINE_CORE_LIBS})
+
+# Box2d
+find_package(box2d REQUIRED)
+include_directories(box2d/include/box2d)
+target_link_libraries(Capstone box2d)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS}")
 
@@ -45,11 +53,13 @@ endif(EMSCRIPTEN)
 find_package(Catch2 CONFIG)
 IF (Catch2_FOUND)
     file(GLOB_RECURSE TEST_SRCS ${PROJECT_SOURCE_DIR}/test/*.c*)
-    add_executable(Test ${GEN_PROTO_FILES} ${TEST_SRCS} ${SRCS})
+    add_executable(Test ${GEN_PROTO_FILES} ${TEST_SRCS} ${SRCS} ${LIBS})
 
     add_compile_definitions(Test PRIVATE ERRORS_AS_WARNINGS)
 
     target_link_libraries(Test PRIVATE ${OXYGINE_CORE_LIBS})
+
+    target_link_libraries(Test PRIVATE box2d)
 
     target_link_libraries(Test PRIVATE Catch2::Catch2)
     include(CTest)

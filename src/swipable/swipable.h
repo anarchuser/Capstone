@@ -16,7 +16,7 @@ namespace sw {
     };
 
     //declare spMainActor as intrusive_ptr holder of MainActor
-    typedef oxygine::intrusive_ptr<sw::MainActor> spMainActor;
+    typedef oxygine::intrusive_ptr<MainActor> spMainActor;
     //you could use DECLARE_SMART preprocessor definition it does the same:
     //DECLARE_SMART(MainActor, spMainActor)
 
