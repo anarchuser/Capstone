@@ -36,8 +36,6 @@ void ph::MainActor::addPlanet () {
     auto res = ph::MainActor::gameResources.getResAnim ("venus");
     spPlanet planet = new Planet (& world, res, getRandomPos(), 0.5);
     addChild (planet);
-
-    logs::messageln ("Planet added at: %d, %d", planet->getPosition().x, planet->getPosition().y);
 }
 
 void ph::MainActor::doUpdate (const UpdateState & us) {

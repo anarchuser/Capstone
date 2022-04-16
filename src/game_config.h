@@ -16,6 +16,9 @@
 
 /// Density of planets dictates their gravitational pull
 #define DENSITY_PLANET  1000
+// TODO: fix workaround of static planets not having mass / size data
+/// Gravitational force, workaround
+#define GRAVITY_PLANET  (FORCE * 0.25)
 
 /// If this is defined, use this as seed
 //#define RNG_SEED        1

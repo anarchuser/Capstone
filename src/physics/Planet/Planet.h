@@ -16,6 +16,8 @@ namespace ph {
     public:
         Planet (b2World * world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
 
+        /// Each frame, apply gravitational force to each spaceship
+        void update (UpdateState const & us) override;
     };
 
     DECLARE_SMART(Planet, spPlanet);
