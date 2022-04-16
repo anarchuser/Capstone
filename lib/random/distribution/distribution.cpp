@@ -1,6 +1,6 @@
 #include "distribution.h"
 
-Distribution::Distribution(unsigned int SEED) : mt(SEED), SEED{SEED} {}
+Distribution::Distribution(unsigned int seed) : mt(seed), seed{seed} {}
 
 Distribution::~Distribution() = default;
 

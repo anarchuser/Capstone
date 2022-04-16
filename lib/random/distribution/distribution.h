@@ -4,10 +4,10 @@
 #include <random>
 
 struct Distribution {
-    explicit Distribution(unsigned int SEED);
+    explicit Distribution(unsigned int seed);
     virtual ~Distribution() = 0;
 
-    const unsigned long SEED;
+    unsigned long const seed;
     std::mt19937 mt;
 };
 

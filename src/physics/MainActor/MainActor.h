@@ -6,9 +6,12 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
+#include <cmath>
+
 #include "physics/Spaceship/Spaceship.h"
 #include "physics/Planet/Planet.h"
 #include "physics/box2d/Box2DDebugDraw.h"
+#include "random/random.h"
 
 namespace ph {
     using namespace oxygine;
@@ -17,6 +20,8 @@ namespace ph {
     private:
         b2World world;
         spBox2DDraw _debugDraw;
+
+        Vector2 getRandomPos ();
 
     public:
         static Resources gameResources;

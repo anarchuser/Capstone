@@ -25,12 +25,17 @@ ph::MainActor::MainActor(): world(b2Vec2_zero) {
 
 ph::MainActor::~MainActor () noexcept = default;
 
+Vector2 ph::MainActor::getRandomPos () {
+    static VectorT2<Uniform> rng {{0, getSize().x}, {0, getSize().y}};
+    return {float (rng.x.random()), float (rng.y.random())};
+}
+
 void ph::MainActor::addPlanet () {
     auto res = ph::MainActor::gameResources.getResAnim ("venus");
-    spPlanet planet = new Planet (& world, res, Vector2 (50, 50), 0.5);
+    spPlanet planet = new Planet (& world, res, getRandomPos(), 0.5);
     addChild (planet);
 
-    logs::messageln ("Planet added at: %d, %d", -1, -1);
+    logs::messageln ("Planet added at: %d, %d", planet->getPosition().x, planet->getPosition().y);
 }
 
 void ph::MainActor::doUpdate (const UpdateState & us) {

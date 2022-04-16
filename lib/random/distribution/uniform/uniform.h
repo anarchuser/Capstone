@@ -27,7 +27,7 @@ struct Uniform : Distribution {
             realDistribution(lowerBound, upperBound) {}
 
     /** Returns a double randomly generated uniformly between the two bounds, based on the internal seed of the distribution */
-    double rand() {return realDistribution(mt);}
+    double random() {return realDistribution(mt);}
 };
 
 
