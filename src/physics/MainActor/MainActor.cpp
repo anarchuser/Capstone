@@ -2,6 +2,8 @@
 
 ox::Resources ph::MainActor::gameResources = Resources();
 
+unsigned int const ph::MainActor::seed = generateSeed();
+
 ph::MainActor::MainActor(): world(b2Vec2_zero) {
     setSize(getStage()->getSize());
 
@@ -26,7 +28,7 @@ ph::MainActor::MainActor(): world(b2Vec2_zero) {
 ph::MainActor::~MainActor () noexcept = default;
 
 Vector2 ph::MainActor::getRandomPos () {
-    static VectorT2<Uniform> rng {{0, getSize().x}, {0, getSize().y}};
+    static VectorT2 <Uniform> rng {{0, getSize().x, seed}, {0, getSize().y, seed}};
     return {float (rng.x.random()), float (rng.y.random())};
 }
 

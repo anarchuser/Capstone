@@ -25,6 +25,7 @@ namespace ph {
 
     public:
         static Resources gameResources;
+        static unsigned int const seed;
 
         MainActor();
         ~MainActor() noexcept override;
