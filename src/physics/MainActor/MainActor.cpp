@@ -6,7 +6,7 @@ ph::MainActor::MainActor(): world(b2Vec2_zero) {
     setSize(getStage()->getSize());
 
     auto res = ph::MainActor::gameResources.getResAnim ("spaceship");
-    spSpaceship ship = new Spaceship (& world, res, getSize() / 2, 1);
+    spSpaceship ship = new Spaceship (& world, res, getSize() / 2, 0.5);
     addChild (ship);
 
     ox::getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
@@ -14,13 +14,24 @@ ph::MainActor::MainActor(): world(b2Vec2_zero) {
 
         switch (_event->data->keysym.scancode) {
             case SDL_SCANCODE_GRAVE:
-                this->toggleDebugDraw();
+                toggleDebugDraw();
+                break;
+            case SDL_SCANCODE_P:
+                addPlanet();
                 break;
         }
     });
 }
 
 ph::MainActor::~MainActor () noexcept = default;
+
+void ph::MainActor::addPlanet () {
+    auto res = ph::MainActor::gameResources.getResAnim ("venus");
+    spPlanet planet = new Planet (& world, res, Vector2 (50, 50), 0.5);
+    addChild (planet);
+
+    logs::messageln ("Planet added at: %d, %d", -1, -1);
+}
 
 void ph::MainActor::doUpdate (const UpdateState & us) {
     world.Step (1 / 60.0, 8, 3);

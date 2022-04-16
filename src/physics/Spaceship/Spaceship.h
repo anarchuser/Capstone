@@ -7,7 +7,7 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "../helper.h"
+#include "physics/helper.h"
 
 namespace ph {
     using namespace oxygine;

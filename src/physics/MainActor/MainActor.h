@@ -7,6 +7,7 @@
 #include "box2d.h"
 
 #include "physics/Spaceship/Spaceship.h"
+#include "physics/Planet/Planet.h"
 #include "physics/box2d/Box2DDebugDraw.h"
 
 namespace ph {
@@ -22,6 +23,8 @@ namespace ph {
 
         MainActor();
         ~MainActor() noexcept override;
+
+        void addPlanet ();
 
         void doUpdate (const UpdateState& us) override;
 

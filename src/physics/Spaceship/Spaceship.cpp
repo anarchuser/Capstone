@@ -20,9 +20,9 @@ ph::Spaceship::Spaceship (b2World * world, oxygine::ResAnim * animation, Vector2
 
     b2PolygonShape cone;
     b2Vec2 triangle[3];
-    triangle[0].Set (-0.25, -0.25);
-    triangle[1].Set ( 0.50,  0.00);
-    triangle[2].Set (-0.25,  0.25);
+    triangle[0].Set (-0.25f * scale, -0.25f * scale);
+    triangle[1].Set ( 0.50f * scale,  0.00f * scale);
+    triangle[2].Set (-0.25f * scale,  0.25f * scale);
     cone.Set(triangle, sizeof (triangle) / 8);
 
     b2FixtureDef coneFixture;
@@ -33,10 +33,10 @@ ph::Spaceship::Spaceship (b2World * world, oxygine::ResAnim * animation, Vector2
 
     b2PolygonShape rear;
     b2Vec2 trapezoid[4];
-    trapezoid[0].Set (-0.50,  0.50);
-    trapezoid[1].Set (-0.25,  0.25);
-    trapezoid[2].Set (-0.25, -0.25);
-    trapezoid[3].Set (-0.50, -0.50);
+    trapezoid[0].Set (-0.50f * scale,  0.50f * scale);
+    trapezoid[1].Set (-0.25f * scale,  0.25f * scale);
+    trapezoid[2].Set (-0.25f * scale, -0.25f * scale);
+    trapezoid[3].Set (-0.50f * scale, -0.50f * scale);
     rear.Set(trapezoid, sizeof (trapezoid) / 8);
 
     b2FixtureDef rearFixture;

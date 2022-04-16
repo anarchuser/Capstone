@@ -6,8 +6,10 @@
 
 #define SCALE           100.0f
 
-#define FORCE           0.01
-#define TORQUE          0.001
+#define FORCE           0.001
+#define TORQUE          0.0001
+
+#define DENSITY_PLANET  1000
 
 #define BRAKE_TYPE_NONE       0     /// There are no brakes
 #define BRAKE_TYPE_DIRECTED   1     /// Braking accelerates backwards
