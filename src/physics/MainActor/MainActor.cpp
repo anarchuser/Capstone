@@ -80,7 +80,12 @@ void ph::MainActor::toggleDebugDraw () {
 }
 
 //TODO: add mechanism to set a specific seed
-unsigned int const seed = generateSeed();
+unsigned int const seed =
+#ifdef RNG_SEED
+        RNG_SEED
+#else
+        generateSeed();
+#endif
 
 unsigned int ph::MainActor::genSeededSeed () {
     static Uniform seeder {0, 1e10, seed};
