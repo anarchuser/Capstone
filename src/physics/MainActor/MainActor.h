@@ -35,6 +35,8 @@ namespace ph {
         void doUpdate (const UpdateState& us) override;
 
         void toggleDebugDraw();
+
+        static unsigned int genSeededSeed ();
     };
 
     DECLARE_SMART(MainActor, spMainActor);

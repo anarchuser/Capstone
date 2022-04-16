@@ -6,8 +6,8 @@
 
 #define SCALE           100.0f
 
-#define FORCE           0.001
-#define TORQUE          0.0001
+#define FORCE           0.002
+#define TORQUE          0.0005
 
 #define DENSITY_PLANET  1000
 

@@ -28,7 +28,7 @@ ph::MainActor::MainActor(): world(b2Vec2_zero) {
 ph::MainActor::~MainActor () noexcept = default;
 
 Vector2 ph::MainActor::getRandomPos () {
-    static VectorT2 <Uniform> rng {{0, getSize().x, seed}, {0, getSize().y, seed}};
+    static VectorT2 <Uniform> rng {{0, getSize().x, genSeededSeed()}, {0, getSize().y, genSeededSeed()}};
     return {float (rng.x.random()), float (rng.y.random())};
 }
 
@@ -77,6 +77,14 @@ void ph::MainActor::toggleDebugDraw () {
     _debugDraw->attachTo (this);
     _debugDraw->setWorld (SCALE, & world);
     _debugDraw->setPriority (1);
+}
+
+//TODO: add mechanism to set a specific seed
+unsigned int const seed = generateSeed();
+
+unsigned int ph::MainActor::genSeededSeed () {
+    static Uniform seeder {0, 1e10, seed};
+    return std::floor (seeder.random());
 }
 
 /* Copyright © 2022 Aaron Alef */
