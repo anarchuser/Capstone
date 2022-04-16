@@ -20,4 +20,11 @@ git clone --recursive-submodules -j3 https://github.com/anarchuser/Capstone
 cd Capstone; make
 ```
 
+### How to play
+
+Currently, the following features are available:
+1. Control the spaceship using `WASD` or `arrow keys`
+2. Spawn immobile planets exerting gravity on the spaceship with `P`
+3. Toggle debug view with `` ` ``
+
 Copyright © 2022 Aaron Alef <aaron.alef@code.berlin> [@anarchuser](https://github.com/anarchuser)
