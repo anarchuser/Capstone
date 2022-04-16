@@ -97,22 +97,31 @@ void ph::Spaceship::update (oxygine::UpdateState const & us) {
     } else if (accelerate) {
         body->ApplyLinearImpulseToCenter (FORCE * direction, true);
     }
+    if (rotateRight && rotateLeft) {
+        auto omega = body->GetAngularVelocity();
+        if (omega < 0) {
+            body->ApplyAngularImpulse (TORQUE, true);
+        } else if (omega > 0) {
+            body->ApplyAngularImpulse (-TORQUE, true);
+        }
+    } else {
 #if TORQUE_TYPE == TORQUE_TYPE_CENTERED
-    if (rotateLeft && !rotateRight) {
-        body->ApplyAngularImpulse (-TORQUE, true);
-    } else if (rotateRight && !rotateLeft) {
-        body->ApplyAngularImpulse (TORQUE, true);
-    }
+        if (rotateLeft && !rotateRight) {
+            body->ApplyAngularImpulse (-TORQUE, true);
+        } else if (rotateRight && !rotateLeft) {
+            body->ApplyAngularImpulse (TORQUE, true);
+        }
 #elif TORQUE_TYPE == TORQUE_TYPE_SIDE_IMPULSE
-    if (rotateLeft) {
-        auto leftRear = body->GetWorldPoint (b2Vec2 (-0.5, 0.25));
-        body->ApplyLinearImpulse (TORQUE * direction, leftRear, true);
-    }
-    if (rotateRight) {
-        auto rightRear = body->GetWorldPoint (b2Vec2 (-0.5, -0.25));
-        body->ApplyLinearImpulse (TORQUE * direction, rightRear, true);
-    }
+        if (rotateLeft) {
+            auto leftRear = body->GetWorldPoint (b2Vec2 (-0.5, 0.25));
+            body->ApplyLinearImpulse (TORQUE * direction, leftRear, true);
+        }
+        if (rotateRight) {
+            auto rightRear = body->GetWorldPoint (b2Vec2 (-0.5, -0.25));
+            body->ApplyLinearImpulse (TORQUE * direction, rightRear, true);
+        }
 #endif
+    }
 
     Actor::update (us);
 }
