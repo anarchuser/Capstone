@@ -6,7 +6,7 @@ ph::Planet::Planet (b2World * world, oxygine::ResAnim * animation, Vector2 const
     setTouchChildrenEnabled (false);
 
     b2BodyDef bodyDef;
-    bodyDef.type = b2_staticBody;
+    bodyDef.type = b2_dynamicBody;
     bodyDef.position = ph::convert (pos);
     bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
 
