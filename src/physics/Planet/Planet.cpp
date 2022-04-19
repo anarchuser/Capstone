@@ -16,7 +16,7 @@ ph::Planet::Planet (b2World * world, oxygine::ResAnim * animation, Vector2 const
 
     b2CircleShape circleShape;
     circleShape.m_radius = 0.5f * scale;
-
+    
     b2FixtureDef circleFixture;
     circleFixture.shape = & circleShape;
     circleFixture.density = DENSITY_PLANET;
@@ -29,13 +29,13 @@ void ph::Planet::update (oxygine::UpdateState const & us) {
     spActor actor = getParent()->getFirstChild();
     while (actor) {
         auto * actor_body = (b2Body *) actor->getUserData();
-
-        /// Apply force to dynamic bodies only
-        if (actor_body->GetType() == b2_dynamicBody) {
+    
+        /// Apply force to existing foreign dynamic bodies only
+        if (actor_body && body != actor_body && actor_body->GetType() == b2_dynamicBody) {
             auto direction = body->GetWorldCenter () - actor_body->GetWorldCenter ();
-            auto force = GRAVITY_PLANET / direction.Normalize();
-
-            actor_body->ApplyLinearImpulseToCenter (force * direction, false);
+            auto force     = GRAVITY_PLANET / direction.Normalize ();
+        
+            actor_body->ApplyLinearImpulseToCenter (force * direction, true);
         }
 
         spActor next = actor->getNextSibling();
