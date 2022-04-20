@@ -1,9 +1,9 @@
-#ifndef CP_EXAMPLE_H
-#define CP_EXAMPLE_H
+#ifndef CP_HELLO_WORLD_H
+#define CP_HELLO_WORLD_H
 
 #include "config.h"
 
-namespace ex {
+namespace hw {
     void actor_preinit ();
 
     void actor_init ();
@@ -15,4 +15,4 @@ namespace ex {
     void actor_flush ();
 }
 
-#endif//CP_EXAMPLE_H
+#endif//CP_HELLO_WORLD_H
