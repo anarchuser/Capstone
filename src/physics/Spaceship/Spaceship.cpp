@@ -87,40 +87,22 @@ void ph::Spaceship::update (oxygine::UpdateState const & us) {
     direction.Normalize();
 
     if (decelerate) {
-#if BRAKE_TYPE == BRAKE_TYPE_UNDIRECTED
         auto velocity = body->GetLinearVelocity();
         velocity.Normalize();
         body->ApplyLinearImpulseToCenter (-FORCE * velocity, true);
-#elif BRAKE_TYPE == BRAKE_TYPE_DIRECTED
-        body->ApplyLinearImpulseToCenter (-FORCE * direction, true);
-#endif
     } else if (accelerate) {
         body->ApplyLinearImpulseToCenter (FORCE * direction, true);
     }
-    if (rotateRight && rotateLeft) {
-        auto omega = body->GetAngularVelocity();
-        if (omega < 0) {
-            body->ApplyAngularImpulse (TORQUE, true);
-        } else if (omega > 0) {
-            body->ApplyAngularImpulse (-TORQUE, true);
-        }
-    } else {
-#if TORQUE_TYPE == TORQUE_TYPE_CENTERED
-        if (rotateLeft && !rotateRight) {
-            body->ApplyAngularImpulse (-TORQUE, true);
-        } else if (rotateRight && !rotateLeft) {
-            body->ApplyAngularImpulse (TORQUE, true);
-        }
-#elif TORQUE_TYPE == TORQUE_TYPE_SIDE_IMPULSE
-        if (rotateLeft) {
-            auto leftRear = body->GetWorldPoint (b2Vec2 (-0.5, 0.25));
-            body->ApplyLinearImpulse (TORQUE * direction, leftRear, true);
-        }
-        if (rotateRight) {
-            auto rightRear = body->GetWorldPoint (b2Vec2 (-0.5, -0.25));
-            body->ApplyLinearImpulse (TORQUE * direction, rightRear, true);
-        }
-#endif
+    auto omega = body->GetAngularVelocity();
+    if (omega < 0) {
+        body->ApplyAngularImpulse (0.5 * TORQUE, true);
+    } else if (omega > 0) {
+        body->ApplyAngularImpulse (-0.5 * TORQUE, true);
+    }
+    if (rotateLeft && !rotateRight) {
+        body->ApplyAngularImpulse (-TORQUE, true);
+    } else if (rotateRight && !rotateLeft) {
+        body->ApplyAngularImpulse (TORQUE, true);
     }
 
     Actor::update (us);

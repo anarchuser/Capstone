@@ -28,7 +28,9 @@ ph::MainActor::MainActor(): world(b2Vec2_zero) {
 ph::MainActor::~MainActor () noexcept = default;
 
 Vector2 ph::MainActor::getRandomPos () {
-    static VectorT2 <Uniform> rng {{0, getSize().x, genSeededSeed()}, {0, getSize().y, genSeededSeed()}};
+    static VectorT2 <Uniform> rng {
+        {PLANET_BORDER_DISTANCE, getSize().x - PLANET_BORDER_DISTANCE, genSeededSeed()},
+        {PLANET_BORDER_DISTANCE, getSize().y - PLANET_BORDER_DISTANCE, genSeededSeed()}};
     return {float (rng.x.random()), float (rng.y.random())};
 }
 

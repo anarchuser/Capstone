@@ -15,7 +15,8 @@
 /// Force is applied forward each frame if accelerating
 #define FORCE           5e-4
 /// TORQUE
-#define TORQUE          5e-5
+#define TORQUE          3e-5
+
 
 /// Density of planets dictates their gravitational pull
 #define DENSITY_PLANET  1e3
@@ -23,20 +24,13 @@
 /// Planet mass multiplier to get final gravitational force
 #define GRAVITY_PLANET  2e-7
 
+#define PLANET_BORDER_DISTANCE 100
+
 /// Spaceship density. Dictates inertia
 #define DENSITY_SPACESHIP 2
 
 /// If this is defined, use this as seed
 //#define RNG_SEED        1
-
-#define BRAKE_TYPE_NONE       0     /// There are no brakes
-#define BRAKE_TYPE_DIRECTED   1     /// Braking accelerates backwards
-#define BRAKE_TYPE_UNDIRECTED 2     /// Braking universally decelerates
-#define BRAKE_TYPE BRAKE_TYPE_UNDIRECTED
-
-#define TORQUE_TYPE_CENTERED     0  /// Rotation is induced using angular impulses
-#define TORQUE_TYPE_SIDE_IMPULSE 1  /// Rotation uses rear corner thrusters
-#define TORQUE_TYPE TORQUE_TYPE_SIDE_IMPULSE
 
 
 #endif //CAPSTONE_GAME_CONFIG_H
