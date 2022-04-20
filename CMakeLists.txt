@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS "-fconcepts")
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
 list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp)
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
-add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
+add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS} src/Game/game_config.h)
 
 # Include every header
 include_directories(${PROJECT_SOURCE_DIR})
