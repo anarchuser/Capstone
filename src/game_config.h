@@ -2,22 +2,29 @@
 #define CAPSTONE_GAME_CONFIG_H
 
 /// Width of application window
-#define WINDOW_WIDTH    960
+#define WINDOW_WIDTH    1080
 /// Height of application window
-#define WINDOW_HEIGHT   640
+#define WINDOW_HEIGHT   1080
 
 /// Conversion rate between display (pixels) and physics
-#define SCALE           100.0f
+#define WORLD_SCALE     100.0f
+
+/// Spaceship scale
+#define SPACESHIP_SCALE 0.2
 
 /// Force is applied forward each frame if accelerating
-#define FORCE           0.002
-/// TORQUE is the force each frame if rotating
-#define TORQUE          0.0005
+#define FORCE           5e-4
+/// TORQUE
+#define TORQUE          5e-5
 
 /// Density of planets dictates their gravitational pull
-#define DENSITY_PLANET  1000
+#define DENSITY_PLANET  1e3
+// TODO: use reasonable physics calculation
 /// Planet mass multiplier to get final gravitational force
-#define GRAVITY_PLANET  1e-6
+#define GRAVITY_PLANET  2e-7
+
+/// Spaceship density. Dictates inertia
+#define DENSITY_SPACESHIP 2
 
 /// If this is defined, use this as seed
 //#define RNG_SEED        1

@@ -27,7 +27,7 @@ ph::Spaceship::Spaceship (b2World * world, oxygine::ResAnim * animation, Vector2
 
     b2FixtureDef coneFixture;
     coneFixture.shape = & cone;
-    coneFixture.density = 1.0;
+    coneFixture.density = DENSITY_SPACESHIP;
     coneFixture.friction = 1.0;
     body->CreateFixture (& coneFixture);
 
@@ -41,7 +41,7 @@ ph::Spaceship::Spaceship (b2World * world, oxygine::ResAnim * animation, Vector2
 
     b2FixtureDef rearFixture;
     rearFixture.shape = & rear;
-    rearFixture.density = 1.0;
+    rearFixture.density = DENSITY_SPACESHIP;
     rearFixture.friction = 1.0;
     body->CreateFixture (& rearFixture);
 

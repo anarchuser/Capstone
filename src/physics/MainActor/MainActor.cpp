@@ -8,7 +8,7 @@ ph::MainActor::MainActor(): world(b2Vec2_zero) {
     setSize(getStage()->getSize());
 
     auto res = ph::MainActor::gameResources.getResAnim ("spaceship");
-    spSpaceship ship = new Spaceship (& world, res, getSize() / 2, 0.5);
+    spSpaceship ship = new Spaceship (& world, res, getSize() / 2, SPACESHIP_SCALE);
     addChild (ship);
 
     ox::getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
@@ -73,7 +73,7 @@ void ph::MainActor::toggleDebugDraw () {
     //TODO: put flags somewhere else
     _debugDraw->SetFlags (b2Draw::e_shapeBit | b2Draw::e_jointBit | b2Draw::e_pairBit | b2Draw::e_centerOfMassBit);
     _debugDraw->attachTo (this);
-    _debugDraw->setWorld (SCALE, & world);
+    _debugDraw->setWorld (WORLD_SCALE, & world);
     _debugDraw->setPriority (1);
 }
 
