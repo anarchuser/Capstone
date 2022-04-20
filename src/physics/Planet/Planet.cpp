@@ -32,9 +32,20 @@ void ph::Planet::update (oxygine::UpdateState const & us) {
     
         /// Apply force to existing foreign dynamic bodies only
         if (actor_body && body != actor_body && actor_body->GetType() == b2_dynamicBody) {
+            auto space = convert(_getStage()->getSize());
             auto direction = body->GetWorldCenter () - actor_body->GetWorldCenter ();
-            auto force      = body->GetMass() * GRAVITY_PLANET / direction.Normalize ();
-        
+            if (direction.x > 0.5 * space.x) {
+                direction.x -= space.x;
+            } else if (direction.x < -0.5 * space.x) {
+                direction.x += space.x;
+            }
+            if (direction.y > 0.5 * space.y) {
+                direction.y -= space.y;
+            } else if (direction.y < -0.5 * space.y) {
+                direction.y += space.y;
+            }
+
+            auto force = body->GetMass() * GRAVITY_PLANET / direction.Normalize ();
             actor_body->ApplyLinearImpulseToCenter (force * direction, true);
         }
 
