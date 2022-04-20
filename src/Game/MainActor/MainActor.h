@@ -17,6 +17,7 @@ namespace kt {
         HashedRNG rng;
 
     public:
+        MainActor ();
         explicit MainActor (std::size_t seed);
         ~MainActor() noexcept override;
 

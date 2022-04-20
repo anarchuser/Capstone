@@ -14,7 +14,7 @@
 /// Path to all resources used in the game
 #define GAME_RESOURCES  (PROJECT_ROOT "/src/Game/data/res.xml")
 
-/// The random seed determines the placement of planets and any other potential randomness
-#define RANDOM_SEED     1
+/// [OPTIONAL] The random seed determines the placement of planets, amongst others
+#define RANDOM_SEED
 
 /* Copyright © 2022 Aaron Alef */

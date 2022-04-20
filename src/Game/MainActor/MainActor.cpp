@@ -1,7 +1,7 @@
 #include "MainActor.h"
 
 namespace kt {
-
+    MainActor::MainActor (): MainActor (generateSeed()) {}
     MainActor::MainActor (std::size_t seed): rng (seed) {
         logs::messageln ("Seed: %lu", seed);
 
