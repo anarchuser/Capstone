@@ -11,4 +11,7 @@
 /// Application background "space" colour (until a proper background exists)
 #define CLEAR_COLOUR    {30, 30, 30, 255};
 
+/// Path to all resources used in the game
+#define GAME_RESOURCES  (PROJECT_ROOT "/src/Game/data/res.xml")
+
 /* Copyright © 2022 Aaron Alef */

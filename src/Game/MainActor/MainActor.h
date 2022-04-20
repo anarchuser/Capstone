@@ -2,6 +2,7 @@
 #define CAPSTONE_MAINACTOR_H
 
 #include "config.h"
+#include "Game/game_config.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
@@ -11,6 +12,7 @@ namespace kt {
 
     class MainActor : public Actor {
     private:
+        Resources gameResources;
 
     public:
         MainActor();

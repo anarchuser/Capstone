@@ -3,11 +3,13 @@
 namespace kt {
 
     MainActor::MainActor () {
-
+        // Load all required game assets
+        gameResources.loadXML (GAME_RESOURCES);
     }
 
     MainActor::~MainActor () noexcept {
-
+        // Free all game assets
+        gameResources.free();
     }
 }
 
