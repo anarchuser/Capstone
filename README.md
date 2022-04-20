@@ -12,7 +12,7 @@ Control a rocket through a field of planets. On a Torus.
 
 1. Clone this repository:
 ```shell
-git clone --recursive-submodules -j3 https://github.com/anarchuser/Capstone
+git clone --recurse-submodules -j3 https://github.com/anarchuser/Capstone
 ```
 
 2. Go into the cloned repo and build the project:
