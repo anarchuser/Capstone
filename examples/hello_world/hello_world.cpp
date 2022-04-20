@@ -1,9 +1,9 @@
 #include "oxygine-framework.h"
-#include "example.h"
+#include "hello_world.h"
 
 using namespace oxygine;
 
-namespace ex {
+namespace hw {
     class MainActor : public Actor {
     public:
         spTextField _text;
@@ -126,12 +126,12 @@ namespace ex {
     };
 
 //declare spMainActor as intrusive_ptr holder of MainActor
-typedef oxygine::intrusive_ptr<ex::MainActor> spMainActor;
+typedef oxygine::intrusive_ptr<hw::MainActor> spMainActor;
 //you could use DECLARE_SMART preprocessor definition it does the same:
 //DECLARE_SMART(MainActor, spMainActor)
 
 
-Resources ex::MainActor::gameResources = Resources();
+Resources hw::MainActor::gameResources = Resources();
 
 void actor_preinit()
 {
@@ -141,12 +141,12 @@ void actor_preinit()
 void actor_init()
 {
     //load xml file with resources definition
-    ex::MainActor::gameResources.loadXML(PROJECT_ROOT "/src/example/data/res.xml");
+    hw::MainActor::gameResources.loadXML(PROJECT_ROOT "/examples/hello_world/data/res.xml");
 
 
     //let's create our client code simple actor
     //spMainActor was defined above as smart intrusive pointer (read more: http://www.boost.org/doc/libs/1_60_0/libs/smart_ptr/intrusive_ptr.html)
-    spMainActor actor = new ex::MainActor;
+    spMainActor actor = new hw::MainActor;
 
     //and add it to Stage as child
     getStage()->addChild(actor);
@@ -162,6 +162,6 @@ void actor_update()
 void actor_destroy()
 {
     //free previously loaded resources
-    ex::MainActor::gameResources.free();
+    hw::MainActor::gameResources.free();
 }
 }
