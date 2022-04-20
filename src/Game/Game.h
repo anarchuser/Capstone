@@ -6,6 +6,8 @@
 
 #include "oxygine-framework.h"
 
+#include "Game/MainActor/MainActor.h"
+
 namespace kt {
 
     using namespace oxygine;

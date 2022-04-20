@@ -47,6 +47,11 @@ namespace kt {
         // Guard to detect memory leaks
         ObjectBase::__startTracingLeaks();
 
+        // TODO: start menu here
+        // Create main actor governing the game
+        spMainActor mainActor = new MainActor;
+        getStage()->addChild (mainActor);
+
         // Main game loop. Returns true if done
         int done;
         do {
@@ -75,7 +80,8 @@ namespace kt {
 
         if (core::beginRendering())
         {
-            Color clearColor(32, 32, 32, 255);
+            // Base background colour
+            Color clearColor = CLEAR_COLOUR;
             Rect viewport(Point(0, 0), core::getDisplaySize());
             // Render all actors inside the stage. Actor::render will also be called for all its children
             getStage()->render(clearColor, viewport);

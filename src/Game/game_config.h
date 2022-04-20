@@ -8,4 +8,7 @@
 /// Application title
 #define WINDOW_TITLE    "Kepler's Torus"
 
+/// Application background "space" colour (until a proper background exists)
+#define CLEAR_COLOUR    {30, 30, 30, 255};
+
 /* Copyright © 2022 Aaron Alef */
