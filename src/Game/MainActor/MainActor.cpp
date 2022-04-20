@@ -2,7 +2,9 @@
 
 namespace kt {
 
-    MainActor::MainActor () {
+    MainActor::MainActor (std::size_t seed): rng (seed) {
+        logs::messageln ("Seed: %lu", seed);
+
         // Load all required game assets
         gameResources.loadXML (GAME_RESOURCES);
     }

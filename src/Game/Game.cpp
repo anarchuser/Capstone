@@ -49,7 +49,7 @@ namespace kt {
 
         // TODO: start menu here
         // Create main actor governing the game
-        spMainActor mainActor = new MainActor;
+        spMainActor mainActor = new MainActor (RANDOM_SEED);
         getStage()->addChild (mainActor);
 
         // Main game loop. Returns true if done
