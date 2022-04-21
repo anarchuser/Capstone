@@ -18,6 +18,35 @@ namespace kt {
         });
     }
 
+    void World::update (UpdateState const & updateState) {
+        world.Step (1/ FPS, 8, 3);
+
+        b2Body * current_body = world.GetBodyList();
+        std::vector <b2Body *> to_delete;
+
+        while (current_body) {
+            auto * current_actor = (Actor *) current_body->GetUserData().pointer;
+
+            if (current_actor) {
+                // Ensure no actor is out of bounds
+                auto pos = wrap (current_body->GetPosition());
+                auto angle = current_body->GetAngle();
+                current_body->SetTransform (pos, angle);
+                current_actor->setPosition (convert (pos));
+                current_actor->setRotation (angle);
+            } else {
+                // Body without actor -> remove
+                to_delete.push_back (current_body);
+            }
+
+            current_body = current_body->GetNext();
+        }
+
+        for (auto * garbage : to_delete) {
+            world.DestroyBody (garbage);
+        }
+    }
+
     b2Vec2 World::wrap (b2Vec2 pos) const {
         pos.x = fmod (std::ceil ((long double) pos.x + std::abs (pos.x) / world_size.x) * world_size.x + pos.x, world_size.x);
         pos.y = fmod (std::ceil ((long double) pos.y + std::abs (pos.y) / world_size.y) * world_size.y + pos.y, world_size.y);

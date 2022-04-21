@@ -42,6 +42,7 @@ namespace kt {
         // TODO: add quit / options dialog
         core::requestQuit();
     }
+
 }
 
 /* Copyright © 2022 Aaron Alef */

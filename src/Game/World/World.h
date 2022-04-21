@@ -10,6 +10,8 @@
 
 #define WORLD_SIZE {10, 10}
 
+#define FPS 60.0
+
 namespace kt {
     using namespace oxygine;
 
@@ -24,6 +26,8 @@ namespace kt {
         b2Vec2 const world_size;
 
         explicit World (b2Vec2 size);
+
+        void update (UpdateState const & updateState) override;
 
         b2Vec2 wrap (b2Vec2 pos) const;
 

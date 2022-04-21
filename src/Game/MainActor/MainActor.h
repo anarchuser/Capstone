@@ -16,6 +16,8 @@
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
 #define RANDOM_SEED
 
+#define FPS 60.0
+
 namespace kt {
     using namespace oxygine;
 
