@@ -1,8 +1,9 @@
 # Simple Makefile providing an interface for cmake. Oh, sweet irony
 
-BUILD_DIR = build
+BUILD_DIR  ?= build
+BUILD_TYPE ?= Release
 
-.PHONY = all build clean default run setup test
+.PHONY = all build clean debug default run setup test
 
 default:	run
 
@@ -11,7 +12,7 @@ all:	clean	test	run
 
 # Initialise cmake build files at BUILD_DIR
 setup:	CMakeLists.txt
-	cmake -H. -B$(BUILD_DIR) > /dev/zero
+	cmake -H. -B$(BUILD_DIR) -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" > /dev/zero
 
 # Build the project (lib and src)
 build:	setup

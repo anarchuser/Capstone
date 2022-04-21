@@ -15,10 +15,16 @@ list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp)
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
 add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
-# Include every header
+# Add base directories for more intuitive includes
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/src/)
 include_directories(${PROJECT_SOURCE_DIR}/lib/)
+
+# Propagate Debug mode by setting the `DEBUG` preprocessor macro
+message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    add_compile_definitions(Capstone DEBUG)
+endif ()
 
 # Constants injected at compile time
 add_compile_definitions(Capstone PROJECT_ROOT="${PROJECT_SOURCE_DIR}")

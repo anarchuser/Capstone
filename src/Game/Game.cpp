@@ -47,6 +47,12 @@ namespace kt {
         // Guard to detect memory leaks
         ObjectBase::__startTracingLeaks();
 
+#ifdef DEBUG
+        logs::messageln ("Debug view enabled");
+        LOG (INFO) << "Debug view enabled";
+        DebugActor::show();
+#endif
+
         // TODO: start menu here
         // Create main actor governing the game
         spMainActor mainActor = new MainActor (RANDOM_SEED);
