@@ -4,15 +4,15 @@
 #include <random>
 
 struct Distribution {
-    explicit Distribution(unsigned int seed);
-    virtual ~Distribution() = 0;
+    explicit Distribution (std::size_t seed);
+    virtual ~Distribution () = 0;
 
-    unsigned long const seed;
+    std::size_t const seed;
     std::mt19937 mt;
 };
 
 /** Returns a Seed guaranteed to be random */
-unsigned int generateSeed();
+std::size_t generateSeed();
 
 #endif //CAPSTONE_DISTRIBUTION_H
 

@@ -17,8 +17,14 @@
 
 #include "config.h"
 
+#include "Game/Game.h"
+
 int main (int argc, char * argv[]) {
     google::InitGoogleLogging (argv[0]);
 
-    LOG (INFO) << "Hello World";
+    LOG (INFO) << "Start game client";
+
+    kt::Game::run();
+
+    LOG (INFO) << "Game client finished";
 }
