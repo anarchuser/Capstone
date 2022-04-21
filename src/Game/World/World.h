@@ -6,6 +6,8 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
+#include "Game/debug/Box2DDebugDraw.h"
+
 #define WORLD_SIZE {10, 10}
 
 namespace kt {
@@ -13,6 +15,11 @@ namespace kt {
 
     class World : public Sprite {
     private:
+        // Scale in x- and y-direction as compared to graphical world
+        b2Vec2 scale;
+
+        spBox2DDraw debugDraw;
+
         b2Vec2 wrap (b2Vec2 pos) const;
 
     public:
@@ -26,6 +33,8 @@ namespace kt {
         b2Vec2 convert (Vector2 const & pos) const;
 
         Vector2 convert (const b2Vec2 & pos) const;
+
+        void toggleDebugDraw ();
     };
 
     DECLARE_SMART (World, spWorld);
