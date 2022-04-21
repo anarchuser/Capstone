@@ -6,15 +6,21 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
+#include "Game/World/World.h"
+
 /// Number of planets per pixel
-#define PLANETS_PER_PIXEL   1e-6
+#define PLANETS_PER_PIXEL   5e-2
+
+#define PLANET_DENSITY      1000
+
+#define PLANET_GRAVITY      2e-7
 
 namespace kt {
     using namespace oxygine;
 
     class Planet : public Sprite {
     public:
-        Planet (b2World * world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
+        Planet (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
     };
 
     DECLARE_SMART(Planet, spPlanet);

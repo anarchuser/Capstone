@@ -13,13 +13,19 @@ namespace kt {
 
     class World : public Sprite {
     private:
+        b2Vec2 wrap (b2Vec2 pos) const;
+
+    public:
         // Physical world
         b2World world;
         // Size of the physical world
-        b2Vec2 world_size;
+        b2Vec2 const world_size;
 
-    public:
         explicit World (b2Vec2 size);
+
+        b2Vec2 convert (Vector2 const & pos) const;
+
+        Vector2 convert (const b2Vec2 & pos) const;
     };
 
     DECLARE_SMART (World, spWorld);
