@@ -7,6 +7,9 @@ namespace kt {
 
         // Load all required game assets
         gameResources.loadXML (GAME_RESOURCES);
+
+        spWorld world = new World (WORLD_SIZE);
+        addChild (world);
     }
 
     MainActor::~MainActor () noexcept {
