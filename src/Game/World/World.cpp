@@ -45,6 +45,8 @@ namespace kt {
         for (auto * garbage : to_delete) {
             world.DestroyBody (garbage);
         }
+
+        Actor::update (updateState);
     }
 
     b2Vec2 World::wrap (b2Vec2 pos) const {

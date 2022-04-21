@@ -15,17 +15,19 @@ namespace kt {
         // TODO: randomise planet size
         auto resource = gameResources.getResAnim ("venus");
         for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
-            auto planet = new Planet (* world, resource, {
-                        float (rng.random ({100, world->getSize().x - 100})),
-                        float (rng.random ({100, world->getSize().y - 100}))
+            spPlanet planet = new Planet (* world, resource, {
+                    float (rng.random ({100, world->getSize().x - 100})),
+                    float (rng.random ({100, world->getSize().y - 100}))
                 }, 0.5);
             world->addChild (planet);
         }
 
-        getStage()->addEventListener (KeyEvent::KEY_DOWN, [=] (Event const * event) {
-            auto const * _event = safeCast <KeyEvent const *> (event);
+        auto spaceshipAnimation = gameResources.getResAnim ("spaceship");
+        spSpaceship spaceship = new Spaceship (* world, spaceshipAnimation, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
+        world->addChild (spaceship);
 
-            switch (_event->data->keysym.scancode) {
+        getStage()->addEventListener (KeyEvent::KEY_DOWN, [=] (Event const * event) {
+            switch (safeCast <KeyEvent const *> (event)->data->keysym.scancode) {
                 case SDL_SCANCODE_ESCAPE:
                     quitGame();
                     break;

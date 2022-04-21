@@ -13,7 +13,7 @@
 
 #define PLANET_DENSITY      1e3
 
-#define PLANET_GRAVITY      2e7
+#define PLANET_GRAVITY      2e-7
 
 namespace kt {
     using namespace oxygine;

@@ -7,8 +7,9 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "Game/World/World.h"
 #include "Game/Planet/Planet.h"
+#include "Game/Spaceship/Spaceship.h"
+#include "Game/World/World.h"
 
 /// Path to all resources used in the game
 #define GAME_RESOURCES  (PROJECT_ROOT "/src/Game/data/res.xml")

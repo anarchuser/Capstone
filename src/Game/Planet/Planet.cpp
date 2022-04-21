@@ -6,8 +6,6 @@ namespace kt {
         OX_ASSERT (world.wrap (world_pos) == world.wrap (world.wrap (world_pos)));
         OX_ASSERT (world_pos == world.wrap (world_pos));
 
-        setPosition (pos); //TODO: factor this out into update function?
-
         setResAnim (animation);
         setAnchor (0.5, 0.5);
         setTouchChildrenEnabled (false);
