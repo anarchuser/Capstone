@@ -2,11 +2,16 @@
 #define CAPSTONE_MAINACTOR_H
 
 #include "config.h"
-#include "Game/game_config.h"
 #include "random/random.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
+
+/// Path to all resources used in the game
+#define GAME_RESOURCES  (PROJECT_ROOT "/src/Game/data/res.xml")
+
+/// [OPTIONAL] The random seed determines the placement of planets, amongst others
+#define RANDOM_SEED
 
 namespace kt {
     using namespace oxygine;
