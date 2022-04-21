@@ -23,11 +23,13 @@ namespace kt {
         }
 
         auto spaceshipAnimation = gameResources.getResAnim ("spaceship");
-        spSpaceship spaceship = new Spaceship (* world, spaceshipAnimation, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
+        spKeyboardSpaceship spaceship = new KeyboardSpaceship (* world, spaceshipAnimation, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
         world->addChild (spaceship);
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [=] (Event const * event) {
-            switch (safeCast <KeyEvent const *> (event)->data->keysym.scancode) {
+            auto const * _event = safeCast <KeyEvent const *> (event);
+
+            switch (_event->data->keysym.scancode) {
                 case SDL_SCANCODE_ESCAPE:
                     quitGame();
                     break;

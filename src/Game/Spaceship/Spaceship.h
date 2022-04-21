@@ -10,11 +10,9 @@
 
 #define SPACESHIP_SCALE     2e-1
 
-#define SPACESHIP_DENSITY   2e0
-
 #define SPACESHIP_FORCE     5e-4
 
-#define SPACESHIP_TORQUE    3e-5
+#define SPACESHIP_TORQUE    2e-5
 
 namespace kt {
     using namespace oxygine;
@@ -31,11 +29,7 @@ namespace kt {
     public:
         Spaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
 
-//        void onSteeringEvent (ox::KeyEvent * event);
-
         void update (UpdateState const & us) final;
-
-        static Spaceship * instance;
     };
 
     DECLARE_SMART(Spaceship, spSpaceship);

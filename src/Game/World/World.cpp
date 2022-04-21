@@ -50,8 +50,8 @@ namespace kt {
     }
 
     b2Vec2 World::wrap (b2Vec2 pos) const {
-        pos.x = fmod (std::ceil ((long double) pos.x + std::abs (pos.x) / world_size.x) * world_size.x + pos.x, world_size.x);
-        pos.y = fmod (std::ceil ((long double) pos.y + std::abs (pos.y) / world_size.y) * world_size.y + pos.y, world_size.y);
+        pos.x = fmod (std::ceil ((long double) std::abs (pos.x) / world_size.x) * world_size.x + pos.x, world_size.x);
+        pos.y = fmod (std::ceil ((long double) std::abs (pos.y) / world_size.y) * world_size.y + pos.y, world_size.y);
 
         return pos;
     }

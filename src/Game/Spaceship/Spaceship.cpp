@@ -2,8 +2,6 @@
 
 namespace kt {
 
-    Spaceship * Spaceship::instance = nullptr;
-
     Spaceship::Spaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale) {
         setResAnim (animation);
         setAnchor (0.5, 0.5);
@@ -29,8 +27,7 @@ namespace kt {
 
         b2FixtureDef coneFixture;
         coneFixture.shape = & cone;
-        coneFixture.density = SPACESHIP_DENSITY;
-        coneFixture.friction = 1.0;
+        coneFixture.density = 1.0;
         body->CreateFixture (& coneFixture);
 
         b2PolygonShape rear;
@@ -43,11 +40,8 @@ namespace kt {
 
         b2FixtureDef rearFixture;
         rearFixture.shape = & rear;
-        rearFixture.density = SPACESHIP_DENSITY;
-        rearFixture.friction = 1.0;
+        rearFixture.density = 1.0;
         body->CreateFixture (& rearFixture);
-
-        instance = this;
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {

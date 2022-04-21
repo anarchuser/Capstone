@@ -8,7 +8,7 @@
 #include "box2d.h"
 
 #include "Game/Planet/Planet.h"
-#include "Game/Spaceship/Spaceship.h"
+#include "Game/Spaceship/KeyboardSpaceship.h"
 #include "Game/World/World.h"
 
 /// Path to all resources used in the game
