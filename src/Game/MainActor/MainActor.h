@@ -28,6 +28,7 @@ namespace kt {
         explicit MainActor (std::size_t seed);
         ~MainActor() noexcept override;
 
+        void quitGame();
     };
 
     DECLARE_SMART(MainActor, spMainActor);
