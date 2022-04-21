@@ -27,7 +27,7 @@ namespace kt {
 
         b2FixtureDef coneFixture;
         coneFixture.shape = & cone;
-        coneFixture.density = 1.0;
+        coneFixture.density = SPACESHIP_DENSITY;
         body->CreateFixture (& coneFixture);
 
         b2PolygonShape rear;
@@ -40,11 +40,24 @@ namespace kt {
 
         b2FixtureDef rearFixture;
         rearFixture.shape = & rear;
-        rearFixture.density = 1.0;
+        rearFixture.density = SPACESHIP_DENSITY;
         body->CreateFixture (& rearFixture);
+
+        sleep();
+    }
+
+    void Spaceship::sleep () {
+        auto * part = body->GetFixtureList();
+        while (part) {
+            part->SetSensor (true);
+            part = part->GetNext();
+        }
+        body->SetAwake (false);
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
+
+
         auto angle = body->GetAngle ();
         auto direction = b2Vec2 (cos (angle), sin (angle));
         direction.Normalize ();
@@ -58,9 +71,9 @@ namespace kt {
         }
         auto omega = body->GetAngularVelocity ();
         if (omega < 0) {
-            body->ApplyAngularImpulse (0.5 * SPACESHIP_TORQUE, true);
+            body->ApplyAngularImpulse (0.5 * SPACESHIP_TORQUE, false);
         } else if (omega > 0) {
-            body->ApplyAngularImpulse (-0.5 * SPACESHIP_TORQUE, true);
+            body->ApplyAngularImpulse (-0.5 * SPACESHIP_TORQUE, false);
         }
         if (rotateLeft && !rotateRight) {
             body->ApplyAngularImpulse (- SPACESHIP_TORQUE, true);

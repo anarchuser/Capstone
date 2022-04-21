@@ -54,7 +54,7 @@ namespace kt {
                 }
 
                 auto force = body->GetMass() * PLANET_GRAVITY / direction.Normalize ();
-                actor_body->ApplyLinearImpulseToCenter (force * direction, true);
+                actor_body->ApplyLinearImpulseToCenter (force * direction, false);
             }
 
             current_actor = current_actor->getNextSibling();

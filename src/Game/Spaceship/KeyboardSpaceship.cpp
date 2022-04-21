@@ -9,10 +9,17 @@ namespace kt {
 
         instance = this;
 
-        ox::getStage()->addEventListener (ox::KeyEvent::KEY_UP, [=](Event * event) {
+        auto * part = body->GetFixtureList();
+        while (part) {
+            part->SetSensor (false);
+            part = part->GetNext();
+        }
+        body->SetAwake (false);
+
+        getStage()->addEventListener (ox::KeyEvent::KEY_UP, [=](Event * event) {
             instance->onSteeringEvent ((ox::KeyEvent *) event);
         });
-        ox::getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
+        getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
             instance->onSteeringEvent ((ox::KeyEvent *) event);
         });
     }
