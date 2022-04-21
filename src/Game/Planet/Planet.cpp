@@ -2,6 +2,10 @@
 
 namespace kt {
     Planet::Planet (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale) {
+        auto world_pos = world.convert (pos);
+        OX_ASSERT (world.wrap (world_pos) == world.wrap (world.wrap (world_pos)));
+        OX_ASSERT (world_pos == world.wrap (world_pos));
+
         setPosition (pos); //TODO: factor this out into update function?
 
         setResAnim (animation);
@@ -10,7 +14,7 @@ namespace kt {
 
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
-        bodyDef.position = world.convert (pos);
+        bodyDef.position = world_pos;
         bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
 
         auto * body = world.world.CreateBody (& bodyDef);

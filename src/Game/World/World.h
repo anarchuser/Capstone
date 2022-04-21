@@ -15,12 +15,7 @@ namespace kt {
 
     class World : public Sprite {
     private:
-        // Scale in x- and y-direction as compared to graphical world
-        b2Vec2 scale;
-
         spBox2DDraw debugDraw;
-
-        b2Vec2 wrap (b2Vec2 pos) const;
 
     public:
         // Physical world
@@ -29,6 +24,8 @@ namespace kt {
         b2Vec2 const world_size;
 
         explicit World (b2Vec2 size);
+
+        b2Vec2 wrap (b2Vec2 pos) const;
 
         b2Vec2 convert (Vector2 const & pos) const;
 
