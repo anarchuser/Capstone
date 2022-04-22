@@ -1,7 +1,7 @@
 #include "Planet.h"
 
 namespace kt {
-    Planet::Planet (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale) {
+    Planet::Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale) {
         auto world_pos = world.convert (pos);
         OX_ASSERT (world.wrap (world_pos) == world.wrap (world.wrap (world_pos)));
         OX_ASSERT (world_pos == world.wrap (world_pos));
@@ -29,7 +29,7 @@ namespace kt {
         body->CreateFixture (& circleFixture);
     }
 
-    void Planet::update (oxygine::UpdateState const & us) {
+    void Planet::update (UpdateState const & us) {
         auto * body = (b2Body *) getUserData();
         auto * world = safeCast<World *> (getParent());
         spActor current_actor = getParent()->getFirstChild();

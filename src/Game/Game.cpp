@@ -65,7 +65,7 @@ namespace kt {
         });
 
         // TODO: start menu here
-        spDialog dialog = new Dialog ({0, 0}, getStage()->getSize());
+        spDialog dialog = new Dialog ({0, 0}, getStage()->getSize(), "Menu");
         getStage()->addChild (dialog);
 
         // Create main actor governing the game

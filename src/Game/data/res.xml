@@ -10,4 +10,7 @@
 		<image file="button.png" cols="2"/>
 		<image file="background.png"/>
 	</atlas>
+
+	<set path = "./fonts"/>
+	<font file="kt-liberation.fnt"/>
 </resources>

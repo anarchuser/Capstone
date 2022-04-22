@@ -8,10 +8,18 @@ namespace kt {
 
         dialogResources.loadXML (GAME_RESOURCES);
         setResAnim (dialogResources.getResAnim ("background"));
+
+        spText text = new Text (dialogResources.getResFont ("kt-liberation"), message);
+        text->setPosition ({pos.x + 100, pos.y + 100});
+        addChild (text);
     }
 
     Dialog::~Dialog () noexcept {
         dialogResources.free();
+    }
+
+    void Dialog::setMessage (std::string message) {
+        text->setText (message);
     }
 }
 
