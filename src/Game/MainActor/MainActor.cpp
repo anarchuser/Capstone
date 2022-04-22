@@ -34,26 +34,11 @@ namespace kt {
         auto spaceshipAnimation = gameResources.getResAnim ("spaceship");
         spKeyboardSpaceship spaceship = new KeyboardSpaceship (* world, spaceshipAnimation, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
         world->addChild (spaceship);
-
-        getStage()->addEventListener (KeyEvent::KEY_DOWN, [=] (Event const * event) {
-            auto const * _event = safeCast <KeyEvent const *> (event);
-
-            switch (_event->data->keysym.scancode) {
-                case SDL_SCANCODE_ESCAPE:
-                    quitGame();
-                    break;
-            }
-        });
     }
 
     MainActor::~MainActor () noexcept {
         // Free all game assets
         gameResources.free();
-    }
-
-    void MainActor::quitGame () {
-        // TODO: add quit / options dialog
-        core::requestQuit();
     }
 
 }

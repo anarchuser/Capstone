@@ -53,10 +53,24 @@ namespace kt {
         DebugActor::show();
 #endif
 
+        getStage()->addEventListener (KeyEvent::KEY_DOWN, [=] (Event const * event) {
+            auto const * _event = safeCast <KeyEvent const *> (event);
+
+            switch (_event->data->keysym.scancode) {
+                case SDL_SCANCODE_ESCAPE:
+                    // TODO: add quit / options dialog
+                    core::requestQuit();
+                    break;
+            }
+        });
+
         // TODO: start menu here
+        spDialog dialog = new Dialog ({0, 0}, getStage()->getSize());
+        getStage()->addChild (dialog);
+
         // Create main actor governing the game
-        spMainActor mainActor = new MainActor (RANDOM_SEED);
-        getStage()->addChild (mainActor);
+//        spMainActor mainActor = new MainActor (RANDOM_SEED);
+//        getStage()->addChild (mainActor);
 
         // Main game loop. Returns true if done
         int done;

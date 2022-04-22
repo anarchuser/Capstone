@@ -8,5 +8,6 @@
 		<image file="venus.png"/>
 		<set scale_factor = "1f"/>
 		<image file="button.png" cols="2"/>
+		<image file="background.png"/>
 	</atlas>
 </resources>
