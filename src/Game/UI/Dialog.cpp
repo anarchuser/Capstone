@@ -21,6 +21,18 @@ namespace kt {
     void Dialog::setMessage (std::string message) {
         text->setText (message);
     }
+
+    void Dialog::addButton (std::string message, std::function <void (Event const *)> && callback) {
+        ResFont * font = dialogResources.getResFont ("kt-liberation");
+        spText msg = new Text (font, message);
+
+        ResAnim * sprite = dialogResources.getResAnim ("button");
+        spButton button = new Button (sprite, msg, std::forward <std::function <void (Event const *)>> (callback));
+        addChild (button);
+        buttons.push_back (button);
+        button->setSize ({getSize().x - 200, 50});
+        button->setPosition (getPosition().x + 100, getPosition().y + 100 + 100 * buttons.size());
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

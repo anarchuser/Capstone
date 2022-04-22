@@ -58,14 +58,15 @@ namespace kt {
 
             switch (_event->data->keysym.scancode) {
                 case SDL_SCANCODE_ESCAPE:
-                    // TODO: add quit / options dialog
-                    core::requestQuit();
+                    onRequestExit(_event);
                     break;
             }
         });
 
         // TODO: start menu here
         spDialog dialog = new Dialog ({0, 0}, getStage()->getSize(), "Menu");
+        dialog->addButton ("Hello World", [](Event const *) { logs::messageln ("Hello World");});
+        dialog->addButton ("Exit", onRequestExit);
         getStage()->addChild (dialog);
 
         // Create main actor governing the game
@@ -110,6 +111,11 @@ namespace kt {
         }
 
         return done;
+    }
+
+    void Game::onRequestExit (Event const * event) {
+        // TODO: add quit / options dialog
+        core::requestQuit();
     }
 }
 

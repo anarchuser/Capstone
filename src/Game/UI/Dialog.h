@@ -10,6 +10,7 @@
 #include "oxygine-framework.h"
 
 #include <string>
+#include <functional>
 
 namespace kt {
     using namespace oxygine;
@@ -18,13 +19,14 @@ namespace kt {
     private:
         Resources dialogResources;
         spText text;
+        std::vector <spButton> buttons;
 
     public:
         Dialog (Vector2 pos, Vector2 size, std::string message = "");
         ~Dialog () noexcept override;
 
         void setMessage (std::string message);
-        void addButton (spButton button);
+        void addButton (std::string message, std::function <void (Event const *)> && callback);
     };
 
     DECLARE_SMART (Dialog, spDialog);

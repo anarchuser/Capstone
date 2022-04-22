@@ -3,6 +3,8 @@
 
 #include "config.h"
 
+#include "Text.h"
+
 #include "oxygine-framework.h"
 
 #include <string>
@@ -11,9 +13,19 @@
 namespace kt {
     using namespace oxygine;
 
-    class Button: public Sprite {
-        Button (ResAnim * animation, std::string message, std::function <void()> onAction);
+    class Button: public Box9Sprite {
+    private:
+        std::function <void (Event const *)> onAction;
+
+        void onMouseOver (Event const * event);
+        void onMouseOut  (Event const * event);
+
+    public:
+        Button (ResAnim * animation, spText message, std::function <void (Event const *)> && onAction);
+
+        void trigger (Event const * event);
     };
+    DECLARE_SMART (Button, spButton);
 
 } // ky
 
