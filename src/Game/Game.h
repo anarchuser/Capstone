@@ -39,7 +39,7 @@ namespace kt {
         /// Function called for each frame to update game
         static bool loop ();
 
-        static void onRequestExit (Event const * event);
+        static void onRequestExit (Event * event);
     };
 }
 

@@ -25,12 +25,12 @@ namespace kt {
         text->setText (message);
     }
 
-    void Dialog::addButton (std::string message, std::function <void (Event const *)> && callback) {
+    void Dialog::addButton (std::string message, std::function <void (Event *)> && callback) {
         ResFont * font = dialogResources.getResFont ("kt-liberation");
         spText msg = new Text (font, message);
 
         ResAnim * sprite = dialogResources.getResAnim ("button");
-        spButton button = new Button (sprite, msg, std::forward <std::function <void (Event const *)>> (callback));
+        spButton button = new Button (sprite, msg, std::forward <std::function <void (Event *)>> (callback));
         addChild (button);
         buttons.push_back (button);
         button->setSize ({0.8f * getSize().x, 50});

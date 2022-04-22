@@ -15,15 +15,15 @@ namespace kt {
 
     class Button: public Box9Sprite {
     private:
-        std::function <void (Event const *)> onAction;
+        std::function <void (Event *)> onAction;
 
-        void onMouseOver (Event const * event);
-        void onMouseOut  (Event const * event);
+        void onMouseOver (Event * event);
+        void onMouseOut  (Event * event);
 
     public:
-        Button (ResAnim * animation, spText message, std::function <void (Event const *)> && onAction);
+        Button (ResAnim * animation, spText message, std::function <void (Event *)> && onAction);
 
-        void trigger (Event const * event);
+        void trigger (Event * event);
     };
     DECLARE_SMART (Button, spButton);
 

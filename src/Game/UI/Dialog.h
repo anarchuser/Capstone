@@ -26,7 +26,7 @@ namespace kt {
         ~Dialog () noexcept override;
 
         void setMessage (std::string message);
-        void addButton (std::string message, std::function <void (Event const *)> && callback);
+        void addButton (std::string message, std::function <void (Event *)> && callback);
     };
 
     DECLARE_SMART (Dialog, spDialog);
