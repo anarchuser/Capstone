@@ -6,5 +6,7 @@
 		<image file="spaceship.png"/>
 		<set scale_factor = "0.115f"/>
 		<image file="venus.png"/>
+		<set scale_factor = "1f"/>
+		<image file="button.png" cols="2"/>
 	</atlas>
 </resources>
