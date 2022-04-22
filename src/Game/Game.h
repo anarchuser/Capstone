@@ -6,7 +6,7 @@
 #include "oxygine-framework.h"
 
 #include "Game/MainActor/MainActor.h"
-#include "Game/Dialog/Dialog.h"
+#include "Game/UI/Dialog.h"
 
 /// Height of game client, in pixels
 #define WINDOW_HEIGHT   1080

@@ -1,13 +1,12 @@
 #include "Dialog.h"
 
 namespace kt {
-    Dialog::Dialog (Vector2 pos, Vector2 size) {
+    Dialog::Dialog (Vector2 pos, Vector2 size, std::string message) {
         setPosition (pos);
         setSize (size);
-        setScale (size);
+        setGuides (1, 1, 1, 1);
 
         dialogResources.loadXML (GAME_RESOURCES);
-
         setResAnim (dialogResources.getResAnim ("background"));
     }
 

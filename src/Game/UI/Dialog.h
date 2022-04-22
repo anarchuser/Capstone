@@ -6,15 +6,19 @@
 
 #include "oxygine-framework.h"
 
+#include <string>
+
 namespace kt {
     using namespace oxygine;
 
-    class Dialog: public Sprite {
+    class Dialog: public Box9Sprite {
     private:
         Resources dialogResources;
 
     public:
-        Dialog (Vector2 pos, Vector2 size);
+        std::string const message;
+
+        Dialog (Vector2 pos, Vector2 size, std::string message = "");
         ~Dialog () noexcept;
 
     };
