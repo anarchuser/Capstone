@@ -65,13 +65,16 @@ namespace kt {
 
         // TODO: start menu here
         spDialog dialog = new Dialog ({0, 0}, getStage()->getSize(), "Menu");
+        dialog->addButton ("New Game", [](Event const *) {
+            getStage()->removeChildren();
+
+            // Create main actor governing the game
+            spMainActor mainActor = new MainActor (RANDOM_SEED);
+            getStage()->addChild (mainActor);
+        });
         dialog->addButton ("Hello World", [](Event const *) { logs::messageln ("Hello World");});
         dialog->addButton ("Exit", onRequestExit);
         getStage()->addChild (dialog);
-
-        // Create main actor governing the game
-//        spMainActor mainActor = new MainActor (RANDOM_SEED);
-//        getStage()->addChild (mainActor);
 
         // Main game loop. Returns true if done
         int done;
@@ -114,8 +117,22 @@ namespace kt {
     }
 
     void Game::onRequestExit (Event const * event) {
-        // TODO: add quit / options dialog
-        core::requestQuit();
+        static bool active = false;
+        static auto size = getStage()->getSize();
+        static spDialog dialog = [=] () {
+            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 5}, "Do you want to quit the game?");
+            // TODO: add options to disconnect or return to main menu
+            dialog->addButton ("Quit", [] (Event const *) { core::requestQuit (); });
+            return dialog;
+        }();
+
+        if (!active) {
+            getStage()->addChild (dialog);
+            active = true;
+        } else {
+            getStage()->removeChild (dialog);
+            active = false;
+        }
     }
 }
 

@@ -1,6 +1,8 @@
 #include "Dialog.h"
 
 namespace kt {
+    Resources Dialog::dialogResources;
+
     Dialog::Dialog (Vector2 pos, Vector2 size, std::string message) {
         setPosition (pos);
         setSize (size);
@@ -10,7 +12,8 @@ namespace kt {
         setResAnim (dialogResources.getResAnim ("background"));
 
         spText text = new Text (dialogResources.getResFont ("kt-liberation"), message);
-        text->setPosition ({pos.x + 100, pos.y + 100});
+        text->setHAlign (TextStyle::HALIGN_MIDDLE);
+        text->setPosition (size.x / 2, 50);
         addChild (text);
     }
 
@@ -30,8 +33,8 @@ namespace kt {
         spButton button = new Button (sprite, msg, std::forward <std::function <void (Event const *)>> (callback));
         addChild (button);
         buttons.push_back (button);
-        button->setSize ({getSize().x - 200, 50});
-        button->setPosition (getPosition().x + 100, getPosition().y + 100 + 100 * buttons.size());
+        button->setSize ({0.8f * getSize().x, 50});
+        button->setPosition (0.1f * getSize().x, 25 + 100 * buttons.size());
     }
 }
 

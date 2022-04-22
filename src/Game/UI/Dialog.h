@@ -17,7 +17,7 @@ namespace kt {
 
     class Dialog: public Box9Sprite {
     private:
-        Resources dialogResources;
+        static Resources dialogResources;
         spText text;
         std::vector <spButton> buttons;
 

@@ -6,7 +6,7 @@ namespace kt {
 
         setGuides (20, 20, 20, 20);
 
-        message->setPosition (getPosition().x + 20, getPosition().y + 5);
+        message->setPosition (20, 5);
         addChild (message);
 
         addClickListener (CLOSURE (this, & Button::trigger));
