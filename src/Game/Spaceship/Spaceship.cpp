@@ -3,6 +3,7 @@
 namespace kt {
 
     Spaceship::Spaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale) {
+        setPosition (pos);
         setResAnim (animation);
         setAnchor (0.5, 0.5);
         setTouchChildrenEnabled (false);

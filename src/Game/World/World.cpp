@@ -2,16 +2,20 @@
 
 namespace kt {
     World::World (b2Vec2 size): world (b2Vec2_zero), world_size {size} {
-        // Size of the World Sprite
+        // Size and position of the World Sprite
         setSize (getStage()->getSize());
+        setPosition (getStage()->getPosition());
 
         OX_ASSERT(world_size.x > 0);
         OX_ASSERT(world_size.y > 0);
 
-        ox::getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
+        // TODO: add listener to world, not to stage
+        // TODO: for the above, add animation to world?
+        getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
             auto key = safeCast<KeyEvent *> (event)->data->keysym.scancode;
             switch (key) {
                 case SDL_SCANCODE_GRAVE:
+                    event->stopsImmediatePropagation = true;
                     toggleDebugDraw ();
                     break;
             }
@@ -74,7 +78,7 @@ namespace kt {
         };
     }
 
-    void kt::World::toggleDebugDraw () {
+    void World::toggleDebugDraw () {
         if (debugDraw) {
             logs::messageln ("disable debug draw");
 

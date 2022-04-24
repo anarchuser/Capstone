@@ -16,11 +16,11 @@ namespace kt {
         }
         body->SetAwake (false);
 
-        getStage()->addEventListener (ox::KeyEvent::KEY_UP, [=](Event * event) {
-            instance->onSteeringEvent ((ox::KeyEvent *) event);
+        getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
+            instance->onSteeringEvent ((KeyEvent *) event);
         });
-        getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
-            instance->onSteeringEvent ((ox::KeyEvent *) event);
+        getStage()->addEventListener (KeyEvent::KEY_DOWN, [](Event * event) {
+            instance->onSteeringEvent ((KeyEvent *) event);
         });
     }
 

@@ -5,8 +5,8 @@
 
 #include "oxygine-framework.h"
 
-#include "Game/MainActor/MainActor.h"
 #include "Game/UI/Dialog.h"
+#include "src/Game/Scene/MenuScene.h"
 
 /// Height of game client, in pixels
 #define WINDOW_HEIGHT   1080
@@ -36,14 +36,8 @@ namespace kt {
         /// False until initialised
         static bool initialised;
 
-        static spMainActor instance;
-
         /// Function called for each frame to update game
         static bool loop ();
-
-        static void onRequestExit (Event * event);
-
-        static void onNewGame (Event * event);
     };
 }
 
