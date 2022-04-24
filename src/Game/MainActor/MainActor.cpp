@@ -41,6 +41,15 @@ namespace kt {
         gameResources.free();
     }
 
+    void MainActor::update (UpdateState const & us) {
+        if (isPaused) return;
+
+        Actor::update (us);
+    }
+
+    bool MainActor::togglePause () {
+        return isPaused = !isPaused;
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

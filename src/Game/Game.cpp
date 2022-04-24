@@ -4,6 +4,8 @@ namespace kt {
 
     bool Game::initialised = false;
 
+    spMainActor Game::instance = nullptr;
+
     void Game::init () {
         // Ensure `init` is only run once
         static bool ran = false;
@@ -65,13 +67,7 @@ namespace kt {
 
         // TODO: start menu here
         spDialog dialog = new Dialog ({0, 0}, getStage()->getSize(), "Menu");
-        dialog->addButton ("New Game", [](Event *) {
-            getStage()->removeChildren();
-
-            // Create main actor governing the game
-            spMainActor mainActor = new MainActor (RANDOM_SEED);
-            getStage()->addChild (mainActor);
-        });
+        dialog->addButton ("New Game", onNewGame);
         dialog->addButton ("Hello World", [](Event *) { logs::messageln ("Hello World");});
         dialog->addButton ("Exit", onRequestExit);
         getStage()->addChild (dialog);
@@ -117,11 +113,13 @@ namespace kt {
     }
 
     void Game::onRequestExit (Event * event) {
+        if (instance) instance->togglePause();
+
         event->stopsImmediatePropagation = true;
         static bool active = false;
         static auto size = getStage()->getSize();
         static spDialog dialog = [=] () {
-            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 5}, "Do you want to quit the game?");
+            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 5}, "Options");
             // TODO: add options to disconnect or return to main menu
             event->stopsImmediatePropagation = true;
             dialog->addButton ("Quit", [] (Event *) { core::requestQuit (); });
@@ -135,6 +133,15 @@ namespace kt {
             getStage()->removeChild (dialog);
             active = false;
         }
+    }
+
+    void Game::onNewGame (Event * event) {
+        getStage()->removeChildren();
+
+        // Create main actor governing the game
+        spMainActor mainActor = new MainActor (RANDOM_SEED);
+        instance = mainActor;
+        getStage()->addChild (mainActor);
     }
 }
 

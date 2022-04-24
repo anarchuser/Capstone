@@ -25,11 +25,16 @@ namespace kt {
     private:
         Resources gameResources;
         HashedRNG rng;
+        bool isPaused = false;
 
     public:
         MainActor ();
         explicit MainActor (std::size_t seed);
         ~MainActor() noexcept override;
+
+        void update(UpdateState const & us) override;
+
+        bool togglePause ();
     };
 
     DECLARE_SMART(MainActor, spMainActor);

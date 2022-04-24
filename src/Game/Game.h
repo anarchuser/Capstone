@@ -36,10 +36,14 @@ namespace kt {
         /// False until initialised
         static bool initialised;
 
+        static spMainActor instance;
+
         /// Function called for each frame to update game
         static bool loop ();
 
         static void onRequestExit (Event * event);
+
+        static void onNewGame (Event * event);
     };
 }
 
