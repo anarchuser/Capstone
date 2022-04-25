@@ -8,21 +8,20 @@ namespace kt {
         // Load all required game assets
         gameResources.loadXML (GAME_RESOURCES);
 
-        spWorld world = new World (WORLD_SIZE);
+        spWorld world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
         addChild (world);
 
         // Generate a couple of planets, number based on world size
         auto resource = gameResources.getResAnim ("venus");
         for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
-            spPlanet planet = new Planet (* world, resource, {
+            new Planet (* world, resource, {
                     float (rng.random ({100, world->getSize().x - 100})),
                     float (rng.random ({100, world->getSize().y - 100}))
             }, float (rng.random ({0.3, 0.7})));
-            world->addChild (planet);
         }
 
         auto spaceshipAnimation = gameResources.getResAnim ("spaceship");
-        spKeyboardSpaceship spaceship = new KeyboardSpaceship (* world, spaceshipAnimation, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
+        new KeyboardSpaceship (* world, spaceshipAnimation, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
             auto * keyEvent = (KeyEvent *) event;
@@ -51,7 +50,6 @@ namespace kt {
     }
 
     void GameScene::onMenu (Event * event) {
-        event->stopsImmediatePropagation = true;
         hardPause = !hardPause;
         static auto size = getSize();
         static spDialog dialog = [this] () {

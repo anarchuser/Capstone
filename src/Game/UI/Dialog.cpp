@@ -9,7 +9,7 @@ namespace kt {
         setGuides (1, 1, 1, 1);
 
         dialogResources.loadXML (GAME_RESOURCES);
-        setResAnim (dialogResources.getResAnim ("background"));
+        setResAnim (dialogResources.getResAnim ("dialog"));
 
         spText text = new Text (dialogResources.getResFont ("kt-liberation"), message);
         text->setHAlign (TextStyle::HALIGN_MIDDLE);

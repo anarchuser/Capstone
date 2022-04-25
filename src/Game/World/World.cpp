@@ -1,21 +1,21 @@
 #include "World.h"
 
 namespace kt {
-    World::World (b2Vec2 size): world (b2Vec2_zero), world_size {size} {
+    World::World (ResAnim * background, b2Vec2 size): world (b2Vec2_zero), world_size {size} {
+        setResAnim (background);
+    
         // Size and position of the World Sprite
         setSize (getStage()->getSize());
         setPosition (getStage()->getPosition());
-
+        
         OX_ASSERT(world_size.x > 0);
         OX_ASSERT(world_size.y > 0);
 
-        // TODO: add listener to world, not to stage
-        // TODO: for the above, add animation to world?
         getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
             auto key = safeCast<KeyEvent *> (event)->data->keysym.scancode;
             switch (key) {
                 case SDL_SCANCODE_GRAVE:
-                    event->stopsImmediatePropagation = true;
+                    event->stopImmediatePropagation();
                     toggleDebugDraw ();
                     break;
             }
@@ -23,7 +23,7 @@ namespace kt {
     }
 
     void World::update (UpdateState const & updateState) {
-        world.Step (1/ FPS, 8, 3);
+        world.Step (1/ FPS, 1, 1);
 
         b2Body * current_body = world.GetBodyList();
         std::vector <b2Body *> to_delete;

@@ -3,6 +3,7 @@
 namespace kt {
     Planet::Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale) {
         setPosition (pos);
+        attachTo (& world);
         auto world_pos = world.convert (pos);
         OX_ASSERT (world.wrap (world_pos) == world.wrap (world.wrap (world_pos)));
         OX_ASSERT (world_pos == world.wrap (world_pos));
