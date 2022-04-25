@@ -70,24 +70,24 @@ namespace kt {
     }
 
     void GameScene::onRestart (Event * event) {
-        getStage()->removeChildren();
-        getStage()->removeAllEventListeners();
-        new GameScene (rng.seed);
         detach();
+        getStage()->removeAllEventListeners();
+        while (get_pointer(getStage()->getLastChild()) == this);
+        new GameScene (rng.seed);
     }
 
     void GameScene::onNewGame (Event * event) {
-        getStage()->removeChildren();
-        getStage()->removeAllEventListeners();
-        new GameScene (RANDOM_SEED);
         detach();
+        getStage()->removeAllEventListeners();
+        while (get_pointer(getStage()->getLastChild()) == this);
+        new GameScene (RANDOM_SEED);
     }
 
     void GameScene::onAbandon (Event * event) {
-        getStage()->removeChildren();
-        getStage()->removeAllEventListeners();
-        new MenuScene ();
         detach();
+        getStage()->removeAllEventListeners();
+        while (get_pointer(getStage()->getLastChild()) == this);
+        new MenuScene ();
     }
     
     void GameScene::onQuit (Event * event) {

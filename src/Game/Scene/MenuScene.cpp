@@ -7,7 +7,7 @@ namespace kt {
         dialog->addButton ("Exit", CLOSURE (this, & MenuScene::onRequestExit));
         addChild (dialog);
 
-        addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
+        getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
             logs::messageln ("Key Down on Menu");
             event->stopsImmediatePropagation = true;
             auto * keyEvent = (KeyEvent *) event;
@@ -21,10 +21,10 @@ namespace kt {
     }
 
     void MenuScene::onNewGame (Event * event) {
-        getStage()->removeChildren();
-        getStage()->removeAllEventListeners();
-        new GameScene (RANDOM_SEED);
         detach();
+        getStage()->removeAllEventListeners();
+        while (get_pointer(getStage()->getLastChild()) == this);
+        new GameScene (RANDOM_SEED);
     }
     void MenuScene::onRequestExit (Event * event) {
         core::requestQuit();
