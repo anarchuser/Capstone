@@ -12,13 +12,12 @@ namespace kt {
         addChild (world);
 
         // Generate a couple of planets, number based on world size
-        // TODO: randomise planet size
         auto resource = gameResources.getResAnim ("venus");
         for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
             spPlanet planet = new Planet (* world, resource, {
                     float (rng.random ({100, world->getSize().x - 100})),
                     float (rng.random ({100, world->getSize().y - 100}))
-            }, 0.5);
+            }, rng.random ({0.3, 0.7}));
             world->addChild (planet);
         }
 

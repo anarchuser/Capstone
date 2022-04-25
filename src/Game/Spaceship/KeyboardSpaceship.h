@@ -12,16 +12,17 @@
 namespace kt {
     using namespace oxygine;
 
+    DECLARE_SMART(KeyboardSpaceship, spKeyboardSpaceship);
+
     class KeyboardSpaceship: public Spaceship {
     public:
         KeyboardSpaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
 
         void onSteeringEvent (ox::KeyEvent * event);
 
-        static KeyboardSpaceship * instance;
+        static spKeyboardSpaceship instance;
     };
 
-    DECLARE_SMART(KeyboardSpaceship, spKeyboardSpaceship);
 }
 
 #endif //CAPSTONE_KB_SPACESHIP_H

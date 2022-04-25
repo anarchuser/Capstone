@@ -36,12 +36,18 @@ namespace kt {
         spActor current_actor = world->getFirstChild();
 
         while (current_actor) {
+            
             auto * actor_body = (b2Body *) current_actor->getUserData();
-
+    
+            if (current_actor == KeyboardSpaceship::instance) {
+                logs::messageln ("Found spaceship");
+            }
             /// Apply force to existing foreign dynamic bodies only
             if (actor_body && body != actor_body && actor_body->GetType() == b2_dynamicBody) {
-//                logs::messageln ("Asserting force");
-    
+                if (current_actor == KeyboardSpaceship::instance) {
+                    logs::messageln ("Pulling spaceship");
+                }
+                
                 auto space = world->convert(_getStage()->getSize());
                 auto direction = body->GetWorldCenter () - actor_body->GetWorldCenter ();
 

@@ -2,7 +2,7 @@
 
 namespace kt {
 
-    KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
+    spKeyboardSpaceship KeyboardSpaceship::instance = nullptr;
 
     KeyboardSpaceship::KeyboardSpaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale)
             : Spaceship (world, animation, pos, scale) {

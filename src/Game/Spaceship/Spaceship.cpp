@@ -3,6 +3,7 @@
 namespace kt {
 
     Spaceship::Spaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale) {
+        attachTo (& world);
         setPosition (pos);
         setResAnim (animation);
         setAnchor (0.5, 0.5);
@@ -16,6 +17,7 @@ namespace kt {
 
         body = world.world.CreateBody (& bodyDef);
         setUserData (body);
+        body->SetAwake (false);
 
         setScale (scale);
 
@@ -29,6 +31,7 @@ namespace kt {
         b2FixtureDef coneFixture;
         coneFixture.shape = & cone;
         coneFixture.density = SPACESHIP_DENSITY;
+        coneFixture.isSensor = true;
         body->CreateFixture (& coneFixture);
 
         b2PolygonShape rear;
@@ -42,9 +45,8 @@ namespace kt {
         b2FixtureDef rearFixture;
         rearFixture.shape = & rear;
         rearFixture.density = SPACESHIP_DENSITY;
+        rearFixture.isSensor = true;
         body->CreateFixture (& rearFixture);
-
-        sleep();
     }
 
     void Spaceship::sleep () {
@@ -71,9 +73,9 @@ namespace kt {
             body->ApplyLinearImpulseToCenter (SPACESHIP_FORCE * direction, true);
         }
         auto omega = body->GetAngularVelocity ();
-        if (omega < 0) {
+        if (omega < -0.5) {
             body->ApplyAngularImpulse (0.5 * SPACESHIP_TORQUE, false);
-        } else if (omega > 0) {
+        } else if (omega > 0.5) {
             body->ApplyAngularImpulse (-0.5 * SPACESHIP_TORQUE, false);
         }
         if (rotateLeft && !rotateRight) {
