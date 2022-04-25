@@ -17,14 +17,12 @@ namespace kt {
             spPlanet planet = new Planet (* world, resource, {
                     float (rng.random ({100, world->getSize().x - 100})),
                     float (rng.random ({100, world->getSize().y - 100}))
-            }, rng.random ({0.3, 0.7}));
+            }, float (rng.random ({0.3, 0.7})));
             world->addChild (planet);
         }
 
         auto spaceshipAnimation = gameResources.getResAnim ("spaceship");
         spKeyboardSpaceship spaceship = new KeyboardSpaceship (* world, spaceshipAnimation, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
-        world->addChild (spaceship);
-        addChild (spaceship);
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
             auto * keyEvent = (KeyEvent *) event;

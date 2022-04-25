@@ -8,13 +8,7 @@ namespace kt {
             : Spaceship (world, animation, pos, scale) {
 
         instance = this;
-
-        auto * part = body->GetFixtureList();
-        while (part) {
-            part->SetSensor (false);
-            part = part->GetNext();
-        }
-        body->SetAwake (false);
+        setAwake (true);
 
         getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
             instance->onSteeringEvent ((KeyEvent *) event);

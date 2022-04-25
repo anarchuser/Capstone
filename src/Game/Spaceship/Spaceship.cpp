@@ -49,13 +49,13 @@ namespace kt {
         body->CreateFixture (& rearFixture);
     }
 
-    void Spaceship::sleep () {
+    void Spaceship::setAwake (bool awake) {
         auto * part = body->GetFixtureList();
         while (part) {
-            part->SetSensor (true);
+            part->SetSensor (!awake);
             part = part->GetNext();
         }
-        body->SetAwake (false);
+        body->SetAwake (awake);
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
