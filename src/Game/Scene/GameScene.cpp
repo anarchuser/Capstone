@@ -62,6 +62,7 @@ namespace kt {
             dialog->addButton ("Restart", CLOSURE (this, & GameScene::onRestart));
             dialog->addButton ("New game", CLOSURE (this, & GameScene::onNewGame));
             dialog->addButton ("Abandon", CLOSURE (this, & GameScene::onAbandon));
+            dialog->addButton ("Quit",  CLOSURE (this, & GameScene::onQuit));
             dialog->addButton ("Cancel",  CLOSURE (this, & GameScene::onMenu));
             return dialog;
         }();
@@ -92,6 +93,10 @@ namespace kt {
         getStage()->removeAllEventListeners();
         new MenuScene ();
         detach();
+    }
+    
+    void GameScene::onQuit (Event * event) {
+        core::requestQuit();
     }
 }
 

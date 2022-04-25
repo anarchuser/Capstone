@@ -31,10 +31,10 @@ namespace kt {
 
         ResAnim * sprite = dialogResources.getResAnim ("button");
         spButton button = new Button (sprite, msg, std::forward <std::function <void (Event *)>> (callback));
+        button->setSize ({0.8f * getSize().x, 50});
+        button->setPosition (0.1f * getSize().x, getSize().y / 5 + std::max (getSize().y / 10, button->getSize().y + 10) * buttons.size());
         addChild (button);
         buttons.push_back (button);
-        button->setSize ({0.8f * getSize().x, 50});
-        button->setPosition (0.1f * getSize().x, 25 + 100 * buttons.size());
     }
 }
 

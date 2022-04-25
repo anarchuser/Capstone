@@ -42,6 +42,7 @@ namespace kt {
         void onRestart (Event * event);
         void onNewGame (Event * event);
         void onAbandon (Event * event);
+        void onQuit (Event * event);
     };
 
     DECLARE_SMART(GameScene, spGameScene);
