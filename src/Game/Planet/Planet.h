@@ -8,6 +8,8 @@
 
 #include "Game/World/World.h"
 
+#include "Game/Spaceship/KeyboardSpaceship.h"
+
 /// Number of planets per pixel
 #define PLANETS_PER_PIXEL   5e-2
 
@@ -20,7 +22,7 @@ namespace kt {
 
     class Planet : public Sprite {
     public:
-        Planet (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
+        Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale = 1);
 
         void update (UpdateState const & us) override;
     };

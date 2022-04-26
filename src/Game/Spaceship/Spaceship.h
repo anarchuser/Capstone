@@ -33,7 +33,7 @@ namespace kt {
 
         void update (UpdateState const & us) final;
 
-        void sleep();
+        void setAwake (bool awake);
     };
 
     DECLARE_SMART(Spaceship, spSpaceship);

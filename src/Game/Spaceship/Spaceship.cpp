@@ -3,6 +3,9 @@
 namespace kt {
 
     Spaceship::Spaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale) {
+        attachTo (& world);
+        setPosition (pos);
+        setRotation (1.5 * b2_pi);
         setResAnim (animation);
         setAnchor (0.5, 0.5);
         setTouchChildrenEnabled (false);
@@ -15,6 +18,7 @@ namespace kt {
 
         body = world.world.CreateBody (& bodyDef);
         setUserData (body);
+        body->SetAwake (false);
 
         setScale (scale);
 
@@ -28,6 +32,7 @@ namespace kt {
         b2FixtureDef coneFixture;
         coneFixture.shape = & cone;
         coneFixture.density = SPACESHIP_DENSITY;
+        coneFixture.isSensor = true;
         body->CreateFixture (& coneFixture);
 
         b2PolygonShape rear;
@@ -41,18 +46,17 @@ namespace kt {
         b2FixtureDef rearFixture;
         rearFixture.shape = & rear;
         rearFixture.density = SPACESHIP_DENSITY;
+        rearFixture.isSensor = true;
         body->CreateFixture (& rearFixture);
-
-        sleep();
     }
 
-    void Spaceship::sleep () {
+    void Spaceship::setAwake (bool awake) {
         auto * part = body->GetFixtureList();
         while (part) {
-            part->SetSensor (true);
+            part->SetSensor (!awake);
             part = part->GetNext();
         }
-        body->SetAwake (false);
+        body->SetAwake (awake);
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
@@ -70,9 +74,9 @@ namespace kt {
             body->ApplyLinearImpulseToCenter (SPACESHIP_FORCE * direction, true);
         }
         auto omega = body->GetAngularVelocity ();
-        if (omega < 0) {
+        if (omega < -0.5) {
             body->ApplyAngularImpulse (0.5 * SPACESHIP_TORQUE, false);
-        } else if (omega > 0) {
+        } else if (omega > 0.5) {
             body->ApplyAngularImpulse (-0.5 * SPACESHIP_TORQUE, false);
         }
         if (rotateLeft && !rotateRight) {

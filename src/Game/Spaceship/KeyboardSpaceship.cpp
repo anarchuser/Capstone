@@ -2,25 +2,19 @@
 
 namespace kt {
 
-    KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
+    spKeyboardSpaceship KeyboardSpaceship::instance = nullptr;
 
     KeyboardSpaceship::KeyboardSpaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale)
             : Spaceship (world, animation, pos, scale) {
 
         instance = this;
+        setAwake (true);
 
-        auto * part = body->GetFixtureList();
-        while (part) {
-            part->SetSensor (false);
-            part = part->GetNext();
-        }
-        body->SetAwake (false);
-
-        getStage()->addEventListener (ox::KeyEvent::KEY_UP, [=](Event * event) {
-            instance->onSteeringEvent ((ox::KeyEvent *) event);
+        getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
+            instance->onSteeringEvent ((KeyEvent *) event);
         });
-        getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
-            instance->onSteeringEvent ((ox::KeyEvent *) event);
+        getStage()->addEventListener (KeyEvent::KEY_DOWN, [](Event * event) {
+            instance->onSteeringEvent ((KeyEvent *) event);
         });
     }
 

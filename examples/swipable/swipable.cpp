@@ -4,10 +4,10 @@ ox::Resources sw::MainActor::gameResources = Resources();
 
 sw::MainActor::MainActor() {}
 
-//declare spMainActor as intrusive_ptr holder of sw::MainActor
+//declare spMainActor as intrusive_ptr holder of sw::GameScene
 typedef oxygine::intrusive_ptr<sw::MainActor> spMainActor;
 //you could use DECLARE_SMART preprocessor definition it does the same:
-//DECLARE_SMART(MainActor, spMainActor)
+//DECLARE_SMART(GameScene, spMainActor)
 
 void sw::actor_preinit() {}
 

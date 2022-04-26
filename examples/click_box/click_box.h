@@ -31,10 +31,10 @@ namespace cb {
         Root();
     };
 
-    //declare spMainActor as intrusive_ptr holder of MainActor
+    //declare spMainActor as intrusive_ptr holder of GameScene
     typedef oxygine::intrusive_ptr<cb::MainActor> spMainActor;
     //you could use DECLARE_SMART preprocessor definition it does the same:
-    //DECLARE_SMART(MainActor, spMainActor)
+    //DECLARE_SMART(GameScene, spMainActor)
 
     void actor_preinit();
     void actor_init();

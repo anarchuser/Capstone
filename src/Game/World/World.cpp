@@ -1,17 +1,21 @@
 #include "World.h"
 
 namespace kt {
-    World::World (b2Vec2 size): world (b2Vec2_zero), world_size {size} {
-        // Size of the World Sprite
+    World::World (ResAnim * background, b2Vec2 size): world (b2Vec2_zero), world_size {size} {
+        setResAnim (background);
+    
+        // Size and position of the World Sprite
         setSize (getStage()->getSize());
-
+        setPosition (getStage()->getPosition());
+        
         OX_ASSERT(world_size.x > 0);
         OX_ASSERT(world_size.y > 0);
 
-        ox::getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
+        getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
             auto key = safeCast<KeyEvent *> (event)->data->keysym.scancode;
             switch (key) {
                 case SDL_SCANCODE_GRAVE:
+                    event->stopImmediatePropagation();
                     toggleDebugDraw ();
                     break;
             }
@@ -19,7 +23,7 @@ namespace kt {
     }
 
     void World::update (UpdateState const & updateState) {
-        world.Step (1/ FPS, 8, 3);
+        world.Step (1/ FPS, 1, 1);
 
         b2Body * current_body = world.GetBodyList();
         std::vector <b2Body *> to_delete;
@@ -74,7 +78,7 @@ namespace kt {
         };
     }
 
-    void kt::World::toggleDebugDraw () {
+    void World::toggleDebugDraw () {
         if (debugDraw) {
             logs::messageln ("disable debug draw");
 

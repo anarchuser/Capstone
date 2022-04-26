@@ -53,10 +53,7 @@ namespace kt {
         DebugActor::show();
 #endif
 
-        // TODO: start menu here
-        // Create main actor governing the game
-        spMainActor mainActor = new MainActor (RANDOM_SEED);
-        getStage()->addChild (mainActor);
+        new MenuScene ();
 
         // Main game loop. Returns true if done
         int done;

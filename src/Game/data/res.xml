@@ -6,5 +6,12 @@
 		<image file="spaceship.png"/>
 		<set scale_factor = "0.115f"/>
 		<image file="venus.png"/>
+		<set scale_factor = "1f"/>
+		<image file="dialog.png"/>
+		<image file="sky.png"/>
+		<image file="button.png"/>
 	</atlas>
+
+	<set path = "./fonts"/>
+	<font file="kt-liberation.fnt"/>
 </resources>
