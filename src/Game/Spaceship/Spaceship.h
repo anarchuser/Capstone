@@ -2,6 +2,7 @@
 #define CAPSTONE_SPACESHIP_H
 
 #include "config.h"
+#include "Game/config.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
@@ -39,7 +40,7 @@ namespace kt {
         void updateScoreboard ();
 
     public:
-        Spaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
+        Spaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
 
         void update (UpdateState const & us) final;
 

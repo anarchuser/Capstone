@@ -16,7 +16,7 @@ namespace kt {
 
     class KeyboardSpaceship: public Spaceship {
     public:
-        KeyboardSpaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
+        KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
 
         void onSteeringEvent (ox::KeyEvent * event);
 

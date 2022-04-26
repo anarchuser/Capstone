@@ -3,12 +3,12 @@
 namespace kt {
     std::size_t Spaceship::ship_counter = 0;
 
-    Spaceship::Spaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale) {
+    Spaceship::Spaceship (World & world, Resources & res, Vector2 const & pos, float scale) {
         setName ("Spaceship");
         attachTo (& world);
         setPosition (pos);
         setRotation (1.5 * b2_pi);
-        setResAnim (animation);
+        setResAnim (res.getResAnim ("spaceship"));
         setAnchor (0.5, 0.5);
         setTouchChildrenEnabled (false);
 
@@ -51,7 +51,7 @@ namespace kt {
         rearFixture.isSensor = true;
         body->CreateFixture (& rearFixture);
 
-        scoreboard = new Text ();
+        scoreboard = new Text (res.getResFont ("kt-liberation"));
         scoreboard->setPosition (0.85 * getParent()->getSize().x, 10 + id * 40);
         getParent()->addChild (scoreboard);
         updateScoreboard();
