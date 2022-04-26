@@ -8,6 +8,8 @@
 
 #include "Game/World/World.h"
 
+#include "Game/Spaceship/KeyboardSpaceship.h"
+
 /// Number of planets per pixel
 #define PLANETS_PER_PIXEL   5e-2
 

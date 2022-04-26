@@ -25,7 +25,7 @@ namespace kt {
         // Size of the physical world
         b2Vec2 const world_size;
 
-        explicit World (b2Vec2 size);
+        World (ResAnim * background, b2Vec2 size);
 
         void update (UpdateState const & updateState) override;
 

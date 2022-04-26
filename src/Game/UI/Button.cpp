@@ -4,7 +4,7 @@ namespace kt {
     Button::Button (ResAnim * animation, spText message, std::function<void (Event *)> && onAction):
             onAction{std::move (onAction)} {
 
-        setGuides (15, 15, 15, 15);
+        setResAnim (animation);
 
         message->setPosition (20, 5);
         message->setColor (Color (0, 0, 0, 255));
@@ -16,17 +16,18 @@ namespace kt {
     }
 
     void Button::trigger (Event * event) {
-        event->stopsImmediatePropagation = true;
-        addTween (Sprite::TweenAnim (getResAnim()), 200);
+        event->stopImmediatePropagation();
+        addTween (Sprite::TweenColor ({80, 80, 80, 255}), 200, 1, true);
         onAction (event);
     }
 
     void Button::onMouseOver (Event * event) {
-        event->stopsImmediatePropagation = true;
+        event->stopImmediatePropagation();
         addTween (Sprite::TweenAddColor (Color (32, 32, 32, 0)), 100);
     }
     void Button::onMouseOut  (Event * event) {
-        event->stopsImmediatePropagation = true;
+        event->stopImmediatePropagation();
+        this->removeTweens (false);
         addTween (Sprite::TweenAddColor (Color (0, 0, 0, 0)), 100);
     }
 }

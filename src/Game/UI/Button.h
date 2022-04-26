@@ -13,7 +13,7 @@
 namespace kt {
     using namespace oxygine;
 
-    class Button: public Box9Sprite {
+    class Button: public Sprite {
     private:
         std::function <void (Event *)> onAction;
 

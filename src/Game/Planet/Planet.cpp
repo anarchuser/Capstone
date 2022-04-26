@@ -2,6 +2,8 @@
 
 namespace kt {
     Planet::Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale) {
+        setPosition (pos);
+        attachTo (& world);
         auto world_pos = world.convert (pos);
         OX_ASSERT (world.wrap (world_pos) == world.wrap (world.wrap (world_pos)));
         OX_ASSERT (world_pos == world.wrap (world_pos));
@@ -32,12 +34,12 @@ namespace kt {
     void Planet::update (UpdateState const & us) {
         auto * body = (b2Body *) getUserData();
         auto * world = safeCast<World *> (getParent());
-        spActor current_actor = getParent()->getFirstChild();
+        spActor current_actor = world->getFirstChild();
 
         while (current_actor) {
             auto * actor_body = (b2Body *) current_actor->getUserData();
-
-            /// Apply force to existing foreign dynamic bodies only
+    
+            // Apply force to existing foreign dynamic bodies only
             if (actor_body && body != actor_body && actor_body->GetType() == b2_dynamicBody) {
                 auto space = world->convert(_getStage()->getSize());
                 auto direction = body->GetWorldCenter () - actor_body->GetWorldCenter ();

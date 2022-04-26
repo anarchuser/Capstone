@@ -10,10 +10,10 @@ void cb::MainActor::buttonOverOut(Event* e) const {}
 
 void cb::MainActor::runSprite() {}
 
-//declare spMainActor as intrusive_ptr holder of cb::MainActor
+//declare spMainActor as intrusive_ptr holder of cb::GameScene
 typedef oxygine::intrusive_ptr<cb::MainActor> spMainActor;
 //you could use DECLARE_SMART preprocessor definition it does the same:
-//DECLARE_SMART(MainActor, spMainActor)
+//DECLARE_SMART(GameScene, spMainActor)
 
 void cb::actor_preinit() {}
 
