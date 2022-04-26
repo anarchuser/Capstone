@@ -29,7 +29,7 @@ namespace kt {
         Resources gameResources;
         HashedRNG rng;
         bool hardPause = false;
-        bool softPause = false;
+        bool softPause = true;
 
     public:
         GameScene ();

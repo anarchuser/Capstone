@@ -30,6 +30,16 @@ namespace kt {
                 case SDL_SCANCODE_P:
                     softPause = !softPause;
                     break;
+                case SDL_SCANCODE_W:
+                case SDL_SCANCODE_A:
+                case SDL_SCANCODE_S:
+                case SDL_SCANCODE_D:
+                case SDL_SCANCODE_UP:
+                case SDL_SCANCODE_LEFT:
+                case SDL_SCANCODE_DOWN:
+                case SDL_SCANCODE_RIGHT:
+                    softPause = false;
+                    break;
                 case SDL_SCANCODE_ESCAPE:
                     onMenu (event);
                     break;
