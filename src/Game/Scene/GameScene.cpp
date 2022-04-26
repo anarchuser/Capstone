@@ -23,6 +23,25 @@ namespace kt {
         auto spaceshipAnimation = gameResources.getResAnim ("spaceship");
         new KeyboardSpaceship (* world, spaceshipAnimation, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
 
+        spText collisionCounter = new Text (gameResources.getResFont ("kt-liberation"), "0");
+        collisionCounter->setPosition (0.9 * getSize().x, 10);
+        addChild (collisionCounter);
+        world->addEventListener (CollisionEvent::BEGIN, [collisionCounter] (Event * event) {
+            auto actors = safeCast <CollisionEvent *> (event)->actors;
+            auto * bodyA = (b2Body *) (actors.first->getUserData());
+            auto * bodyB = (b2Body *) (actors.second->getUserData());
+            auto * fixtureA = bodyA->GetFixtureList();
+            auto * fixtureB = bodyB->GetFixtureList();
+
+            // Ignore bodies that don't collide (i.e., yet uncontrolled spaceships)
+            if (fixtureA->IsSensor() || fixtureB->IsSensor()) return;
+            // Ignore planet-planet collisions
+            if (fixtureA->GetType() == b2Shape::e_circle && fixtureB->GetType() == b2Shape::e_circle) return;
+
+            static int counter = 0;
+            collisionCounter->setText (std::to_string (++counter));
+        });
+
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;

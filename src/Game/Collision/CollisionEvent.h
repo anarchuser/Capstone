@@ -13,11 +13,11 @@ namespace kt {
 
     class CollisionEvent: public Event {
     public:
-        enum { EVENT = eventID ('C', 'o', 'l', 'l') };
+        enum { BEGIN = eventID ('C', 'o', 'l', 'l') };
 
         std::pair <spActor, spActor> const actors;
 
-        explicit CollisionEvent (std::pair <spActor, spActor> actors);
+        CollisionEvent (std::pair <spActor, spActor> actors, eventType type);
     };
 
 } // kt

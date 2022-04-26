@@ -8,7 +8,7 @@ namespace kt {
         auto * actorA = (Actor *) contact->GetFixtureA()->GetBody()->GetUserData().pointer;
         auto * actorB = (Actor *) contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 
-        auto * event = new CollisionEvent({actorA, actorB});
+        auto * event = new CollisionEvent({actorA, actorB}, CollisionEvent::BEGIN);
         target->dispatchEvent (event);
     }
 
