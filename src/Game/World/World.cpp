@@ -11,6 +11,8 @@ namespace kt {
         OX_ASSERT(world_size.x > 0);
         OX_ASSERT(world_size.y > 0);
 
+        world.SetContactListener (new CollisionListener (this));
+
         getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
             auto key = safeCast<KeyEvent *> (event)->data->keysym.scancode;
             switch (key) {

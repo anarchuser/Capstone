@@ -7,6 +7,7 @@
 #include "box2d.h"
 
 #include "Game/debug/Box2DDebugDraw.h"
+#include "Game/Collision/CollisionListener.h"
 
 #define WORLD_SIZE {10, 10}
 
