@@ -64,7 +64,7 @@ namespace kt {
             --health;
             updateScoreboard();
             if (health <= 0) {
-                scoreboard->detach();
+                scoreboard->setText (std::to_string (id) + ": dead");
                 detach();
             }
         });

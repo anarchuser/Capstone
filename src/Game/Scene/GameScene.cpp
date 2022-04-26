@@ -20,6 +20,7 @@ namespace kt {
             }, float (rng.random ({0.3, 0.7})));
         }
 
+        Spaceship::ship_counter = 0;
         new KeyboardSpaceship (* world, gameResources, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
