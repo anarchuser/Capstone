@@ -1,8 +1,10 @@
 #include "Spaceship.h"
 
 namespace kt {
+    std::size_t Spaceship::ship_counter = 0;
 
     Spaceship::Spaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale) {
+        setName ("Spaceship");
         attachTo (& world);
         setPosition (pos);
         setRotation (1.5 * b2_pi);
@@ -48,6 +50,28 @@ namespace kt {
         rearFixture.density = SPACESHIP_DENSITY;
         rearFixture.isSensor = true;
         body->CreateFixture (& rearFixture);
+
+        scoreboard = new Text ();
+        scoreboard->setPosition (0.85 * getParent()->getSize().x, 10 + id * 40);
+        getParent()->addChild (scoreboard);
+        updateScoreboard();
+
+        addEventListener (CollisionEvent::BEGIN, [this] (Event * event) {
+            if (!body->IsAwake()) return;
+
+            // Currently unused
+            spSprite other = safeCast <CollisionEvent *> (event)->other;
+            --health;
+            updateScoreboard();
+            if (health <= 0) {
+                scoreboard->detach();
+                detach();
+            }
+        });
+    }
+
+    void Spaceship::updateScoreboard () {
+        scoreboard->setText (std::to_string (id) + ": " + std::to_string (health) + " hp");
     }
 
     void Spaceship::setAwake (bool awake) {

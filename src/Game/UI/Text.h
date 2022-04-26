@@ -12,7 +12,7 @@ namespace kt {
 
     class Text: public TextField {
     public:
-        Text (ResFont * font, std::string message);
+        Text (ResFont * font = nullptr, std::string message = "");
 
     };
     DECLARE_SMART (Text, spText);

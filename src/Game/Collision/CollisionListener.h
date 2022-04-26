@@ -11,11 +11,8 @@
 namespace kt {
 
     class CollisionListener: public b2ContactListener {
-    private:
-        spActor target;
-
     public:
-        explicit CollisionListener (spActor target);
+        CollisionListener ();
 
         void BeginContact (b2Contact * contact) override;
         void EndContact   (b2Contact * contact) override;

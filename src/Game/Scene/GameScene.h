@@ -15,7 +15,6 @@
 #include "Game/Scene/Scene.h"
 //#include "Game/Scene/config.h"
 #include "MenuScene.h"
-#include "Game/Collision/CollisionEvent.h"
 
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
 #define RANDOM_SEED

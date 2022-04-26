@@ -2,14 +2,18 @@
 
 namespace kt {
 
-    CollisionListener::CollisionListener (spActor target): target {target} {}
+    CollisionListener::CollisionListener () {}
 
     void CollisionListener::BeginContact (b2Contact * contact) {
-        auto * actorA = (Actor *) contact->GetFixtureA()->GetBody()->GetUserData().pointer;
-        auto * actorB = (Actor *) contact->GetFixtureB()->GetBody()->GetUserData().pointer;
+        auto * actorA = (Sprite *) contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+        auto * actorB = (Sprite *) contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 
-        auto * event = new CollisionEvent({actorA, actorB}, CollisionEvent::BEGIN);
-        target->dispatchEvent (event);
+        if (actorB->isName ("Spaceship")) {
+            actorB->dispatchEvent (new CollisionEvent (actorA, CollisionEvent::BEGIN));
+        }
+        if (actorA->isName ("Spaceship")) {
+            actorA->dispatchEvent (new CollisionEvent (actorB, CollisionEvent::BEGIN));
+        }
     }
 
     void CollisionListener::EndContact (b2Contact * contact) {

@@ -6,6 +6,8 @@ namespace kt {
 
     KeyboardSpaceship::KeyboardSpaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale)
             : Spaceship (world, animation, pos, scale) {
+        // TODO: Is a special tag needed? Default is "Spaceship"
+//        setName ("KeyboardSpaceship");
 
         instance = this;
         setAwake (true);
