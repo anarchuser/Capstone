@@ -12,16 +12,16 @@ namespace kt {
         addChild (world);
 
         // Generate a couple of planets, number based on world size
-        auto resource = gameResources.getResAnim ("venus");
+        auto planetAnimation = gameResources.getResAnim ("venus");
         for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
-            new Planet (* world, resource, {
+            new Planet (* world, planetAnimation, {
                     float (rng.random ({100, world->getSize().x - 100})),
                     float (rng.random ({100, world->getSize().y - 100}))
             }, float (rng.random ({0.3, 0.7})));
         }
 
-        auto spaceshipAnimation = gameResources.getResAnim ("spaceship");
-        new KeyboardSpaceship (* world, spaceshipAnimation, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
+        Spaceship::ship_counter = 0;
+        new KeyboardSpaceship (* world, gameResources, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
             auto * keyEvent = (KeyEvent *) event;

@@ -16,14 +16,13 @@
 /// Application title
 #define WINDOW_TITLE    "Kepler's Torus"
 
-/// Application background "space" colour (until a proper background exists)
+/// Default "fallback" application background colour. Overridden by `sky` and `dialog` images, respectively
 #define CLEAR_COLOUR    {30, 30, 30, 255};
 
 namespace kt {
-
     using namespace oxygine;
 
-    /// Provides methods for setting up oxygine and starting a game client
+    /// Set of static methods to initialise oxygine and start the game
     class Game {
     public:
         /// Initialise oxygine (set window properties, create root node)

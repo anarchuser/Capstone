@@ -1,12 +1,14 @@
 #include "Spaceship.h"
 
 namespace kt {
+    std::size_t Spaceship::ship_counter = 0;
 
-    Spaceship::Spaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale) {
+    Spaceship::Spaceship (World & world, Resources & res, Vector2 const & pos, float scale) {
+        setName ("Spaceship");
         attachTo (& world);
         setPosition (pos);
         setRotation (1.5 * b2_pi);
-        setResAnim (animation);
+        setResAnim (res.getResAnim ("spaceship"));
         setAnchor (0.5, 0.5);
         setTouchChildrenEnabled (false);
 
@@ -48,6 +50,28 @@ namespace kt {
         rearFixture.density = SPACESHIP_DENSITY;
         rearFixture.isSensor = true;
         body->CreateFixture (& rearFixture);
+
+        scoreboard = new Text (res.getResFont ("kt-liberation"));
+        scoreboard->setPosition (0.85 * getParent()->getSize().x, 10 + id * 40);
+        getParent()->addChild (scoreboard);
+        updateScoreboard();
+
+        addEventListener (CollisionEvent::BEGIN, [this] (Event * event) {
+            if (!body->IsAwake()) return;
+
+            // Currently unused
+            spSprite other = safeCast <CollisionEvent *> (event)->other;
+            --health;
+            updateScoreboard();
+            if (health <= 0) {
+                scoreboard->setText (std::to_string (id) + ": dead");
+                detach();
+            }
+        });
+    }
+
+    void Spaceship::updateScoreboard () {
+        scoreboard->setText (std::to_string (id) + ": " + std::to_string (health) + " hp");
     }
 
     void Spaceship::setAwake (bool awake) {
@@ -67,18 +91,20 @@ namespace kt {
         direction.Normalize ();
 
         if (decelerate) {
+            // Decelerate spaceship. Works as universal brake, e.g., against gravity
             auto velocity = body->GetLinearVelocity ();
             velocity.Normalize ();
             body->ApplyLinearImpulseToCenter (- SPACESHIP_FORCE * velocity, true);
         } else if (accelerate) {
+            // Accelerate spaceship in the direction it's facing
             body->ApplyLinearImpulseToCenter (SPACESHIP_FORCE * direction, true);
         }
+
+        // Slow rotation down by a fraction of angular momentum each iteration
         auto omega = body->GetAngularVelocity ();
-        if (omega < -0.5) {
-            body->ApplyAngularImpulse (0.5 * SPACESHIP_TORQUE, false);
-        } else if (omega > 0.5) {
-            body->ApplyAngularImpulse (-0.5 * SPACESHIP_TORQUE, false);
-        }
+        body->ApplyAngularImpulse (- 0.1 * SPACESHIP_TORQUE * omega, false);
+
+        // Rotate spaceship according to whether `left` or `right` is pressed
         if (rotateLeft && !rotateRight) {
             body->ApplyAngularImpulse (- SPACESHIP_TORQUE, true);
         } else if (rotateRight && !rotateLeft) {

@@ -2,6 +2,7 @@
 
 namespace kt {
     Planet::Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale) {
+        setName ("Planet");
         setPosition (pos);
         attachTo (& world);
         auto world_pos = world.convert (pos);

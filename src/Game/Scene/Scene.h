@@ -11,8 +11,11 @@ namespace kt {
     using namespace oxygine;
 
     DECLARE_SMART (Scene, spScene);
+
+    /// Parent class for Scenes. A scene is a specific state of the game, e.g., in game (GameScene) or menu (MenuScene)
     class Scene: public Actor {
     public:
+        /// Construct a new scene. Injects itself into the stage. Should optimally be the only scene there
         Scene ();
     };
 

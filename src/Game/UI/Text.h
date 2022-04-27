@@ -10,9 +10,11 @@
 namespace kt {
     using namespace oxygine;
 
+    /// Wrapper around TextField that takes font and message directly as (optional) arguments
     class Text: public TextField {
     public:
-        Text (ResFont * font, std::string message);
+        /// Create a new Text field with given font and message. Text fields without font may not be rendered correctly
+        explicit Text (ResFont * font = nullptr, std::string message = "");
 
     };
     DECLARE_SMART (Text, spText);

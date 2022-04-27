@@ -14,12 +14,16 @@ namespace kt {
 
     DECLARE_SMART(KeyboardSpaceship, spKeyboardSpaceship);
 
+    /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     public:
-        KeyboardSpaceship (World & world, oxygine::ResAnim * animation, Vector2 const & pos, float scale = 1);
+        /// Creates a new human-controllable spaceship. Only one such ship may exist in a game
+        KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
 
+        /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
 
+        /// Current keyboard controlled spaceship instance
         static spKeyboardSpaceship instance;
     };
 
