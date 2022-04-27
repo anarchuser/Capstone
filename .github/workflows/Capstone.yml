@@ -39,12 +39,6 @@ jobs:
         run:  sudo apt install -y libgoogle-glog-dev
       - name: install SDL2
         run:  sudo apt install libsdl2-dev
-      - name: download catch2 v2
-        run:  git clone -b v2.x https://github.com/catchorg/Catch2.git
-      - name: setup catch2
-        run:  cmake -BCatch2/build -HCatch2 -DBUILD_TESTING=OFF
-      - name: build and install catch2
-        run: sudo cmake --build Catch2/build --target install
       - uses: actions/checkout@v2
         with:
           submodules: recursive
