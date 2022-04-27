@@ -6,8 +6,6 @@ jobs:
     steps:
       - name: install cmake
         run:  sudo apt install cmake
-      - name: install box2d
-        run:  sudo apt install libbox2d-dev
 
   runs:
     needs:    dependencies
@@ -17,6 +15,8 @@ jobs:
         run:  sudo apt install -y libgoogle-glog-dev
       - name: install SDL2
         run:  sudo apt install libsdl2-dev
+      - name: install Cap'n Proto
+        run:  curl -O https://capnproto.org/capnproto-c++-0.9.1.tar.gz; tar zxf capnproto-c++-0.9.1.tar.gz; cd capnproto-c++-0.9.1; ./configure; make -j6 check; sudo make install
       - uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -39,6 +39,8 @@ jobs:
         run:  sudo apt install -y libgoogle-glog-dev
       - name: install SDL2
         run:  sudo apt install libsdl2-dev
+      - name: install Cap'n Proto
+        run:  curl -O https://capnproto.org/capnproto-c++-0.9.1.tar.gz; tar zxf capnproto-c++-0.9.1.tar.gz; cd capnproto-c++-0.9.1; ./configure; make -j6 check; sudo make install
       - uses: actions/checkout@v2
         with:
           submodules: recursive

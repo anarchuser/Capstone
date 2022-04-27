@@ -7,8 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 # Linker & compiler flags
 set(CAPNP_LIBS "-lcapnp -lcapnp-rpc -lkj -lkj-async")
-set(CMAKE_REQUIRED_LIBRARIES "${CAPNP_LIBS} -lglog")
-set(CMAKE_CXX_FLAGS "-fconcepts")
+set(CMAKE_REQUIRED_LIBRARIES "${CAPNP_LIBS} -lglog -pthread")
 
 set(GEN_PROTO_FILES src/Server/generated/synchro.capnp.*)
 add_custom_command(OUTPUT ${GEN_PROTO_FILES}
@@ -37,6 +36,9 @@ endif ()
 # Constants injected at compile time
 add_compile_definitions(Capstone PROJECT_ROOT="${PROJECT_SOURCE_DIR}")
 
+set(CMAKE_THREAD_LIBS_INIT "-pthread")
+set(CMAKE_HAVE_THREADS_LIBRARY 1)
+set(CMAKE_USE_PTHREADS_INIT 1)
 find_package(Threads REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 target_link_libraries(Capstone Threads::Threads)
@@ -65,7 +67,7 @@ find_package(box2d REQUIRED)
 include_directories(box2d/include/box2d)
 target_link_libraries(Capstone box2d)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS} -fconcepts")
 
 if (EMSCRIPTEN)
     SET(CMAKE_EXECUTABLE_SUFFIX ".html")
