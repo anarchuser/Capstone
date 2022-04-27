@@ -4,4 +4,5 @@
 # Exclude temporary / build directories
 /*build*
 /*tmp*
+*generated*
 

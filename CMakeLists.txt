@@ -6,14 +6,22 @@ set(CMAKE_CXX_STANDARD 20)
 #set(CMAKE_CXX_COMPILER /usr/bin/g++)
 
 # Linker & compiler flags
-set(CMAKE_REQUIRED_LIBRARIES "-lglog")
+set(CAPNP_LIBS "-lcapnp -lcapnp-rpc -lkj -lkj-async")
+set(CMAKE_REQUIRED_LIBRARIES "${CAPNP_LIBS} -lglog")
 set(CMAKE_CXX_FLAGS "-fconcepts")
+
+set(GEN_PROTO_FILES src/Server/generated/synchro.capnp.*)
+add_custom_command(OUTPUT ${GEN_PROTO_FILES}
+        COMMAND bash -c "./gen_proto"
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/src/Server/"
+        MAIN_DEPENDENCY ${PROJECT_SOURCE_DIR}/src/Server/synchro.capnp
+        VERBATIM)
 
 # List source files and define target
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
 list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp)
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
-add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
+add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${GEN_PROTO_FILES} ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
 # Add base directories for more intuitive includes
 include_directories(${PROJECT_SOURCE_DIR})
@@ -29,8 +37,18 @@ endif ()
 # Constants injected at compile time
 add_compile_definitions(Capstone PROJECT_ROOT="${PROJECT_SOURCE_DIR}")
 
+find_package(Threads REQUIRED)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+target_link_libraries(Capstone Threads::Threads)
+
 # Google Logging Library
 target_link_libraries(Capstone glog)
+
+find_package(CapnProto REQUIRED)
+target_link_libraries(Capstone CapnProto::capnp)
+target_link_libraries(Capstone CapnProto::capnp-rpc)
+target_link_libraries(Capstone kj)
+target_link_libraries(Capstone kj-async)
 
 # Set OpenGL preference
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -69,6 +87,13 @@ if (Catch2_FOUND)
     target_link_libraries(Test PRIVATE ${OXYGINE_CORE_LIBS})
     target_link_libraries(Test PRIVATE box2d)
     target_link_libraries(Test PRIVATE glog)
+
+    target_link_libraries(Test PRIVATE Threads::Threads)
+
+    target_link_libraries(Test PRIVATE CapnProto::capnp)
+    target_link_libraries(Test PRIVATE CapnProto::capnp-rpc)
+    target_link_libraries(Test PRIVATE kj)
+    target_link_libraries(Test PRIVATE kj-async)
 
     add_compile_definitions(Test PRIVATE ERRORS_AS_WARNINGS)
 endif()
