@@ -7,6 +7,7 @@ namespace kt {
     KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
             : Spaceship (world, res, pos, scale) {
         // TODO: Is a special tag needed? Default is "Spaceship"
+        // TODO: replace by player names?
 //        setName ("KeyboardSpaceship");
 
         instance = this;

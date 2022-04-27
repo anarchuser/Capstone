@@ -91,18 +91,20 @@ namespace kt {
         direction.Normalize ();
 
         if (decelerate) {
+            // Decelerate spaceship. Works as universal brake, e.g., against gravity
             auto velocity = body->GetLinearVelocity ();
             velocity.Normalize ();
             body->ApplyLinearImpulseToCenter (- SPACESHIP_FORCE * velocity, true);
         } else if (accelerate) {
+            // Accelerate spaceship in the direction it's facing
             body->ApplyLinearImpulseToCenter (SPACESHIP_FORCE * direction, true);
         }
+
+        // Slow rotation down by a fraction of angular momentum each iteration
         auto omega = body->GetAngularVelocity ();
-        if (omega < -0.5) {
-            body->ApplyAngularImpulse (0.5 * SPACESHIP_TORQUE, false);
-        } else if (omega > 0.5) {
-            body->ApplyAngularImpulse (-0.5 * SPACESHIP_TORQUE, false);
-        }
+        body->ApplyAngularImpulse (- 0.1 * SPACESHIP_TORQUE * omega, false);
+
+        // Rotate spaceship according to whether `left` or `right` is pressed
         if (rotateLeft && !rotateRight) {
             body->ApplyAngularImpulse (- SPACESHIP_TORQUE, true);
         } else if (rotateRight && !rotateLeft) {
