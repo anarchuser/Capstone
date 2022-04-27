@@ -9,33 +9,43 @@
 #include "Game/debug/Box2DDebugDraw.h"
 #include "Game/Collision/CollisionListener.h"
 
+/// Size of the physical world. Determines x/y ratio and size of objects contained
 #define WORLD_SIZE {10, 10}
 
+/// Number of iterations performed per second. Adjust based on network load
 #define FPS 60.0
 
 namespace kt {
     using namespace oxygine;
 
+    /// Wrapper around the physical world. Responsible for displaying and updating objects in the world
     class World : public Sprite {
     private:
+        /// Toggled with `` ` ``. Overlays rendered sprites with box2d primitives for debugging purposes
         spBox2DDraw debugDraw;
 
     public:
-        // Physical world
+        /// Physical world, i.e., box2d world responsible for the physics in the game
         b2World world;
-        // Size of the physical world
+        /// Size of physical world
         b2Vec2 const world_size;
 
+        /// Construct a new world with the given background and size
         World (ResAnim * background, b2Vec2 size);
 
+        /// Iteratively called for each descendent of the root actor. Calculates the next physics iteration
         void update (UpdateState const & updateState) override;
 
+        /// Modulates the given vector to be within [0, world_size], i.e., ensures no object leaves the world
         b2Vec2 wrap (b2Vec2 pos) const;
 
+        /// Convert an oxygine vector to a box2d vector
         b2Vec2 convert (Vector2 const & pos) const;
 
+        /// Convert a box2d vector to an oxygine vector
         Vector2 convert (const b2Vec2 & pos) const;
 
+        /// Turn debug view on or off. Called by pressing `` ` ``
         void toggleDebugDraw ();
     };
 

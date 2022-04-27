@@ -1,10 +1,7 @@
 #ifndef Capstone_CONFIG_H
 #define Capstone_CONFIG_H
 
-// TODO: remove
-#include <iostream>
-
-/** Google Logging Library */
+/// Google Logging Library
 // Minimum LOG level. 0 = Everything, 1 = Ignore LOG (INFO), ...
 #define GOOGLE_STRIP_LOG 0
 #include <glog/logging.h>

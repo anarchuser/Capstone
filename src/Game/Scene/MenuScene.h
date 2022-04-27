@@ -7,17 +7,20 @@
 
 #include "Game/UI/Dialog.h"
 #include "Game/Scene/Scene.h"
-//#include "Game/Scene/config.h"
 #include "GameScene.h"
 
 namespace kt {
     using namespace oxygine;
 
-class MenuScene: public Scene {
+    /// Scene representing the main menu. Consists of a window-spanning dialog with "start game" and "quit" options
+    class MenuScene: public Scene {
     public:
+        /// Inject a new Main Menu scene instance into the stage
         MenuScene ();
 
+        /// Callback for when starting a new game is requested
         void onNewGame (Event * event);
+        /// Callback for when quitting the application is requested
         void onRequestExit (Event * event);
     };
     DECLARE_SMART (MenuScene, spMenuScene);
