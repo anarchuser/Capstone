@@ -4,9 +4,8 @@ namespace kt {
     Planet::Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale) {
         setName ("Planet");
         attachTo (& world);
-        auto world_pos = world.wrap (world.convert (pos));
+        auto world_pos = world.convert (pos);
         OX_ASSERT (world.wrap (world_pos) == world.wrap (world.wrap (world_pos)));
-        setPosition (world.convert (world_pos));
 
         setResAnim (animation);
         setAnchor (0.5, 0.5);
@@ -14,11 +13,12 @@ namespace kt {
 
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
-        bodyDef.position = world.wrap (world_pos);
+        bodyDef.position = world_pos;
         bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
 
         auto * body = world.world.CreateBody (& bodyDef);
         setUserData (body);
+        setPosition (world.convert (world_pos));
         setScale (scale);
 
         b2CircleShape circleShape;

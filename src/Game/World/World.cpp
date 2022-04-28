@@ -63,6 +63,10 @@ namespace kt {
         return pos;
     }
 
+    Vector2 World::wrap (Vector2 pos) const {
+        return convert (wrap (convert (pos)));
+    }
+
     b2Vec2 World::convert (Vector2 const & pos) const {
         static float scale_x = getSize().x / world_size.x;
         static float scale_y = getSize().y / world_size.y;
@@ -98,6 +102,16 @@ namespace kt {
         debugDraw->attachTo (this);
         debugDraw->setWorld (getSize().x / world_size.x, & world);
         debugDraw->setPriority (1);
+    }
+
+    void World::addChild (spActor child) {
+        auto * body = (b2Body *) child->getUserData();
+        if (body) {
+            body->SetTransform (wrap (body->GetPosition()), body->GetAngle());
+            child->setPosition (convert (body->GetPosition()));
+        }
+
+        Actor::addChild (child);
     }
 }
 

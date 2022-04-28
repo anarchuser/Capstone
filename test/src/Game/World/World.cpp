@@ -7,7 +7,7 @@
 #define WINDOW_SIZE 100
 #define PHYS_SCALE  0.1
 
-#define TEST_RANDOM_SEED
+#define TEST_RANDOM_SEED 1
 
 SCENARIO ("World handles objects as expected") {
     auto rng = HashedRNG (TEST_RANDOM_SEED);
@@ -63,6 +63,7 @@ SCENARIO ("World handles objects as expected") {
 
             THEN ("They are appropriately scaled in the world") {
                 auto & child = * world.getLastChild ();
+
                 REQUIRE (child.getPosition () == pos);
                 REQUIRE (world.convert (child.getPosition ()) == phys_pos);
 
