@@ -38,6 +38,7 @@ namespace kt {
 
         /// Modulates the given vector to be within [0, world_size], i.e., ensures no object leaves the world
         b2Vec2 wrap (b2Vec2 pos) const;
+        Vector2 wrap (Vector2 pos) const;
 
         /// Convert an oxygine vector to a box2d vector
         b2Vec2 convert (Vector2 const & pos) const;
@@ -47,6 +48,8 @@ namespace kt {
 
         /// Turn debug view on or off. Called by pressing `` ` ``
         void toggleDebugDraw ();
+
+        void addChild (spActor child);
     };
 
     DECLARE_SMART (World, spWorld);

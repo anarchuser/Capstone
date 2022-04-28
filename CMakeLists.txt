@@ -55,22 +55,20 @@ if (EMSCRIPTEN)
     em_link_pre_js(Game  ${OXYGINE_JS_LIBRARIES}  ${CMAKE_CURRENT_SOURCE_DIR}/data.js)
 endif(EMSCRIPTEN)
 
-# If Catch2 is installed prepare the `Test` target
-find_package(Catch2 CONFIG)
-IF (Catch2_FOUND)
+find_package(Catch2 3 CONFIG)
+if (Catch2_FOUND)
+    add_subdirectory(Catch2)
     file(GLOB_RECURSE TEST_SRCS ${PROJECT_SOURCE_DIR}/test/*.c*)
     add_executable(Test ${GEN_PROTO_FILES} ${TEST_SRCS} ${SRCS} ${LIBS})
+    target_link_libraries(Test PRIVATE Catch2::Catch2WithMain)
 
-    add_compile_definitions(Test PRIVATE ERRORS_AS_WARNINGS)
-
-    target_link_libraries(Test PRIVATE ${OXYGINE_CORE_LIBS})
-
-    target_link_libraries(Test PRIVATE box2d)
-
-    target_link_libraries(Test PRIVATE Catch2::Catch2)
     include(CTest)
     include(Catch)
     catch_discover_tests(Test)
 
+    target_link_libraries(Test PRIVATE ${OXYGINE_CORE_LIBS})
+    target_link_libraries(Test PRIVATE box2d)
     target_link_libraries(Test PRIVATE glog)
-ENDIF()
+
+    add_compile_definitions(Test PRIVATE ERRORS_AS_WARNINGS)
+endif()
