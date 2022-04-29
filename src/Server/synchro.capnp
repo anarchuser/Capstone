@@ -9,4 +9,5 @@ interface Synchro {
     }
 
     connect @0 () -> ();
+    updateDirection @1 (direction :Direction) -> ();
 }
