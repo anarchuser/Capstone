@@ -10,7 +10,7 @@
 
 #include "Game/UI/Dialog.h"
 #include "Game/Planet/Planet.h"
-#include "Game/Spaceship/KeyboardSpaceship.h"
+#include "Game/Spaceship/RemoteSpaceship.h"
 #include "Game/World/World.h"
 #include "Game/Scene/Scene.h"
 #include "MenuScene.h"

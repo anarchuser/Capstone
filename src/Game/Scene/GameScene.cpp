@@ -21,7 +21,7 @@ namespace kt {
         }
 
         Spaceship::ship_counter = 0;
-        new KeyboardSpaceship (* world, gameResources, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
+        new RemoteSpaceship (* world, gameResources, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
             auto * keyEvent = (KeyEvent *) event;
@@ -53,8 +53,9 @@ namespace kt {
     }
 
     void GameScene::update (UpdateState const & us) {
-        if (hardPause) return;
-        if (softPause) return;
+        // TODO: don't pause in multiplayer games
+//        if (hardPause) return;
+//        if (softPause) return;
 
         Actor::update (us);
     }

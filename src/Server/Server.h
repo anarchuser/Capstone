@@ -11,6 +11,7 @@
 #include <capnp/message.h>
 
 #include <iostream>
+#include <functional>
 
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
@@ -23,6 +24,9 @@ namespace cg {
         void log (std::string msg);
 
     public:
+        // TODO: make write only?
+        static std::function <void (bool, bool, bool, bool)> updateDirectionCallback;
+
         kj::Promise <void> connect (ConnectContext context) override;
 
         kj::Promise <void> updateDirection (UpdateDirectionContext context) override;

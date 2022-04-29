@@ -8,10 +8,13 @@
 
 #include "Spaceship.h"
 
+#include "Server/Server.h"
+
 namespace kt {
     using namespace oxygine;
 
     class RemoteSpaceship: public Spaceship {
+    public:
         RemoteSpaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
 
     };
