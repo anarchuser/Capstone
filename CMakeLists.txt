@@ -17,8 +17,9 @@ add_custom_command(OUTPUT ${GEN_PROTO_FILES}
         VERBATIM)
 
 # List source files and define target
-file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
-list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp)
+file(GLOB_RECURSE SRCS_GAME   ${PROJECT_SOURCE_DIR}/src/Game/*)
+file(GLOB_RECURSE SRCS_SERVER ${PROJECT_SOURCE_DIR}/src/Server/*)
+file(GLOB_RECURSE SRCS ${SRCS_GAME} ${SRCS_SERVER})
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
 add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${GEN_PROTO_FILES} ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
@@ -99,3 +100,13 @@ if (Catch2_FOUND)
 
     add_compile_definitions(Test PRIVATE ERRORS_AS_WARNINGS)
 endif()
+
+# Simple Target compiling a client to test RPC server connections.
+# TODO: remove
+add_executable(Client client.cpp ${GEN_PROTO_FILES} ${SRCS_SERVER} ${LIBS})
+target_link_libraries(Client PRIVATE glog)
+
+target_link_libraries(Client PRIVATE CapnProto::capnp)
+target_link_libraries(Client PRIVATE CapnProto::capnp-rpc)
+target_link_libraries(Client PRIVATE kj)
+target_link_libraries(Client PRIVATE kj-async)
