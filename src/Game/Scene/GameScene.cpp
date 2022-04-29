@@ -21,7 +21,9 @@ namespace kt {
         }
 
         Spaceship::ship_counter = 0;
-        new RemoteSpaceship (* world, gameResources, world->convert (0.5 * world->world_size), SPACESHIP_SCALE);
+        auto sp_pos = getSize() * 0.5;
+        new KeyboardSpaceship (* world, gameResources, {sp_pos.x - 10, sp_pos.y}, SPACESHIP_SCALE);
+        new RemoteSpaceship   (* world, gameResources, {sp_pos.x + 10, sp_pos.y}, SPACESHIP_SCALE);
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
             auto * keyEvent = (KeyEvent *) event;

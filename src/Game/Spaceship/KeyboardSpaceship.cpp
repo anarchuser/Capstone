@@ -11,7 +11,6 @@ namespace kt {
 //        setName ("KeyboardSpaceship");
 
         instance = this;
-        setAwake (true);
 
         getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
             instance->onSteeringEvent ((KeyEvent *) event);
@@ -25,6 +24,8 @@ namespace kt {
     void KeyboardSpaceship::onSteeringEvent (ox::KeyEvent * event) {
         auto keysym = event->data->keysym;
         bool key_is_down = event->type == ox::KeyEvent::KEY_DOWN;
+
+        ONCE (setAwake (true));
 
         switch (keysym.scancode) {
             case SDL_SCANCODE_UP: // accelerate
