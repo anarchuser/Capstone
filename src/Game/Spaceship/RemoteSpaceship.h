@@ -2,6 +2,7 @@
 #define CAPSTONE_REMOTESPACESHIP_H
 
 #include "config.h"
+#include "helper.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"

@@ -6,7 +6,7 @@ namespace kt {
             : Spaceship (world, res, pos, scale) {
 
         cg::SynchroImpl::updateDirectionCallback = [this] (bool w, bool s, bool a, bool d) {
-            static bool once = [this]() { setAwake (true); return true; }();
+            ONCE (setAwake (true));
             accelerate = w;
             decelerate = s;
             rotateLeft = a;

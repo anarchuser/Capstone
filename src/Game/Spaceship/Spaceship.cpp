@@ -84,8 +84,6 @@ namespace kt {
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
-
-
         auto angle = body->GetAngle ();
         auto direction = b2Vec2 (cos (angle), sin (angle));
         direction.Normalize ();
