@@ -15,22 +15,25 @@ namespace cg {
     }
 
     kj::Promise <void> SynchroImpl::updateDirection (UpdateDirectionContext context) {
-        std::string msg = "Update direction to ";
         auto direction = context.getParams().getDirection();
-        if (direction.getRotateLeft() && !direction.getRotateRight()) msg += '<';
-        else msg += ' ';
-        if (direction.getAccelerate()) msg += '^';
-        else if (direction.getDecelerate()) msg += '_';
-        else msg += '*';
-        if (!direction.getRotateLeft() && direction.getRotateRight()) msg += '>';
-        else msg += ' ';
-        log (msg);
-        updateDirectionCallback
-            ( direction.getAccelerate()
-            , direction.getDecelerate()
-            , direction.getRotateLeft()
-            , direction.getRotateRight()
-            );
+        try {
+            updateDirectionCallback ( direction.getAccelerate ()
+                                    , direction.getDecelerate ()
+                                    , direction.getRotateLeft ()
+                                    , direction.getRotateRight ()
+                                    );
+            std::string msg = "Update direction to ";
+            if (direction.getRotateLeft() && !direction.getRotateRight()) msg += '<';
+            else msg += ' ';
+            if (direction.getAccelerate()) msg += '^';
+            else if (direction.getDecelerate()) msg += '_';
+            else msg += '*';
+            if (!direction.getRotateLeft() && direction.getRotateRight()) msg += '>';
+            else msg += ' ';
+            log (msg);
+        } catch (std::bad_function_call &) {
+            LOG (WARNING) << "Received updateDirection before callback has been initialised";
+        }
         return kj::READY_NOW;
     }
 }
