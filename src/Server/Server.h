@@ -25,7 +25,7 @@ namespace cg {
 
     public:
         // TODO: make write only?
-        static std::function <void (bool, bool, bool, bool)> updateDirectionCallback;
+        static std::function <void (int, int, int, int)> updateDirectionCallback;
 
         kj::Promise <void> connect (ConnectContext context) override;
 

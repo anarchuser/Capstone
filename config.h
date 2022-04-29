@@ -22,6 +22,9 @@
 namespace fs = std::filesystem;
 fs::path const DATA_DIR = PROJECT_ROOT "/data";
 
+#define DEFAULT_ADDRESS "localhost"
+#define DEFAULT_PORT    44444
+
 #endif //Capstone_CONFIG_H
 
 /* Copyright (C) 2022 Aaron Alef */

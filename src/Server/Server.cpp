@@ -2,7 +2,7 @@
 
 namespace cg {
 
-    std::function <void (bool, bool, bool, bool)> SynchroImpl::updateDirectionCallback;
+    std::function <void (int, int, int, int)> SynchroImpl::updateDirectionCallback;
 
     void SynchroImpl::log (std::string msg) {
         LOG (INFO) << "Synchro @" << this << ": '" << msg << "'";
@@ -23,12 +23,12 @@ namespace cg {
                                     , direction.getRotateRight ()
                                     );
             std::string msg = "Update direction to ";
-            if (direction.getRotateLeft() && !direction.getRotateRight()) msg += '<';
+            if (direction.getRotateLeft() == 1 && direction.getRotateRight() != 1) msg += '<';
             else msg += ' ';
-            if (direction.getAccelerate()) msg += '^';
-            else if (direction.getDecelerate()) msg += '_';
+            if (direction.getAccelerate() == 1) msg += '^';
+            else if (direction.getDecelerate() == 1) msg += '_';
             else msg += '*';
-            if (!direction.getRotateLeft() && direction.getRotateRight()) msg += '>';
+            if (direction.getRotateLeft() != 1 && direction.getRotateRight() == 1) msg += '>';
             else msg += ' ';
             log (msg);
         } catch (std::bad_function_call &) {

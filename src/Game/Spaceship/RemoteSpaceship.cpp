@@ -5,12 +5,12 @@ namespace kt {
     RemoteSpaceship::RemoteSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
             : Spaceship (world, res, pos, scale) {
 
-        cg::SynchroImpl::updateDirectionCallback = [this] (bool w, bool s, bool a, bool d) {
+        cg::SynchroImpl::updateDirectionCallback = [this] (int w, int s, int a, int d) {
             ONCE (setAwake (true));
-            accelerate  ^= w;
-            decelerate  ^= s;
-            rotateLeft  ^= a;
-            rotateRight ^= d;
+            if (w >= 0) accelerate  = w;
+            if (s >= 0) decelerate  = s;
+            if (a >= 0) rotateLeft  = a;
+            if (d >= 0) rotateRight = d;
         };
     }
 }

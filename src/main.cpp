@@ -19,38 +19,16 @@
 
 #include "Game/Game.h"
 
-#include "Server/Server.h"
-#include <capnp/ez-rpc.h>
-#include <kj/debug.h>
-
 #include <iostream>
 #include <string>
-#include <thread>
-
-#define DEFAULT_ADDRESS "localhost"
-#define DEFAULT_PORT    "44444"
-
-void startServer (std::string address) {
-    logs::message (" Setting up game backend at '%s'...", address.c_str());
-    auto server = kj::heap <capnp::EzRpcServer> (kj::heap <cg::SynchroImpl>(), address);
-    server->getPort().wait (server->getWaitScope());
-    std::cout << " Done" << std::endl;
-    kj::NEVER_DONE.wait (server->getWaitScope());
-}
 
 int main (int argc, char * argv[]) {
     google::InitGoogleLogging (argv[0]);
 
     LOG (INFO) << "Start game client";
 
-    // Start server in separate thread
-    std::string address = DEFAULT_ADDRESS ":" DEFAULT_PORT;
-    auto server_thread = std::thread (startServer, address);
-
     // Start game, runs endlessly
     kt::Game::run();
-
-    if (server_thread.joinable()) server_thread.join();
 
     LOG (INFO) << "Game client finished";
 }
