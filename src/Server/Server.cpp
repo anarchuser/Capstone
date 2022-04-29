@@ -4,6 +4,7 @@ namespace cg {
 
     void SynchroImpl::log (std::string msg) {
         LOG (INFO) << "Synchro @" << this << ": '" << msg << "'";
+        std::cout << "Synchro @" << this << ": '" << msg << "'" << std::endl;
     }
 
     kj::Promise <void> SynchroImpl::connect (ConnectContext context) {
@@ -13,11 +14,14 @@ namespace cg {
 
     kj::Promise <void> SynchroImpl::updateDirection (UpdateDirectionContext context) {
         std::string msg = "Update direction to ";
-        auto dir = context.getParams().getDirection();
-        if (dir.getAccelerate()) msg += 'W';
-        else if (dir.getDecelerate()) msg += 'S';
-        if (dir.getRotateLeft() && !dir.getRotateRight()) msg += 'A';
-        if (dir.getRotateRight() && !dir.getRotateLeft()) msg += 'D';
+        auto direction = context.getParams().getDirection();
+        if (direction.getRotateLeft() && !direction.getRotateRight()) msg += '<';
+        else msg += ' ';
+        if (direction.getAccelerate()) msg += '^';
+        else if (direction.getDecelerate()) msg += '_';
+        else msg += '*';
+        if (!direction.getRotateLeft() && direction.getRotateRight()) msg += '>';
+        else msg += ' ';
         log (msg);
         return kj::READY_NOW;
     }

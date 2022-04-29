@@ -10,6 +10,8 @@
 #include <capnp/ez-rpc.h>
 #include <capnp/message.h>
 
+#include <iostream>
+
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
  */

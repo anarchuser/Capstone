@@ -25,16 +25,17 @@
 
 #include <iostream>
 #include <string>
+#include <thread>
 
 #define DEFAULT_ADDRESS "localhost"
 #define DEFAULT_PORT    "44444"
 
-kj::Own <capnp::EzRpcServer> startServer (std::string address) {
+void startServer (std::string address) {
     logs::message (" Setting up game backend at '%s'...", address.c_str());
     auto server = kj::heap <capnp::EzRpcServer> (kj::heap <cg::SynchroImpl>(), address);
     server->getPort().wait (server->getWaitScope());
     std::cout << " Done" << std::endl;
-    return server;
+    kj::NEVER_DONE.wait (server->getWaitScope());
 }
 
 int main (int argc, char * argv[]) {
@@ -42,12 +43,14 @@ int main (int argc, char * argv[]) {
 
     LOG (INFO) << "Start game client";
 
-    // Start server, runs in background
+    // Start server in separate thread
     std::string address = DEFAULT_ADDRESS ":" DEFAULT_PORT;
-    auto server = startServer (address);
+    auto server_thread = std::thread (startServer, address);
 
     // Start game, runs endlessly
     kt::Game::run();
+
+    if (server_thread.joinable()) server_thread.join();
 
     LOG (INFO) << "Game client finished";
 }
