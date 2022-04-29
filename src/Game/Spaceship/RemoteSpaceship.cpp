@@ -7,10 +7,10 @@ namespace kt {
 
         cg::SynchroImpl::updateDirectionCallback = [this] (bool w, bool s, bool a, bool d) {
             ONCE (setAwake (true));
-            accelerate = w;
-            decelerate = s;
-            rotateLeft = a;
-            rotateRight = d;
+            accelerate  ^= w;
+            decelerate  ^= s;
+            rotateLeft  ^= a;
+            rotateRight ^= d;
         };
     }
 }
