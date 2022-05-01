@@ -17,7 +17,7 @@
 
 #include "config.h"
 
-#include "Game/Game.h"
+#include "Game.h"
 
 #include <iostream>
 #include <string>

@@ -3,7 +3,7 @@
 
 #include "config.h"
 
-#include "generated/synchro.capnp.h"
+#include "lib/Server/generated/synchro.capnp.h"
 
 #include <kj/debug.h>
 #include <kj/memory.h>

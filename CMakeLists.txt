@@ -9,18 +9,17 @@ set(CMAKE_CXX_STANDARD 20)
 set(CAPNP_LIBS "-lcapnp -lcapnp-rpc -lkj -lkj-async")
 set(CMAKE_REQUIRED_LIBRARIES "${CAPNP_LIBS} -lglog -pthread")
 
-set(GEN_PROTO_FILES src/Server/generated/synchro.capnp.*)
+set(GEN_PROTO_FILES lib/Server/generated/synchro.capnp.*)
 add_custom_command(OUTPUT ${GEN_PROTO_FILES}
         COMMAND bash -c "./gen_proto"
-        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/src/Server/"
-        MAIN_DEPENDENCY ${PROJECT_SOURCE_DIR}/src/Server/synchro.capnp
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/lib/Server/"
+        MAIN_DEPENDENCY lib/Server/synchro.capnp
         VERBATIM)
 
 # List source files and define target
-file(GLOB_RECURSE SRCS_GAME   ${PROJECT_SOURCE_DIR}/src/Game/*)
-file(GLOB_RECURSE SRCS_SERVER ${PROJECT_SOURCE_DIR}/src/Server/*)
-set(SRCS ${SRCS_GAME} ${SRCS_SERVER} ${GEN_PROTO_FILES})
+file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
+set(LIBS ${LIBS} ${GEN_PROTO_FILES})
 add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
 # Add base directories for more intuitive includes
@@ -103,7 +102,7 @@ endif()
 
 # Simple Target compiling a client to test RPC server connections.
 # TODO: remove
-add_executable(Client client.cpp ${GEN_PROTO_FILES} ${SRCS_SERVER} ${LIBS})
+add_executable(Client client.cpp ${GEN_PROTO_FILES} ${LIBS})
 target_link_libraries(Client PRIVATE glog)
 
 target_link_libraries(Client PRIVATE CapnProto::capnp)

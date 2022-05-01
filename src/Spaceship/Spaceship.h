@@ -2,14 +2,14 @@
 #define CAPSTONE_SPACESHIP_H
 
 #include "config.h"
-#include "Game/config.h"
+#include "src/config.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "Game/World/World.h"
-#include "Game/Collision/CollisionEvent.h"
-#include "Game/UI/Text.h"
+#include "src/World/World.h"
+#include "src/Collision/CollisionEvent.h"
+#include "src/UI/Text.h"
 
 /// Relative spaceship size
 #define SPACESHIP_SCALE     2e-1

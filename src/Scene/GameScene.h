@@ -2,17 +2,17 @@
 #define CAPSTONE_GAMESCENE_H
 
 #include "config.h"
-#include "Game/config.h"
-#include "random/random.h"
+#include "src/config.h"
+#include "Random/random.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "Game/UI/Dialog.h"
-#include "Game/Planet/Planet.h"
-#include "Game/Spaceship/RemoteSpaceship.h"
-#include "Game/World/World.h"
-#include "Game/Scene/Scene.h"
+#include "src/UI/Dialog.h"
+#include "src/Planet/Planet.h"
+#include "src/Spaceship/RemoteSpaceship.h"
+#include "src/World/World.h"
+#include "Scene.h"
 #include "MenuScene.h"
 
 #include "Server/generated/synchro.capnp.h"
