@@ -5,8 +5,8 @@
 
 #include "oxygine-framework.h"
 
-#include "Game/UI/Dialog.h"
-#include "Game/Scene/Scene.h"
+#include "src/UI/Dialog.h"
+#include "Scene.h"
 #include "GameScene.h"
 
 namespace kt {

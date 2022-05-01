@@ -6,9 +6,9 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "Game/World/World.h"
+#include "src/World/World.h"
 
-#include "Game/Spaceship/KeyboardSpaceship.h"
+#include "src/Spaceship/KeyboardSpaceship.h"
 
 /// Number of planets per pixel
 #define PLANETS_PER_PIXEL   5e-2

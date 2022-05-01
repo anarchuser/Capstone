@@ -2,7 +2,7 @@
 #define CAPSTONE_DIALOG_H
 
 #include "config.h"
-#include "Game/config.h"
+#include "src/config.h"
 
 #include "Button.h"
 #include "Text.h"

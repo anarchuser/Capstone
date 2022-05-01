@@ -6,8 +6,8 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "Game/debug/Box2DDebugDraw.h"
-#include "Game/Collision/CollisionListener.h"
+#include "src/debug/Box2DDebugDraw.h"
+#include "src/Collision/CollisionListener.h"
 
 /// Size of the physical world. Determines x/y ratio and size of objects contained
 #define WORLD_SIZE {10, 10}

@@ -25,7 +25,7 @@ jobs:
       - name: install box2d
         run:  sudo cmake --build box2d/build --target install
       - name: explicitly generate capnp files
-        run:  cd src/Server/; ./gen_proto
+        run:  cd lib/Server/; ./gen_proto
       - name: configure cmake
         run:  cmake -H. -Bbuild
       - name: compile the project
@@ -55,7 +55,7 @@ jobs:
       - name: build and install box2d
         run:  sudo cmake --build box2d/build --target install
       - name: explicitly generate capnp files
-        run:  cd src/Server/; ./gen_proto
+        run:  cd lib/Server/; ./gen_proto
       - name: configure own cmake
         run:  cmake -H. -Bbuild
       - name: Build test files
