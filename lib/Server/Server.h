@@ -13,6 +13,8 @@
 #include <iostream>
 #include <functional>
 
+#include "Direction/Direction.h"
+
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
  */
@@ -25,7 +27,7 @@ namespace cg {
 
     public:
         // TODO: make write only?
-        static std::function <void (int, int, int, int)> updateDirectionCallback;
+        static std::function <void (Direction direction)> updateDirectionCallback;
 
         kj::Promise <void> connect (ConnectContext context) override;
 
