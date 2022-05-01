@@ -43,13 +43,13 @@ namespace kt {
         /// Physical body representing this spaceship in the physical world
         b2Body * body = nullptr;
 
-        /// Current issued direction:
-        Direction direction;
-
         /// Update personal scoreboard based on current health
         void updateScoreboard ();
 
     public:
+        /// Current issued direction:
+        Direction direction;
+
         /// Construct a new ship in the current world, at given position (usually centred)
         Spaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
 
