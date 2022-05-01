@@ -6,13 +6,20 @@ set(CMAKE_CXX_STANDARD 20)
 #set(CMAKE_CXX_COMPILER /usr/bin/g++)
 
 # Linker & compiler flags
-set(CMAKE_REQUIRED_LIBRARIES "-lglog")
-set(CMAKE_CXX_FLAGS "-fconcepts")
+set(CAPNP_LIBS "-lcapnp -lcapnp-rpc -lkj -lkj-async")
+set(CMAKE_REQUIRED_LIBRARIES "${CAPNP_LIBS} -lglog -pthread")
+
+set(GEN_PROTO_FILES lib/Server/generated/synchro.capnp.*)
+add_custom_command(OUTPUT ${GEN_PROTO_FILES}
+        COMMAND bash -c "./gen_proto"
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/lib/Server/"
+        MAIN_DEPENDENCY lib/Server/synchro.capnp
+        VERBATIM)
 
 # List source files and define target
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
-list(REMOVE_ITEM SRCS ${PROJECT_SOURCE_DIR}/src/main.cpp)
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
+set(LIBS ${LIBS} ${GEN_PROTO_FILES})
 add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
 # Add base directories for more intuitive includes
@@ -29,8 +36,21 @@ endif ()
 # Constants injected at compile time
 add_compile_definitions(Capstone PROJECT_ROOT="${PROJECT_SOURCE_DIR}")
 
+set(CMAKE_THREAD_LIBS_INIT "-pthread")
+set(CMAKE_HAVE_THREADS_LIBRARY 1)
+set(CMAKE_USE_PTHREADS_INIT 1)
+find_package(Threads REQUIRED)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+target_link_libraries(Capstone Threads::Threads)
+
 # Google Logging Library
 target_link_libraries(Capstone glog)
+
+find_package(CapnProto REQUIRED)
+target_link_libraries(Capstone CapnProto::capnp)
+target_link_libraries(Capstone CapnProto::capnp-rpc)
+target_link_libraries(Capstone kj)
+target_link_libraries(Capstone kj-async)
 
 # Set OpenGL preference
 set(OpenGL_GL_PREFERENCE GLVND)
@@ -47,7 +67,7 @@ find_package(box2d REQUIRED)
 include_directories(box2d/include/box2d)
 target_link_libraries(Capstone box2d)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS} -fconcepts -w")
 
 if (EMSCRIPTEN)
     SET(CMAKE_EXECUTABLE_SUFFIX ".html")
@@ -70,5 +90,22 @@ if (Catch2_FOUND)
     target_link_libraries(Test PRIVATE box2d)
     target_link_libraries(Test PRIVATE glog)
 
+    target_link_libraries(Test PRIVATE Threads::Threads)
+
+    target_link_libraries(Test PRIVATE CapnProto::capnp)
+    target_link_libraries(Test PRIVATE CapnProto::capnp-rpc)
+    target_link_libraries(Test PRIVATE kj)
+    target_link_libraries(Test PRIVATE kj-async)
+
     add_compile_definitions(Test PRIVATE ERRORS_AS_WARNINGS)
 endif()
+
+# Simple Target compiling a client to test RPC server connections.
+# TODO: remove
+add_executable(Client client.cpp ${GEN_PROTO_FILES} ${LIBS})
+target_link_libraries(Client PRIVATE glog)
+
+target_link_libraries(Client PRIVATE CapnProto::capnp)
+target_link_libraries(Client PRIVATE CapnProto::capnp-rpc)
+target_link_libraries(Client PRIVATE kj)
+target_link_libraries(Client PRIVATE kj-async)

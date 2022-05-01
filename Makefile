@@ -27,6 +27,11 @@ test:	build
 	cmake --build $(BUILD_DIR) --target Test
 	./$(BUILD_DIR)/Test
 
+# Build test RPC client
+client:	build
+	cmake --build $(BUILD_DIR) --target Client
+	./$(BUILD_DIR)/Client
+
 # Clean all build files
 clean:
 	rm -rf $(BUILD_DIR)

@@ -2,14 +2,15 @@
 #define CAPSTONE_SPACESHIP_H
 
 #include "config.h"
-#include "Game/config.h"
+#include "src/config.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "Game/World/World.h"
-#include "Game/Collision/CollisionEvent.h"
-#include "Game/UI/Text.h"
+#include "src/World/World.h"
+#include "src/Collision/CollisionEvent.h"
+#include "src/UI/Text.h"
+#include "Direction/Direction.h"
 
 /// Relative spaceship size
 #define SPACESHIP_SCALE     2e-1
@@ -42,14 +43,8 @@ namespace kt {
         /// Physical body representing this spaceship in the physical world
         b2Body * body = nullptr;
 
-        /// Flag issuing acceleration
-        bool accelerate  = false;
-        /// Flag issuing deceleration
-        bool decelerate  = false;
-        /// Flag issuing counter clock-wise rotation
-        bool rotateLeft  = false;
-        /// Flag issuing clock-wise rotation
-        bool rotateRight = false;
+        /// Current issued direction:
+        Direction direction;
 
         /// Update personal scoreboard based on current health
         void updateScoreboard ();

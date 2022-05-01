@@ -2,12 +2,13 @@
 #define CAPSTONE_KB_SPACESHIP_H
 
 #include "config.h"
+#include "helper.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "Game/World/World.h"
-#include "Game/Spaceship/Spaceship.h"
+#include "src/World/World.h"
+#include "Spaceship.h"
 
 namespace kt {
     using namespace oxygine;

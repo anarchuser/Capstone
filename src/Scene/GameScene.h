@@ -2,18 +2,25 @@
 #define CAPSTONE_GAMESCENE_H
 
 #include "config.h"
-#include "Game/config.h"
-#include "random/random.h"
+#include "src/config.h"
+#include "Random/random.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "Game/UI/Dialog.h"
-#include "Game/Planet/Planet.h"
-#include "Game/Spaceship/KeyboardSpaceship.h"
-#include "Game/World/World.h"
-#include "Game/Scene/Scene.h"
+#include "src/UI/Dialog.h"
+#include "src/Planet/Planet.h"
+#include "src/Spaceship/RemoteSpaceship.h"
+#include "src/World/World.h"
+#include "Scene.h"
 #include "MenuScene.h"
+
+#include "Server/generated/synchro.capnp.h"
+#include "Server/Server.h"
+#include <capnp/ez-rpc.h>
+#include <kj/debug.h>
+#include <thread>
+#include <string>
 
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
 #define RANDOM_SEED
@@ -32,6 +39,17 @@ namespace kt {
         bool hardPause = false;
         /// Set to true when pause is requested (default button `P`). pauses game independently of menu (hard) pause
         bool softPause = true;
+
+        kj::Own <capnp::EzRpcServer> server;
+        std::thread server_thread;
+        kj::Own <capnp::EzRpcClient> rpcClient;
+        Synchro::Client client;
+
+        std::size_t volatile port = 0;
+
+        void serve (std::string address);
+
+        void controlRemote (KeyEvent * event);
 
     public:
         /// Inject a new Game instance with random seed into the stage

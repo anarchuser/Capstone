@@ -6,8 +6,6 @@ jobs:
     steps:
       - name: install cmake
         run:  sudo apt install cmake
-      - name: install box2d
-        run:  sudo apt install libbox2d-dev
 
   runs:
     needs:    dependencies
@@ -17,16 +15,20 @@ jobs:
         run:  sudo apt install -y libgoogle-glog-dev
       - name: install SDL2
         run:  sudo apt install libsdl2-dev
+      - name: install Cap'n Proto
+        run:  curl -O https://capnproto.org/capnproto-c++-0.9.1.tar.gz; tar zxf capnproto-c++-0.9.1.tar.gz; cd capnproto-c++-0.9.1; ./configure; make -j6 check; sudo make install
       - uses: actions/checkout@v2
         with:
           submodules: recursive
       - name: configure box2d cmake
         run:  cmake -Hbox2d -Bbox2d/build
-      - name: build box2d
+      - name: install box2d
         run:  sudo cmake --build box2d/build --target install
+      - name: explicitly generate capnp files
+        run:  cd lib/Server/; ./gen_proto
       - name: configure cmake
         run:  cmake -H. -Bbuild
-      - name: Build src and lib files
+      - name: compile the project
         run:  cmake --build build --target Capstone
 #      - name: Run the benchmarks
 #        run: ./build/Capstone
@@ -39,6 +41,8 @@ jobs:
         run:  sudo apt install -y libgoogle-glog-dev
       - name: install SDL2
         run:  sudo apt install libsdl2-dev
+      - name: install Cap'n Proto
+        run:  curl -O https://capnproto.org/capnproto-c++-0.9.1.tar.gz; tar zxf capnproto-c++-0.9.1.tar.gz; cd capnproto-c++-0.9.1; ./configure; make -j6 check; sudo make install
       - uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -50,6 +54,8 @@ jobs:
         run:  cmake -Hbox2d -Bbox2d/build
       - name: build and install box2d
         run:  sudo cmake --build box2d/build --target install
+      - name: explicitly generate capnp files
+        run:  cd lib/Server/; ./gen_proto
       - name: configure own cmake
         run:  cmake -H. -Bbuild
       - name: Build test files
