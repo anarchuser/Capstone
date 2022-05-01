@@ -77,36 +77,40 @@ namespace kt {
     void Spaceship::setAwake (bool awake) {
         auto * part = body->GetFixtureList();
         while (part) {
-            part->SetSensor (!awake);
+        part->SetSensor (!awake);
             part = part->GetNext();
         }
         body->SetAwake (awake);
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
-        auto angle = body->GetAngle ();
-        auto direction = b2Vec2 (cos (angle), sin (angle));
-        direction.Normalize ();
-
-        if (decelerate) {
+        // Update ship velocity
+        if (direction.decelerate && !direction.accelerate) {
             // Decelerate spaceship. Works as universal brake, e.g., against gravity
             auto velocity = body->GetLinearVelocity ();
             velocity.Normalize ();
-            body->ApplyLinearImpulseToCenter (- SPACESHIP_FORCE * velocity, true);
-        } else if (accelerate) {
+            body->ApplyLinearImpulseToCenter (-SPACESHIP_FORCE * velocity, true);
+
+        } else if (direction.accelerate && !direction.decelerate) {
             // Accelerate spaceship in the direction it's facing
-            body->ApplyLinearImpulseToCenter (SPACESHIP_FORCE * direction, true);
+            auto angle = b2Vec2 (cos (body->GetAngle()), sin (body->GetAngle()));
+            angle.Normalize ();
+            body->ApplyLinearImpulseToCenter (SPACESHIP_FORCE * angle, true);
         }
 
-        // Slow rotation down by a fraction of angular momentum each iteration
-        auto omega = body->GetAngularVelocity ();
-        body->ApplyAngularImpulse (- 0.1 * SPACESHIP_TORQUE * omega, false);
+        // Update angular velocity
+        if (direction.rotateLeft && !direction.rotateRight) {
+            // Rotate spaceship counter clock-wise around its origin
+            body->ApplyAngularImpulse (-SPACESHIP_TORQUE, true);
 
-        // Rotate spaceship according to whether `left` or `right` is pressed
-        if (rotateLeft && !rotateRight) {
-            body->ApplyAngularImpulse (- SPACESHIP_TORQUE, true);
-        } else if (rotateRight && !rotateLeft) {
+        } else if (direction.rotateRight && !direction.rotateLeft) {
+            // Rotate spaceship clock-wise around its origin
             body->ApplyAngularImpulse (SPACESHIP_TORQUE, true);
+
+        } else {
+            // Slow rotation by a fraction of its angular momentum
+            auto omega = body->GetAngularVelocity ();
+            body->ApplyAngularImpulse (- 0.1 * SPACESHIP_TORQUE * omega, false);
         }
 
         Actor::update (us);

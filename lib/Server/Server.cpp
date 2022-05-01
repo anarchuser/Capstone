@@ -2,7 +2,7 @@
 
 namespace cg {
 
-    std::function <void (int, int, int, int)> SynchroImpl::updateDirectionCallback;
+    std::function <void (Direction direction)> SynchroImpl::updateDirectionCallback;
 
     void SynchroImpl::log (std::string msg) {
         LOG (INFO) << "Synchro @" << this << ": '" << msg << "'";
@@ -17,11 +17,10 @@ namespace cg {
     kj::Promise <void> SynchroImpl::updateDirection (UpdateDirectionContext context) {
         auto direction = context.getParams().getDirection();
         try {
-            updateDirectionCallback ( direction.getAccelerate ()
-                                    , direction.getDecelerate ()
-                                    , direction.getRotateLeft ()
-                                    , direction.getRotateRight ()
-                                    );
+            updateDirectionCallback (
+                    {direction.getAccelerate (), direction.getDecelerate (), direction.getRotateLeft (),
+                     direction.getRotateRight ()
+                    });
             std::string msg = "Update direction to ";
             if (direction.getRotateLeft() == 1 && direction.getRotateRight() != 1) msg += '<';
             else msg += ' ';
