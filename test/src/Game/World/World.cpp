@@ -1,8 +1,8 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "Game/World/World.h"
-#include "Game/Planet/Planet.h"
-#include "random/random.h"
+#include "World/World.h"
+#include "Planet/Planet.h"
+#include "Random/random.h"
 
 #define WINDOW_SIZE 100
 #define PHYS_SCALE  0.1
