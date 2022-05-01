@@ -29,11 +29,21 @@ namespace cg {
         // TODO: make write only?
         static std::function <void (Direction direction)> updateDirectionCallback;
 
-        kj::Promise <void> connect (ConnectContext context) override;
+        ::kj::Promise <void> connect (ConnectContext context) override;
 
-        kj::Promise <void> updateDirection (UpdateDirectionContext context) override;
+        ::kj::Promise <void> updateDirection (UpdateDirectionContext context) override;
+
+        ::kj::Promise <void> streamDirections (StreamDirectionsContext context) override;
     };
 
+    class DirectionCallbackImpl final: public Synchro::DirectionCallback::Server {
+    private:
+        void log (std::string msg);
+
+    public:
+        ::kj::Promise <void> sendDirection (SendDirectionContext context) override;
+        ::kj::Promise <void> done (DoneContext context) override;
+    };
 } // cg
 
 #endif //CAPSTONE_SERVER_H

@@ -39,10 +39,10 @@ namespace kt {
         new RemoteSpaceship (* world, gameResources, {sp_pos.x + 50, sp_pos.y}, SPACESHIP_SCALE);
 
         getStage ()->addEventListener (KeyEvent::KEY_UP, [this] (Event * event) {
-            controlRemote ((KeyEvent *) event);
+//            controlRemote ((KeyEvent *) event);
         });
         getStage ()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
-            controlRemote ((KeyEvent *) event);
+//            controlRemote ((KeyEvent *) event);
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;
             switch (keysym.scancode) {
@@ -80,6 +80,8 @@ namespace kt {
         // TODO: don't pause in multiplayer games
 //        if (hardPause) return;
 //        if (softPause) return;
+
+        streamRemote();
 
         Actor::update (us);
     }
@@ -137,6 +139,7 @@ namespace kt {
     }
 
     void GameScene::controlRemote (KeyEvent * event) {
+        // FIXME: memory leak. Call request.doneRequest() in dtor
         auto request = client.updateDirectionRequest ();
         bool key_is_down = event->type == ox::KeyEvent::KEY_DOWN;
 
@@ -159,6 +162,19 @@ namespace kt {
                 request.initDirection().setRotateRight(key_is_down);
                 break;
         }
+        request.send().wait (rpcClient->getWaitScope());
+    }
+
+    void GameScene::streamRemote () {
+        static auto callback = client.streamDirectionsRequest().send().wait (rpcClient->getWaitScope()).getCallback();
+        auto request = callback.sendDirectionRequest ();
+
+        auto direction = request.initDirection();
+        direction.setAccelerate(KeyboardSpaceship::instance->direction.accelerate);
+        direction.setDecelerate(KeyboardSpaceship::instance->direction.decelerate);
+        direction.setRotateLeft(KeyboardSpaceship::instance->direction.rotateLeft);
+        direction.setRotateRight(KeyboardSpaceship::instance->direction.rotateRight);
+
         request.send().wait (rpcClient->getWaitScope());
     }
 }

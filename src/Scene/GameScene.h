@@ -50,6 +50,7 @@ namespace kt {
         void serve (std::string address);
 
         void controlRemote (KeyEvent * event);
+        void streamRemote ();
 
     public:
         /// Inject a new Game instance with random seed into the stage
