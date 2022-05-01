@@ -19,9 +19,9 @@ add_custom_command(OUTPUT ${GEN_PROTO_FILES}
 # List source files and define target
 file(GLOB_RECURSE SRCS_GAME   ${PROJECT_SOURCE_DIR}/src/Game/*)
 file(GLOB_RECURSE SRCS_SERVER ${PROJECT_SOURCE_DIR}/src/Server/*)
-file(GLOB_RECURSE SRCS ${SRCS_GAME} ${SRCS_SERVER})
+set(SRCS ${SRCS_GAME} ${SRCS_SERVER} ${GEN_PROTO_FILES})
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
-add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${GEN_PROTO_FILES} ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
+add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
 # Add base directories for more intuitive includes
 include_directories(${PROJECT_SOURCE_DIR})
@@ -68,7 +68,7 @@ find_package(box2d REQUIRED)
 include_directories(box2d/include/box2d)
 target_link_libraries(Capstone box2d)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS} -fconcepts")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS} -fconcepts -w")
 
 if (EMSCRIPTEN)
     SET(CMAKE_EXECUTABLE_SUFFIX ".html")
