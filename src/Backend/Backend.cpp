@@ -23,6 +23,19 @@ namespace kt {
         while (port == -1);
         return port;
     }
+    std::string const & Backend::getAddress() const {
+        return address;
+    }
+
+    void Backend::connect (Direction const * direction, std::string address, unsigned short port) {
+        connections.push_back (std::make_unique <Connection> (direction, address, port));
+    }
+    void Backend::update () {
+        for (auto & connection : connections) {
+            connection->update();
+        }
+    }
+
 }
 
 /* Copyright (C) Aaron Alef */

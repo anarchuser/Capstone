@@ -7,13 +7,17 @@
 
 #include "helper.h"
 
+#include "Connection.h"
 #include "Server/generated/synchro.capnp.h"
 #include "Server/Server.h"
 #include <capnp/ez-rpc.h>
 #include <kj/debug.h>
 #include <thread>
-#include <string>
 #include <atomic>
+#include <memory>
+
+#include <unordered_map>
+#include <string>
 
 namespace kt {
     using namespace oxygine;
@@ -24,14 +28,20 @@ namespace kt {
         std::thread server_thread;
         std::string const address;
         std::atomic <int> port = -1;
+
+        std::vector <std::unique_ptr <Connection>> connections;
         
         void serve ();
         
     public:
-        [[nodiscard]] unsigned short getPort() const;
-        
         explicit Backend (std::string address);
         ~Backend () noexcept;
+
+        [[nodiscard]] unsigned short getPort() const;
+        [[nodiscard]] std::string const & getAddress() const;
+
+        void connect (Direction const * direction, std::string address, unsigned short port);
+        void update();
     };
 
 } // kt

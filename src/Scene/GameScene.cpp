@@ -3,14 +3,9 @@
 namespace kt {
     GameScene::GameScene () : GameScene (generateSeed ()) {}
 
-    GameScene::GameScene (std::size_t seed) : Scene (), rng (seed),
-                backend (DEFAULT_ADDRESS),
-                rpcClient (kj::heap<capnp::EzRpcClient> (DEFAULT_ADDRESS, backend.getPort())),
-                client (rpcClient->getMain<Synchro> ()) {
-        logs::messageln ("Seed: %lu", rng.seed);
+    GameScene::GameScene (std::size_t seed) : Scene (), rng (seed), backend (DEFAULT_ADDRESS) {
 
-        client = rpcClient->getMain<Synchro>();
-        client.connectRequest ().send ().wait (rpcClient->getWaitScope());
+        logs::messageln ("Seed: %lu", rng.seed);
 
         // Load all required game assets
         gameResources.loadXML (GAME_RESOURCES);
@@ -28,20 +23,17 @@ namespace kt {
         }
 
         Spaceship::ship_counter = 0;
-        auto sp_pos = getSize () * 0.5;
-        new KeyboardSpaceship (* world, gameResources, {sp_pos.x - 50, sp_pos.y}, SPACESHIP_SCALE);
-        new RemoteSpaceship (* world, gameResources, {sp_pos.x + 50, sp_pos.y}, SPACESHIP_SCALE);
+        new KeyboardSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
 
-        getStage ()->addEventListener (KeyEvent::KEY_UP, [this] (Event * event) {
-//            controlRemote ((KeyEvent *) event);
-        });
         getStage ()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
-//            controlRemote ((KeyEvent *) event);
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;
             switch (keysym.scancode) {
                 case SDL_SCANCODE_P:
                     softPause = !softPause;
+                    break;
+                case SDL_SCANCODE_N:
+                    connectNewSpaceship();
                     break;
                 case SDL_SCANCODE_W:
                 case SDL_SCANCODE_A:
@@ -61,8 +53,6 @@ namespace kt {
     }
 
     GameScene::~GameScene () noexcept {
-        rpcClient->getWaitScope().cancelAllDetached();
-
         // Free all game assets
         gameResources.free ();
     }
@@ -72,7 +62,7 @@ namespace kt {
 //        if (hardPause) return;
 //        if (softPause) return;
 
-        streamRemote();
+        backend.update();
 
         Actor::update (us);
     }
@@ -122,44 +112,9 @@ namespace kt {
         core::requestQuit ();
     }
 
-    void GameScene::controlRemote (KeyEvent * event) {
-        // FIXME: memory leak. Call request.doneRequest() in dtor
-        auto request = client.updateDirectionRequest ();
-        bool key_is_down = event->type == ox::KeyEvent::KEY_DOWN;
-
-        auto keysym = event->data->keysym;
-        switch (keysym.scancode) {
-            case SDL_SCANCODE_W:
-            case SDL_SCANCODE_UP:
-                request.initDirection().setAccelerate(key_is_down);
-                break;
-            case SDL_SCANCODE_S:
-            case SDL_SCANCODE_DOWN:
-                request.initDirection().setDecelerate(key_is_down);
-                break;
-            case SDL_SCANCODE_A:
-            case SDL_SCANCODE_LEFT:
-                request.initDirection().setRotateLeft(key_is_down);
-                break;
-            case SDL_SCANCODE_D:
-            case SDL_SCANCODE_RIGHT:
-                request.initDirection().setRotateRight(key_is_down);
-                break;
-        }
-        request.send().wait (rpcClient->getWaitScope());
-    }
-
-    void GameScene::streamRemote () {
-        static auto callback = client.streamDirectionsRequest().send().wait (rpcClient->getWaitScope()).getCallback();
-        auto request = callback.sendDirectionRequest ();
-
-        auto direction = request.initDirection();
-        direction.setAccelerate(KeyboardSpaceship::instance->direction.accelerate);
-        direction.setDecelerate(KeyboardSpaceship::instance->direction.decelerate);
-        direction.setRotateLeft(KeyboardSpaceship::instance->direction.rotateLeft);
-        direction.setRotateRight(KeyboardSpaceship::instance->direction.rotateRight);
-
-        request.send().wait (rpcClient->getWaitScope());
+    void GameScene::connectNewSpaceship () {
+        logs::messageln ("Project our spaceship to '%s:%d'", backend.getAddress().c_str(), backend.getPort());
+        backend.connect (& KeyboardSpaceship::instance->direction, backend.getAddress(), backend.getPort());
     }
 }
 

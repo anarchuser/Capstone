@@ -42,14 +42,9 @@ namespace kt {
         bool softPause = true;
 
         Backend backend;
+
+        void connectNewSpaceship();
         
-        std::thread server_thread;
-        kj::Own <capnp::EzRpcClient> rpcClient;
-        Synchro::Client client;
-
-        void controlRemote (KeyEvent * event);
-        void streamRemote ();
-
     public:
         /// Inject a new Game instance with random seed into the stage
         GameScene ();
