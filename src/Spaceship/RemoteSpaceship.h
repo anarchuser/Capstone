@@ -18,6 +18,7 @@ namespace kt {
     public:
         RemoteSpaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
 
+        void updateDirection (Direction new_dir);
     };
 
 } // kt

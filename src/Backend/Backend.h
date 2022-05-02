@@ -32,9 +32,10 @@ namespace kt {
         std::vector <std::unique_ptr <Connection>> connections;
         
         void serve ();
+        std::function <std::function <void (Direction)> ()> onNewStreamCallback;
         
     public:
-        explicit Backend (std::string address);
+        Backend (std::string address, std::function <std::function <void (Direction)>()> && onNewStreamCallback);
         ~Backend () noexcept;
 
         [[nodiscard]] unsigned short getPort() const;

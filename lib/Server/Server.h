@@ -23,11 +23,13 @@ namespace cg {
 
     class SynchroImpl final: public Synchro::Server {
     private:
+        std::function <std::function <void (Direction)> ()> onNewRemoteSpaceship;
+
         void log (std::string msg);
+        static std::function <void (Direction direction)> updateDirectionCallback;
 
     public:
-        // TODO: make write only?
-        static std::function <void (Direction direction)> updateDirectionCallback;
+        explicit SynchroImpl (std::function <std::function <void (Direction)> ()> && onNewStreamCallback);
 
         ::kj::Promise <void> connect (ConnectContext context) override;
 
@@ -40,7 +42,11 @@ namespace cg {
     private:
         void log (std::string msg);
 
+        std::function <void (Direction)> updateDirectionCallback;
+
     public:
+        DirectionCallbackImpl (std::function <void (Direction)> && updateDirectionCallback);
+
         ::kj::Promise <void> sendDirection (SendDirectionContext context) override;
         ::kj::Promise <void> done (DoneContext context) override;
     };

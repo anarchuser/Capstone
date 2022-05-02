@@ -37,13 +37,19 @@ namespace cg {
     }
 
     ::kj::Promise<void> SynchroImpl::streamDirections (Synchro::Server::StreamDirectionsContext context) {
-        log ("Registering Direction Callback");
+        log ("Add new projected spaceship");
 
         auto result = context.getResults();
-        result.setCallback (kj::heap <DirectionCallbackImpl>());
+        result.setCallback (kj::heap <DirectionCallbackImpl> (onNewRemoteSpaceship()));
 
         return kj::READY_NOW;
     }
+
+    SynchroImpl::SynchroImpl (std::function<std::function <void (Direction)> ()> && onNewStreamCallback)
+            : onNewRemoteSpaceship {std::move (onNewStreamCallback)} {}
+
+    DirectionCallbackImpl::DirectionCallbackImpl (std::function<void (Direction)> && updateDirectionCallback)
+            : updateDirectionCallback {std::move (updateDirectionCallback)} {}
 
     void DirectionCallbackImpl::log (std::string msg) {
         LOG (INFO) << "DirectionCallback @" << this << ": '" << msg << "'";
@@ -54,19 +60,21 @@ namespace cg {
     DirectionCallbackImpl::sendDirection (SendDirectionContext context) {
         auto direction = context.getParams().getDirection();
         try {
-            SynchroImpl::updateDirectionCallback (
-                    {direction.getAccelerate (), direction.getDecelerate (), direction.getRotateLeft (),
-                     direction.getRotateRight ()
-                    });
-            std::string msg = "Update direction to ";
-            if (direction.getRotateLeft() == 1 && direction.getRotateRight() != 1) msg += '<';
-            else msg += ' ';
-            if (direction.getAccelerate() == 1) msg += '^';
-            else if (direction.getDecelerate() == 1) msg += '_';
-            else msg += '*';
-            if (direction.getRotateLeft() != 1 && direction.getRotateRight() == 1) msg += '>';
-            else msg += ' ';
-            log (msg);
+            updateDirectionCallback ({
+                direction.getAccelerate (),
+                direction.getDecelerate (),
+                direction.getRotateLeft (),
+                direction.getRotateRight ()
+            });
+//            std::string msg = "Update direction to ";
+//            if (direction.getRotateLeft() == 1 && direction.getRotateRight() != 1) msg += '<';
+//            else msg += ' ';
+//            if (direction.getAccelerate() == 1) msg += '^';
+//            else if (direction.getDecelerate() == 1) msg += '_';
+//            else msg += '*';
+//            if (direction.getRotateLeft() != 1 && direction.getRotateRight() == 1) msg += '>';
+//            else msg += ' ';
+//            log (msg);
         } catch (std::bad_function_call &) {
             LOG (WARNING) << "Received updateDirection before callback has been initialised";
         }

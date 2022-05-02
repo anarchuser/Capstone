@@ -3,7 +3,18 @@
 namespace kt {
     GameScene::GameScene () : GameScene (generateSeed ()) {}
 
-    GameScene::GameScene (std::size_t seed) : Scene (), rng (seed), backend (DEFAULT_ADDRESS) {
+    GameScene::GameScene (std::size_t seed) : Scene (), rng (seed), backend (DEFAULT_ADDRESS, [this] () {
+        spWorld world = safeSpCast <World> (getFirstChild());
+        OX_ASSERT(world);
+
+        auto remote_ship = new RemoteSpaceship (* world, gameResources, {
+                float (rng.random ({100, world->getSize ().x - 100})),
+                float (rng.random ({100, world->getSize ().y - 100}))
+        }, SPACESHIP_SCALE);
+        return [remote_ship] (Direction new_dir) {
+            remote_ship->updateDirection (new_dir);
+        };
+    }) {
 
         logs::messageln ("Seed: %lu", rng.seed);
 
