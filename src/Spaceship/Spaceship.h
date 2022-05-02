@@ -25,7 +25,7 @@
 #define SPACESHIP_TORQUE    3e-5
 
 /// Number of collisions allowed before destroying spaceship
-#define SPACESHIP_HEALTH    100
+#define SPACESHIP_HEALTH    1
 
 namespace kt {
     using namespace oxygine;
@@ -34,8 +34,10 @@ namespace kt {
     class Spaceship: public Sprite {
         /// Health of this particular instance
         int health = SPACESHIP_HEALTH;
+
         /// ID of this spaceship. IDs increment with each ship, starting from 0 each game
         std::size_t const id = ship_counter++;
+
         /// HUD showing current health of this ship
         spText scoreboard = nullptr;
 

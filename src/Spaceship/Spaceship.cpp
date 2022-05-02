@@ -65,6 +65,8 @@ namespace kt {
             updateScoreboard();
             if (health <= 0) {
                 scoreboard->setText (std::to_string (id) + ": dead");
+                body->GetUserData().pointer = 0;
+                body = nullptr;
                 detach();
             }
         });
