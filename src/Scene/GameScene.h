@@ -17,6 +17,7 @@
 
 #include "Server/generated/synchro.capnp.h"
 #include "Server/Server.h"
+#include "Backend/Backend.h"
 #include <capnp/ez-rpc.h>
 #include <kj/debug.h>
 #include <thread>
@@ -40,14 +41,11 @@ namespace kt {
         /// Set to true when pause is requested (default button `P`). pauses game independently of menu (hard) pause
         bool softPause = true;
 
-        kj::Own <capnp::EzRpcServer> server;
+        Backend backend;
+        
         std::thread server_thread;
         kj::Own <capnp::EzRpcClient> rpcClient;
         Synchro::Client client;
-
-        std::size_t volatile port = 0;
-
-        void serve (std::string address);
 
         void controlRemote (KeyEvent * event);
         void streamRemote ();

@@ -4,19 +4,13 @@ namespace kt {
     GameScene::GameScene () : GameScene (generateSeed ()) {}
 
     GameScene::GameScene (std::size_t seed) : Scene (), rng (seed),
-                server_thread (& GameScene::serve, this, DEFAULT_ADDRESS),
-                rpcClient ([this] () {
-                    while (!server);
-                    return kj::heap<capnp::EzRpcClient> (DEFAULT_ADDRESS, port);
-                }()),
+                backend (DEFAULT_ADDRESS),
+                rpcClient (kj::heap<capnp::EzRpcClient> (DEFAULT_ADDRESS, backend.getPort())),
                 client (rpcClient->getMain<Synchro> ()) {
         logs::messageln ("Seed: %lu", rng.seed);
 
-        while (!port);
-        rpcClient = kj::heap<capnp::EzRpcClient> (DEFAULT_ADDRESS, port);
         client = rpcClient->getMain<Synchro>();
         client.connectRequest ().send ().wait (rpcClient->getWaitScope());
-        logs::messageln ("Server running on port %d", port);
 
         // Load all required game assets
         gameResources.loadXML (GAME_RESOURCES);
@@ -67,10 +61,7 @@ namespace kt {
     }
 
     GameScene::~GameScene () noexcept {
-        server->getWaitScope().cancelAllDetached();
         rpcClient->getWaitScope().cancelAllDetached();
-        if (server_thread.joinable ()) server_thread.detach ();
-//        if (server_thread.joinable ()) server_thread.join ();
 
         // Free all game assets
         gameResources.free ();
@@ -129,13 +120,6 @@ namespace kt {
 
     void GameScene::onQuit (Event * event) {
         core::requestQuit ();
-    }
-
-    void GameScene::serve (std::string address) {
-        logs::messageln ("Setting up game backend at '%s'", address.c_str());
-        server = kj::heap <capnp::EzRpcServer> (kj::heap <cg::SynchroImpl>(), address);
-        port = server->getPort().wait (server->getWaitScope());
-        kj::NEVER_DONE.wait (server->getWaitScope());
     }
 
     void GameScene::controlRemote (KeyEvent * event) {
