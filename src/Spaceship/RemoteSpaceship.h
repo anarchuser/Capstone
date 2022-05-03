@@ -14,6 +14,8 @@
 
 #include <functional>
 
+#define REMOTE_SPACESHIP_COLOR {255, 0, 0}
+
 namespace kt {
     using namespace oxygine;
 

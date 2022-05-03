@@ -10,6 +10,8 @@ namespace kt {
         // TODO: replace by player names?
 //        setName ("KeyboardSpaceship");
 
+        setAddColor (KEYBOARD_SPACESHIP_COLOR);
+
         instance = this;
 
         listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {

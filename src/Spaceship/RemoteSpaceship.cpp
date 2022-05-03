@@ -5,6 +5,8 @@ namespace kt {
     RemoteSpaceship::RemoteSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
             : Spaceship (world, res, pos, scale)
     {
+        setAddColor (REMOTE_SPACESHIP_COLOR);
+
         setAwake (true);
     }
 

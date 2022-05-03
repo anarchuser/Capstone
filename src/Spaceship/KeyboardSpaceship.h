@@ -10,6 +10,8 @@
 #include "src/World/World.h"
 #include "Spaceship.h"
 
+#define KEYBOARD_SPACESHIP_COLOR {0, 0, 255}
+
 namespace kt {
     using namespace oxygine;
 
