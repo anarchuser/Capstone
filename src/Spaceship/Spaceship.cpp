@@ -64,16 +64,25 @@ namespace kt {
             --health;
             updateScoreboard();
             if (health <= 0) {
-                scoreboard->setText (std::to_string (id) + ": dead");
-                body->GetUserData().pointer = 0;
-                body = nullptr;
-                detach();
+                destroy();
             }
         });
     }
 
-    void Spaceship::updateScoreboard () {
-        scoreboard->setText (std::to_string (id) + ": " + std::to_string (health) + " hp");
+    void Spaceship::destroy () {
+        for (auto listener : listeners) {
+            getStage()->removeEventListener (listener);
+        }
+        scoreboard->setText (std::to_string (id) + ": dead");
+        setAwake (false);
+        if (body) body->GetUserData().pointer = 0;
+        body = nullptr;
+        detach();
+    }
+
+    void Spaceship::updateScoreboard (std::string msg) {
+        if (msg.empty()) msg = std::to_string (health) + " hp";
+        scoreboard->setText (std::to_string (id) + ": " + msg);
     }
 
     void Spaceship::setAwake (bool awake) {

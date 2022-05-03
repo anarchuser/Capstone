@@ -1,10 +1,9 @@
 #include "Backend.h"
 
 namespace kt {
-    Backend::Backend (std::string address, std::function <std::function <void (Direction)> ()> && onNewStreamCallback)
+    Backend::Backend (std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections)
             : address {std::move (address)}
-            , onNewStreamCallback {std::move (onNewStreamCallback)}
-            , server_thread {& Backend::serve, this} {
+            , server_thread {& Backend::serve, this, std::move (onStreamDirections)} {
         while (!server);
     }
     
@@ -14,8 +13,11 @@ namespace kt {
         server_thread.detach();
     }
     
-    void Backend::serve () {
-        server = kj::heap <capnp::EzRpcServer> (kj::heap <cg::SynchroImpl> (std::move (onNewStreamCallback)), address);
+    void Backend::serve (std::function <cg::DirectionCallback ()> && onStreamDirections) {
+        server = kj::heap <capnp::EzRpcServer> (
+                kj::heap <cg::SynchroImpl> (
+                        std::forward <std::function <cg::DirectionCallback ()>> (onStreamDirections)
+                ), address);
         port = server->getPort().wait (server->getWaitScope());
         logs::messageln ("Set up backend at '%s:%d'", address.c_str(), (int) port);
         kj::NEVER_DONE.wait (server->getWaitScope());
@@ -38,6 +40,9 @@ namespace kt {
         }
     }
 
+    void Backend::disconnectAll () {
+        connections.clear();
+    }
 }
 
 /* Copyright (C) Aaron Alef */

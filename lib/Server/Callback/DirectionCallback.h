@@ -1,5 +1,5 @@
-#ifndef CAPSTONE_DIRECTIONCALLBACKIMPL_H
-#define CAPSTONE_DIRECTIONCALLBACKIMPL_H
+#ifndef CAPSTONE_DIRECTIONCALLBACK_H
+#define CAPSTONE_DIRECTIONCALLBACK_H
 
 #include "config.h"
 
@@ -16,15 +16,19 @@
 #include "Direction/Direction.h"
 
 namespace cg {
+    struct DirectionCallback final {
+        std::function <void (Direction)> const onSendDirection;
+        std::function <void ()> const onDone;
+    };
 
     class DirectionCallbackImpl final: public Synchro::DirectionCallback::Server {
     private:
         void log (const std::string& msg);
 
-        std::function <void (Direction)> onSendDirection;
+        DirectionCallback callback;
 
     public:
-        DirectionCallbackImpl (std::function <void (Direction)> && onSendDirection);
+        explicit DirectionCallbackImpl (DirectionCallback && callback);
 
         ::kj::Promise <void> sendDirection (SendDirectionContext context) override;
         // TODO: call this when spaceship was destroyed
@@ -33,6 +37,6 @@ namespace cg {
 
 } // cg
 
-#endif //CAPSTONE_DIRECTIONCALLBACKIMPL_H
+#endif //CAPSTONE_DIRECTIONCALLBACK_H
 
 /* Copyright © 2022 Aaron Alef */

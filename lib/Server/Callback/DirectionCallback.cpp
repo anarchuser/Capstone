@@ -1,8 +1,8 @@
 #include "DirectionCallback.h"
 
 namespace cg {
-    DirectionCallbackImpl::DirectionCallbackImpl (std::function<void (Direction)> && onSendDirection)
-            : onSendDirection {std::move (onSendDirection)} {}
+    DirectionCallbackImpl::DirectionCallbackImpl (DirectionCallback && callback)
+            : callback {std::move (callback)} {}
 
     void DirectionCallbackImpl::log (std::string const & msg) {
         LOG (INFO) << "DirectionCallback @" << this << ": '" << msg << "'";
@@ -12,21 +12,17 @@ namespace cg {
     ::kj::Promise<void>
     DirectionCallbackImpl::sendDirection (SendDirectionContext context) {
         auto direction = context.getParams().getDirection();
-        try {
-            onSendDirection ({
-                                     direction.getAccelerate (),
-                                     direction.getDecelerate (),
-                                     direction.getRotateLeft (),
-                                     direction.getRotateRight ()
-                             });
-        } catch (std::bad_function_call &) {
-            LOG (WARNING) << "Received updateDirection before callback has been initialised";
-        }
+        callback.onSendDirection ({
+            direction.getAccelerate (),
+            direction.getDecelerate (),
+            direction.getRotateLeft (),
+            direction.getRotateRight ()});
         return kj::READY_NOW;
     }
 
     ::kj::Promise<void> DirectionCallbackImpl::done (DoneContext context) {
         log ("Client disconnected");
+        callback.onDone();
         return kj::READY_NOW;
     }
 }

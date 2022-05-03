@@ -24,8 +24,10 @@ namespace kt {
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
 
+        void destroy () override;
+
         /// Current keyboard controlled spaceship instance
-        static spKeyboardSpaceship instance;
+        static KeyboardSpaceship * instance;
     };
 
 }

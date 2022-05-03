@@ -19,6 +19,5 @@ interface Synchro {
     }
 
     connect @0 () -> ();
-    updateDirection @1 (direction :Direction) -> ();
-    streamDirections @2 () -> (callback :DirectionCallback);
+    streamDirections @1 () -> (callback :DirectionCallback);
 }

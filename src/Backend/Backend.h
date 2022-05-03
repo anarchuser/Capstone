@@ -31,17 +31,17 @@ namespace kt {
 
         std::vector <std::unique_ptr <Connection>> connections;
         
-        void serve ();
-        std::function <std::function <void (Direction)> ()> onNewStreamCallback;
-        
+        void serve (std::function <cg::DirectionCallback ()> && onStreamDirections);
+
     public:
-        Backend (std::string address, std::function <std::function <void (Direction)>()> && onNewStreamCallback);
+        Backend (std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections);
         ~Backend () noexcept;
 
         [[nodiscard]] unsigned short getPort() const;
         [[nodiscard]] std::string const & getAddress() const;
 
         void connect (Direction const * direction, std::string address, unsigned short port);
+        void disconnectAll ();
         void update();
     };
 

@@ -2,7 +2,7 @@
 
 namespace kt {
 
-    spKeyboardSpaceship KeyboardSpaceship::instance = nullptr;
+    KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
 
     KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
             : Spaceship (world, res, pos, scale) {
@@ -12,12 +12,12 @@ namespace kt {
 
         instance = this;
 
-        getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
+        listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
             instance->onSteeringEvent ((KeyEvent *) event);
-        });
-        getStage()->addEventListener (KeyEvent::KEY_DOWN, [](Event * event) {
+        }));
+        listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_DOWN, [](Event * event) {
             instance->onSteeringEvent ((KeyEvent *) event);
-        });
+        }));
     }
 
     void KeyboardSpaceship::onSteeringEvent (ox::KeyEvent * event) {
@@ -44,6 +44,11 @@ namespace kt {
                 direction.rotateRight = key_is_down;
                 break;
         }
+    }
+
+    void KeyboardSpaceship::destroy () {
+        Spaceship::destroy();
+        instance = nullptr;
     }
 }
 
