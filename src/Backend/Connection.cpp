@@ -24,6 +24,10 @@ namespace kt {
 
         request.send().wait (waitscope);
     }
+
+    void Connection::ping () {
+        client.connectRequest ().send().wait (waitscope);
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

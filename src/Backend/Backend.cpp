@@ -8,9 +8,11 @@ namespace kt {
     }
     
     Backend::~Backend () noexcept {
-        server->getWaitScope().cancelAllDetached();
-//        if (server_thread.joinable()) server_thread.join();
-        server_thread.detach();
+        thread_executor->executeSync ([this]() {
+            server = nullptr;
+        });
+        if (server_thread.joinable()) server_thread.join();
+//        server_thread.detach();
     }
     
     void Backend::serve (std::function <cg::DirectionCallback ()> && onStreamDirections) {
@@ -20,7 +22,13 @@ namespace kt {
                 ), address);
         port = server->getPort().wait (server->getWaitScope());
         logs::messageln ("Set up backend at '%s:%d'", address.c_str(), (int) port);
-        kj::NEVER_DONE.wait (server->getWaitScope());
+        thread_executor = & kj::getCurrentThreadExecutor();
+
+        try {
+            kj::NEVER_DONE.wait (server->getWaitScope());
+        } catch (...) {
+            logs::messageln ("Server stopped");
+        }
     }
     
     unsigned short Backend::getPort () const {

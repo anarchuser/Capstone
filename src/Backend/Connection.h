@@ -27,6 +27,7 @@ namespace kt {
         ~Connection() noexcept;
 
         void update ();
+        void ping ();
     };
 
 } // kt

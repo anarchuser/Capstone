@@ -29,6 +29,8 @@ namespace kt {
         std::string const address;
         std::atomic <int> port = -1;
 
+        kj::Executor const * thread_executor;
+
         std::vector <std::unique_ptr <Connection>> connections;
         
         void serve (std::function <cg::DirectionCallback ()> && onStreamDirections);
