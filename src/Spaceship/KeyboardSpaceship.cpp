@@ -14,6 +14,9 @@ namespace kt {
 
         instance = this;
 
+        // TODO: remove this
+        setAwake (true);
+
         listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
             instance->onSteeringEvent ((KeyEvent *) event);
         }));

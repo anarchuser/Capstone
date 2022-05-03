@@ -56,23 +56,20 @@ namespace kt {
         getParent()->addChild (scoreboard);
         updateScoreboard();
 
-        addEventListener (CollisionEvent::BEGIN, [this] (Event * event) {
+        listeners.push_back (addEventListener (CollisionEvent::BEGIN, [this] (Event * event) {
             if (!body->IsAwake()) return;
-
-            // Currently unused
-            spSprite other = safeCast <CollisionEvent *> (event)->other;
+//            spSprite other = safeCast <CollisionEvent *> (event)->other;
             --health;
             updateScoreboard();
             if (health <= 0) {
                 destroy();
             }
-        });
+        }));
     }
 
     void Spaceship::destroy () {
-        for (auto listener : listeners) {
-            getStage()->removeEventListener (listener);
-        }
+        for (auto listener : listeners)
+            getStage ()->removeEventListener (listener);
         scoreboard->setText (std::to_string (id) + ": dead");
         setAwake (false);
         if (body) body->GetUserData().pointer = 0;

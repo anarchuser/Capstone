@@ -20,6 +20,11 @@ namespace kt {
             [this] () { destroy(); },
         };
     }
+
+    void RemoteSpaceship::destroy () {
+        Spaceship::destroy();
+        updateScoreboard ("ghost");
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

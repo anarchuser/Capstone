@@ -27,6 +27,8 @@ namespace kt {
         void updateDirection (Direction new_dir);
 
         [[nodiscard]] cg::DirectionCallback getCallback();
+
+        void destroy () override;
     };
 
 } // kt

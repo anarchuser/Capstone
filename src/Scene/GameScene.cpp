@@ -74,7 +74,10 @@ namespace kt {
         if (KeyboardSpaceship::instance) {
             backend.update();
         } else {
-            backend.disconnectAll();
+            ONCE ({
+                backend.disconnectAll ();
+                onMenu (nullptr);
+            });
         }
 
         Actor::update (us);

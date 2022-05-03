@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "src/config.h"
+#include "helper.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
@@ -25,7 +26,7 @@
 #define SPACESHIP_TORQUE    3e-5
 
 /// Number of collisions allowed before destroying spaceship
-#define SPACESHIP_HEALTH    1
+#define SPACESHIP_HEALTH    100
 
 namespace kt {
     using namespace oxygine;

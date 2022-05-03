@@ -10,7 +10,6 @@ namespace kt {
 
     Connection::~Connection () noexcept {
         callback.doneRequest ().send().wait (waitscope);
-        waitscope.cancelAllDetached();
     }
 
     void Connection::update () {
