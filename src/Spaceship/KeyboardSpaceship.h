@@ -10,6 +10,8 @@
 #include "src/World/World.h"
 #include "Spaceship.h"
 
+#define KEYBOARD_SPACESHIP_COLOR {0, 0, 255}
+
 namespace kt {
     using namespace oxygine;
 
@@ -24,8 +26,10 @@ namespace kt {
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
 
+        void destroy () override;
+
         /// Current keyboard controlled spaceship instance
-        static spKeyboardSpaceship instance;
+        static KeyboardSpaceship * instance;
     };
 
 }

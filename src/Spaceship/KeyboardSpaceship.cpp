@@ -2,7 +2,7 @@
 
 namespace kt {
 
-    spKeyboardSpaceship KeyboardSpaceship::instance = nullptr;
+    KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
 
     KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
             : Spaceship (world, res, pos, scale) {
@@ -10,16 +10,20 @@ namespace kt {
         // TODO: replace by player names?
 //        setName ("KeyboardSpaceship");
 
+        setAddColor (KEYBOARD_SPACESHIP_COLOR);
+
         instance = this;
 
-        getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
-            instance->onSteeringEvent ((KeyEvent *) event);
-        });
-        getStage()->addEventListener (KeyEvent::KEY_DOWN, [](Event * event) {
-            instance->onSteeringEvent ((KeyEvent *) event);
-        });
-    }
+        // TODO: remove this
+        setAwake (true);
 
+        listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
+            instance->onSteeringEvent ((KeyEvent *) event);
+        }));
+        listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_DOWN, [](Event * event) {
+            instance->onSteeringEvent ((KeyEvent *) event);
+        }));
+    }
 
     void KeyboardSpaceship::onSteeringEvent (ox::KeyEvent * event) {
         auto keysym = event->data->keysym;
@@ -45,6 +49,11 @@ namespace kt {
                 direction.rotateRight = key_is_down;
                 break;
         }
+    }
+
+    void KeyboardSpaceship::destroy () {
+        Spaceship::destroy();
+        instance = nullptr;
     }
 }
 

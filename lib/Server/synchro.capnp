@@ -8,12 +8,16 @@ interface Synchro {
         rotateRight @3 :Int8 = -1;
     }
 
+    struct Position {
+        x @0 :Float32;
+        y @1 :Float32;
+    }
+
     interface DirectionCallback {
         sendDirection @0 (direction :Direction) -> stream;
         done @1 ();
     }
 
     connect @0 () -> ();
-    updateDirection @1 (direction :Direction) -> ();
-    streamDirections @2 () -> (callback :DirectionCallback);
+    streamDirections @1 () -> (callback :DirectionCallback);
 }

@@ -14,6 +14,7 @@
 #include <functional>
 
 #include "Direction/Direction.h"
+#include "Callback/DirectionCallback.h"
 
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
@@ -23,26 +24,16 @@ namespace cg {
 
     class SynchroImpl final: public Synchro::Server {
     private:
-        void log (std::string msg);
+        std::function <cg::DirectionCallback ()> onStreamDirections;
+
+        void log (std::string const & msg);
 
     public:
-        // TODO: make write only?
-        static std::function <void (Direction direction)> updateDirectionCallback;
+        explicit SynchroImpl (std::function <DirectionCallback ()> && onStreamDirections);
 
         ::kj::Promise <void> connect (ConnectContext context) override;
 
-        ::kj::Promise <void> updateDirection (UpdateDirectionContext context) override;
-
         ::kj::Promise <void> streamDirections (StreamDirectionsContext context) override;
-    };
-
-    class DirectionCallbackImpl final: public Synchro::DirectionCallback::Server {
-    private:
-        void log (std::string msg);
-
-    public:
-        ::kj::Promise <void> sendDirection (SendDirectionContext context) override;
-        ::kj::Promise <void> done (DoneContext context) override;
     };
 } // cg
 

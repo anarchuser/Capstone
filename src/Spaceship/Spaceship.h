@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "src/config.h"
+#include "helper.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
@@ -32,19 +33,23 @@ namespace kt {
 
     /// Spaceship intended to be controlled by (human) players. No control mechanism included; subclass to do so
     class Spaceship: public Sprite {
-        /// Health of this particular instance
-        int health = SPACESHIP_HEALTH;
         /// ID of this spaceship. IDs increment with each ship, starting from 0 each game
         std::size_t const id = ship_counter++;
+
         /// HUD showing current health of this ship
         spText scoreboard = nullptr;
 
     protected:
+        std::vector <int> listeners;
+
+        /// Health of this particular instance
+        int health = SPACESHIP_HEALTH;
+
         /// Physical body representing this spaceship in the physical world
         b2Body * body = nullptr;
 
         /// Update personal scoreboard based on current health
-        void updateScoreboard ();
+        void updateScoreboard (std::string msg = "");
 
     public:
         /// Current issued direction:
@@ -58,6 +63,8 @@ namespace kt {
 
         /// Wakes or puts a spaceship to sleep. Asleep spaceships have collision and gravity turned off
         void setAwake (bool awake);
+
+        virtual void destroy ();
 
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
         static std::size_t ship_counter;

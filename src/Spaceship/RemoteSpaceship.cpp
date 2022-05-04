@@ -3,16 +3,27 @@
 namespace kt {
     // TODO: connect to one specific server instance?
     RemoteSpaceship::RemoteSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
-            : Spaceship (world, res, pos, scale) {
+            : Spaceship (world, res, pos, scale)
+    {
+        setAddColor (REMOTE_SPACESHIP_COLOR);
 
-        cg::SynchroImpl::updateDirectionCallback = [this] (Direction new_dir) {
-            ONCE (setAwake (true));
-//            if (new_dir.accelerate >= 0) direction.accelerate  = new_dir.accelerate;
-//            if (new_dir.decelerate >= 0) direction.decelerate  = new_dir.decelerate;
-//            if (new_dir.rotateLeft >= 0) direction.rotateLeft  = new_dir.rotateLeft;
-//            if (new_dir.rotateRight>= 0) direction.rotateRight = new_dir.rotateRight;
-            direction = new_dir;
+        setAwake (true);
+    }
+
+    void RemoteSpaceship::updateDirection (Direction new_dir) {
+        direction = new_dir;
+    };
+
+    cg::DirectionCallback RemoteSpaceship::getCallback() {
+        return {
+            [this] (Direction dir) { updateDirection (dir); },
+            [this] () { destroy(); },
         };
+    }
+
+    void RemoteSpaceship::destroy () {
+        Spaceship::destroy();
+        updateScoreboard ("ghost");
     }
 }
 
