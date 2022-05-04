@@ -42,7 +42,7 @@ namespace kt {
         [[nodiscard]] unsigned short getPort() const;
         [[nodiscard]] std::string const & getAddress() const;
 
-        void connect (Direction const * direction, std::string address, unsigned short port);
+        void connect (Direction const * direction, std::string remote, unsigned short port);
         void disconnectAll ();
         void update();
     };

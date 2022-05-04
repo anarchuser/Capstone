@@ -3,7 +3,7 @@
 namespace kt {
     GameScene::GameScene () : GameScene (generateSeed ()) {}
 
-    GameScene::GameScene (std::size_t seed) : Scene (), rng (seed), backend {DEFAULT_ADDRESS, ([this] () {
+    GameScene::GameScene (std::size_t seed) : Scene (), rng (seed), backend {SERVER_FULL_ADDRESS, ([this] () {
         spWorld world = safeSpCast<World> (getFirstChild ());
         OX_ASSERT(world);
 
@@ -130,8 +130,10 @@ namespace kt {
 
     void GameScene::connectNewSpaceship () {
         if (!KeyboardSpaceship::instance) return;
-        logs::messageln ("Project our spaceship to '%s:%d'", backend.getAddress().c_str(), backend.getPort());
-        backend.connect (& KeyboardSpaceship::instance->direction, backend.getAddress(), backend.getPort());
+//        logs::messageln ("Project our spaceship to '%s:%d'", backend.getAddress().c_str(), backend.getPort());
+//        backend.connect (& KeyboardSpaceship::instance->direction, backend.getAddress(), backend.getPort());
+        logs::messageln ("Project our spaceship to '%s:%d'", remote.c_str(), backend.getPort());
+        backend.connect (& KeyboardSpaceship::instance->direction, remote, SERVER_PORT);
     }
 }
 

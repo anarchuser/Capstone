@@ -21,7 +21,7 @@ namespace kt {
                         std::forward <std::function <cg::DirectionCallback ()>> (onStreamDirections)
                 ), address);
         port = server->getPort().wait (server->getWaitScope());
-        logs::messageln ("Set up backend at '%s:%d'", address.c_str(), (int) port);
+        logs::messageln ("Set up backend at '%s'", address.c_str());
         thread_executor = & kj::getCurrentThreadExecutor();
 
         try {
@@ -39,8 +39,8 @@ namespace kt {
         return address;
     }
 
-    void Backend::connect (Direction const * direction, std::string address, unsigned short port) {
-        connections.push_back (std::make_unique <Connection> (direction, address, port));
+    void Backend::connect (Direction const * direction, std::string remote, unsigned short port) {
+        connections.push_back (std::make_unique <Connection> (direction, remote, port));
     }
     void Backend::update () {
         for (auto & connection : connections) {

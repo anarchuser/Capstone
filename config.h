@@ -22,8 +22,12 @@
 namespace fs = std::filesystem;
 fs::path const DATA_DIR = PROJECT_ROOT "/data";
 
-#define DEFAULT_ADDRESS "localhost"
-#define DEFAULT_PORT    44444
+#define SERVER_ADDRESS "azazel"
+#define REMOTE_ADDRESS "azazel"
+#define SERVER_PORT    44444
+#define SERVER_FULL_ADDRESS (std::string (SERVER_ADDRESS)  + ":" + std::to_string (SERVER_PORT))
+
+static std::string remote = REMOTE_ADDRESS;
 
 #endif //Capstone_CONFIG_H
 

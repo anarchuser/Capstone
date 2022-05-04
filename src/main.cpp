@@ -27,6 +27,9 @@ int main (int argc, char * argv[]) {
 
     LOG (INFO) << "Start game client";
 
+//    if (argc > 1)
+//        remote = argv[1];
+    
     // Start game, runs endlessly
     kt::Game::run();
 
