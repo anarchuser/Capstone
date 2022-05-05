@@ -32,7 +32,7 @@ namespace kt {
     Connection::initCallback (std::function<cg::DirectionCallback ()> & onStreamDirections) {
         auto request = client.streamDirectionsRequest ();
         auto impl = kj::heap <cg::SynchroImpl> (std::forward <std::function <cg::DirectionCallback ()>> (onStreamDirections));
-        request.setClient (kj::mv (impl));
+        request.initClient().setValue (kj::mv (impl));
         return request.send().wait (waitscope).getCallback();
     }
 }

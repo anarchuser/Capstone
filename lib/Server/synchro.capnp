@@ -18,6 +18,13 @@ interface Synchro {
         done @1 ();
     }
 
+    struct Maybe(T) {
+        union {
+            nothing @0 :Void;
+            value @1 :T;
+        }
+    }
+
     connect @0 () -> ();
-    streamDirections @1 (client :Synchro) -> (callback :DirectionCallback);
+    streamDirections @1 (client :Maybe(Synchro)) -> (callback :DirectionCallback);
 }
