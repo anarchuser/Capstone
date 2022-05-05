@@ -19,6 +19,9 @@
 #include <unordered_map>
 #include <string>
 
+#define ITOS(I) std::to_string (I)
+#define IP(first, second, third, fourth) (ITOS (first) +'.'+ ITOS (second) +'.'+ ITOS (third) +'.'+ ITOS (fourth))
+
 namespace kt {
     using namespace oxygine;
 
