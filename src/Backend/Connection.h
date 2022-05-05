@@ -22,8 +22,13 @@ namespace kt {
         kj::WaitScope & waitscope;
         Synchro::DirectionCallback::Client callback;
 
+        Synchro::DirectionCallback::Client initCallback (std::function <cg::DirectionCallback ()> & onStreamDirections);
+
     public:
-        Connection (Direction const * direction, std::string address, unsigned short port);
+        Connection (std::function <cg::DirectionCallback ()> & onStreamDirections,
+                    Direction const * direction,
+                    std::string address,
+                    unsigned short port);
         ~Connection() noexcept;
 
         void update ();

@@ -14,6 +14,11 @@ namespace cg {
     ::kj::Promise<void> SynchroImpl::streamDirections (Synchro::Server::StreamDirectionsContext context) {
         log ("Add new projected spaceship");
 
+        auto newRequest = context.getParams().getClient().streamDirectionsRequest ();
+        auto impl = kj::heap <cg::SynchroImpl> (std::function <cg::DirectionCallback ()> (onStreamDirections));
+        newRequest.setClient (kj::mv (impl));
+        newRequest.send();
+
         auto result = context.getResults();
         result.setCallback (kj::heap <DirectionCallbackImpl> (onStreamDirections()));
 

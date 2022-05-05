@@ -19,5 +19,5 @@ interface Synchro {
     }
 
     connect @0 () -> ();
-    streamDirections @1 () -> (callback :DirectionCallback);
+    streamDirections @1 (client :Synchro) -> (callback :DirectionCallback);
 }

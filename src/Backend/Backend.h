@@ -27,6 +27,7 @@ namespace kt {
 
     class Backend {
     private:
+        std::function <cg::DirectionCallback ()> onStreamDirections;
         kj::Own <capnp::EzRpcServer> server;
         std::thread server_thread;
         std::string const address;
@@ -36,7 +37,7 @@ namespace kt {
 
         std::unordered_map <std::string, std::unique_ptr <Connection>> connections;
         
-        void serve (std::function <cg::DirectionCallback ()> && onStreamDirections);
+        void serve ();
 
     public:
         Backend (std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections);

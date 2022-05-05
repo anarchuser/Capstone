@@ -2,8 +2,9 @@
 
 namespace kt {
     Backend::Backend (std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections)
-            : address {std::move (address)}
-            , server_thread {& Backend::serve, this, std::move (onStreamDirections)} {
+            : onStreamDirections {std::move (onStreamDirections)}
+            , address {std::move (address)}
+            , server_thread {& Backend::serve, this} {
         while (!server);
     }
     
@@ -15,11 +16,11 @@ namespace kt {
 //        server_thread.detach();
     }
     
-    void Backend::serve (std::function <cg::DirectionCallback ()> && onStreamDirections) {
-        server = kj::heap <capnp::EzRpcServer> (
-                kj::heap <cg::SynchroImpl> (
-                        std::forward <std::function <cg::DirectionCallback ()>> (onStreamDirections)
-                ), address);
+    void Backend::serve () {
+        auto impl = kj::heap <cg::SynchroImpl> (
+                std::function <cg::DirectionCallback ()> (onStreamDirections)
+        );
+        server = kj::heap <capnp::EzRpcServer> (kj::mv (impl), address);
         port = server->getPort().wait (server->getWaitScope());
         logs::messageln ("Set up backend at '%s'", address.c_str());
         thread_executor = & kj::getCurrentThreadExecutor();
@@ -40,7 +41,8 @@ namespace kt {
     }
 
     void Backend::connect (Direction const * direction, std::string remote, unsigned short port) {
-        connections.insert_or_assign (remote + ':' + std::to_string (port), std::make_unique <Connection> (direction, remote, port));
+        connections.insert_or_assign (remote + ':' + std::to_string (port),
+                                      std::make_unique <Connection> (onStreamDirections, direction, remote, port));
     }
 
     void Backend::update () {
