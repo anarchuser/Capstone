@@ -31,7 +31,7 @@ namespace kt {
 
         kj::Executor const * thread_executor;
 
-        std::vector <std::unique_ptr <Connection>> connections;
+        std::unordered_map <std::string, std::unique_ptr <Connection>> connections;
         
         void serve (std::function <cg::DirectionCallback ()> && onStreamDirections);
 

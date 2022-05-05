@@ -40,11 +40,11 @@ namespace kt {
     }
 
     void Backend::connect (Direction const * direction, std::string remote, unsigned short port) {
-        connections.push_back (std::make_unique <Connection> (direction, remote, port));
+        connections.insert_or_assign (remote + ':' + std::to_string (port), std::make_unique <Connection> (direction, remote, port));
     }
     void Backend::update () {
         for (auto & connection : connections) {
-            connection->update();
+            connection.second->update();
         }
     }
 

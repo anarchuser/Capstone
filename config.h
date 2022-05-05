@@ -22,8 +22,8 @@
 namespace fs = std::filesystem;
 fs::path const DATA_DIR = PROJECT_ROOT "/data";
 
-#define SERVER_ADDRESS "192.168.178.36"
-#define REMOTE_ADDRESS "192.168.178.35"
+#define SERVER_ADDRESS "192.168.178.35"
+#define REMOTE_ADDRESS "192.168.178.36"
 #define SERVER_PORT    44444
 #define SERVER_FULL_ADDRESS (std::string (SERVER_ADDRESS)  + ":" + std::to_string (SERVER_PORT))
 
