@@ -16,6 +16,7 @@ namespace kt {
     class Connection {
     private:
         Direction const * direction;
+        std::size_t seed;
 
         kj::Own <capnp::EzRpcClient> rpcClient;
         Synchro::Client client;
@@ -26,6 +27,7 @@ namespace kt {
 
     public:
         Connection (std::function <cg::DirectionCallback ()> & onStreamDirections,
+                    std::size_t seed,
                     Direction const * direction,
                     std::string address,
                     unsigned short port);

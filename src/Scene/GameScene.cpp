@@ -7,7 +7,7 @@ namespace kt {
         joinGame (ip, port);
     }
 
-    GameScene::GameScene (std::size_t seed) : Scene (), rng (seed), backend {SERVER_FULL_ADDRESS, ([this] () {
+    GameScene::GameScene (std::size_t seed) : Scene (), rng (seed), backend {seed, SERVER_FULL_ADDRESS, ([this] () {
         spWorld world = safeSpCast<World> (getFirstChild ());
         OX_ASSERT(world);
 
@@ -137,8 +137,8 @@ namespace kt {
 
     std::size_t GameScene::requestSeed (std::string const & ip, short port) {
         auto client = capnp::EzRpcClient (ip, port);
-        client.getMain <Synchro> ().connectRequest ().send().wait (client.getWaitScope());
-        return RANDOM_SEED;
+        auto promise = client.getMain <Synchro> ().randomSeedRequest ().send();
+        return promise.wait (client.getWaitScope()).getSeed();
     }
 
     void GameScene::joinGame (std::string const & ip, short port) {

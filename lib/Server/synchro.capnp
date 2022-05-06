@@ -27,4 +27,5 @@ interface Synchro {
 
     connect @0 () -> ();
     streamDirections @1 (client :Maybe(Synchro)) -> (callback :DirectionCallback);
+    randomSeed @2 () -> (seed :UInt64);
 }

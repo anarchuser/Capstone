@@ -27,6 +27,7 @@ namespace kt {
 
     class Backend {
     private:
+        std::size_t seed;
         std::function <cg::DirectionCallback ()> onStreamDirections;
         kj::Own <capnp::EzRpcServer> server;
         std::thread server_thread;
@@ -40,7 +41,7 @@ namespace kt {
         void serve ();
 
     public:
-        Backend (std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections);
+        Backend (std::size_t seed, std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections);
         ~Backend () noexcept;
 
         [[nodiscard]] unsigned short getPort() const;

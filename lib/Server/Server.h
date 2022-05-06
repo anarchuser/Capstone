@@ -26,14 +26,18 @@ namespace cg {
     private:
         std::function <cg::DirectionCallback ()> onStreamDirections;
 
+        std::size_t const seed;
+
         void log (std::string const & msg);
 
     public:
-        explicit SynchroImpl (std::function <DirectionCallback ()> && onStreamDirections);
+        explicit SynchroImpl (std::size_t seed, std::function <DirectionCallback ()> && onStreamDirections);
 
         ::kj::Promise <void> connect (ConnectContext context) override;
 
         ::kj::Promise <void> streamDirections (StreamDirectionsContext context) override;
+
+        ::kj::Promise <void> randomSeed (RandomSeedContext context) override;
     };
 } // cg
 

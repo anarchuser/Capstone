@@ -1,7 +1,8 @@
 #include "Connection.h"
 
 namespace kt {
-    Connection::Connection (std::function <cg::DirectionCallback ()> & onStreamDirections, Direction const * direction, std::string address, unsigned short port):
+    Connection::Connection (std::function <cg::DirectionCallback ()> & onStreamDirections, std::size_t seed, Direction const * direction, std::string address, unsigned short port):
+            seed {seed},
             direction {direction},
             rpcClient {kj::heap <capnp::EzRpcClient> (address, port)},
             client {rpcClient->getMain<Synchro>()},
@@ -31,7 +32,7 @@ namespace kt {
     Synchro::DirectionCallback::Client
     Connection::initCallback (std::function<cg::DirectionCallback ()> & onStreamDirections) {
         auto request = client.streamDirectionsRequest ();
-        auto impl = kj::heap <cg::SynchroImpl> (std::forward <std::function <cg::DirectionCallback ()>> (onStreamDirections));
+        auto impl = kj::heap <cg::SynchroImpl> (seed, std::forward <std::function <cg::DirectionCallback ()>> (onStreamDirections));
         request.initClient().setValue (kj::mv (impl));
         return request.send().wait (waitscope).getCallback();
     }
