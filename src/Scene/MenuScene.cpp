@@ -4,6 +4,7 @@ namespace kt {
     MenuScene::MenuScene (): Scene() {
         spDialog dialog = new Dialog ({0, 0}, getStage()->getSize(), "Menu");
         dialog->addButton ("New Game", CLOSURE (this, & MenuScene::onNewGame));
+        dialog->addButton ("Join Game", CLOSURE (this, & MenuScene::onJoinGame));
         dialog->addButton ("Exit", CLOSURE (this, & MenuScene::onRequestExit));
         addChild (dialog);
 
@@ -25,6 +26,13 @@ namespace kt {
         getStage()->removeAllEventListeners();
         while (get_pointer(getStage()->getLastChild()) == this);
         new GameScene (RANDOM_SEED);
+    }
+    void MenuScene::onJoinGame (Event * event) {
+        detach();
+        getStage()->removeAllEventListeners();
+        while (get_pointer (getStage()->getLastChild()) == this);
+        std::string ip = REMOTE_ADDRESS;
+        new GameScene (ip, SERVER_PORT);
     }
     void MenuScene::onRequestExit (Event * event) {
         core::requestQuit();

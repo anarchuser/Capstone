@@ -20,6 +20,8 @@ namespace kt {
 
         /// Callback for when starting a new game is requested
         void onNewGame (Event * event);
+        /// Callback for when joining an existing game is requested
+        void onJoinGame (Event * event);
         /// Callback for when quitting the application is requested
         void onRequestExit (Event * event);
     };

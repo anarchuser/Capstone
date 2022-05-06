@@ -3,6 +3,10 @@
 namespace kt {
     GameScene::GameScene () : GameScene (generateSeed ()) {}
 
+    GameScene::GameScene (std::string ip, short port): GameScene (requestSeed (ip, port)) {
+        joinGame (ip, port);
+    }
+
     GameScene::GameScene (std::size_t seed) : Scene (), rng (seed), backend {SERVER_FULL_ADDRESS, ([this] () {
         spWorld world = safeSpCast<World> (getFirstChild ());
         OX_ASSERT(world);
@@ -40,9 +44,6 @@ namespace kt {
             switch (keysym.scancode) {
                 case SDL_SCANCODE_P:
                     softPause = !softPause;
-                    break;
-                case SDL_SCANCODE_N:
-                    connectNewSpaceship();
                     break;
                 case SDL_SCANCODE_W:
                 case SDL_SCANCODE_A:
@@ -132,6 +133,18 @@ namespace kt {
         if (!KeyboardSpaceship::instance) return;
         logs::messageln ("Project our spaceship to '%s:%d'", remote.c_str(), backend.getPort());
         backend.connect (& KeyboardSpaceship::instance->direction, remote, SERVER_PORT);
+    }
+
+    std::size_t GameScene::requestSeed (std::string const & ip, short port) {
+        auto client = capnp::EzRpcClient (ip, port);
+        client.getMain <Synchro> ().connectRequest ().send().wait (client.getWaitScope());
+        return RANDOM_SEED;
+    }
+
+    void GameScene::joinGame (std::string const & ip, short port) {
+        if (!KeyboardSpaceship::instance) return;
+        logs::messageln ("Project our spaceship to '%s:%d'", ip.c_str(), port);
+        backend.connect (& KeyboardSpaceship::instance->direction, ip, port);
     }
 }
 
