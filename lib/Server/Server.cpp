@@ -2,7 +2,7 @@
 
 namespace cg {
     void SynchroImpl::log (std::string const & msg) {
-        LOG (INFO) << "Synchro @" << this << ": '" << msg << "'";
+        // TODO: allow setting an external logging function
         std::cout << "Synchro @" << this << ": '" << msg << "'" << std::endl;
     }
 

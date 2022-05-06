@@ -5,7 +5,7 @@ namespace cg {
             : callback {std::move (callback)} {}
 
     void DirectionCallbackImpl::log (std::string const & msg) {
-        LOG (INFO) << "DirectionCallback @" << this << ": '" << msg << "'";
+        // TODO: allow setting an external logging function
         std::cout << "DirectionCallback @" << this << ": '" << msg << "'" << std::endl;
     }
 
