@@ -10,7 +10,10 @@
 #include <capnp/ez-rpc.h>
 #include <kj/debug.h>
 
+#include "oxygine-framework.h"
+
 namespace kt {
+    using namespace oxygine;
 
     /// Wrapper class around streamDirection requests TODO: renmame
     class Connection {
@@ -34,7 +37,7 @@ namespace kt {
         ~Connection() noexcept;
 
         void update ();
-        void ping ();
+        static bool ping (std::string const & ip, short port);
     };
 
 } // kt

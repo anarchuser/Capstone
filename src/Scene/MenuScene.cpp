@@ -31,7 +31,9 @@ namespace kt {
         static spDialog dialog = [this] () {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to connect to:");
             dialog->addInput (REMOTE_ADDRESS, [this] (std::string msg) {
-                joinGame (msg);
+                if (Connection::ping (msg, SERVER_PORT)) {
+                    joinGame (msg);
+                }
             });
             dialog->addButton ("Cancel", CLOSURE (this, & MenuScene::onJoinGame));
             return dialog;

@@ -32,6 +32,7 @@ namespace kt {
                 switch (keysym.scancode) {
                     case SDL_SCANCODE_BACKSPACE:
                         message->setText (msg.substr (0, msg.size () - 1));
+                        break;
                 }
             }
             first = false;

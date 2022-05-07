@@ -9,6 +9,7 @@
 #include "src/UI/Input.h"
 #include "Scene.h"
 #include "GameScene.h"
+#include "Backend/Connection.h"
 
 namespace kt {
     using namespace oxygine;

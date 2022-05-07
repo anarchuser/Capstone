@@ -25,16 +25,23 @@ namespace kt {
         request.send().wait (waitscope);
     }
 
-    void Connection::ping () {
-        client.connectRequest ().send().wait (waitscope);
-    }
-
     Synchro::DirectionCallback::Client
     Connection::initCallback (std::function<cg::DirectionCallback ()> & onStreamDirections) {
         auto request = client.streamDirectionsRequest ();
         auto impl = kj::heap <cg::SynchroImpl> (seed, std::forward <std::function <cg::DirectionCallback ()>> (onStreamDirections));
         request.initClient().setValue (kj::mv (impl));
         return request.send().wait (waitscope).getCallback();
+    }
+
+    bool Connection::ping (std::string const & ip, short port) {
+        auto client = capnp::EzRpcClient (ip, port);
+        try {
+            client.getMain <Synchro> ().connectRequest ().send().wait (client.getWaitScope());
+            return true;
+        } catch (...) {
+            logs::warning ("Failed to connect to '%s:%d'", ip.c_str(), port);
+        }
+        return false;
     }
 }
 
