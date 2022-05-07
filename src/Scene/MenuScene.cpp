@@ -28,11 +28,28 @@ namespace kt {
         new GameScene (RANDOM_SEED);
     }
     void MenuScene::onJoinGame (Event * event) {
+        static auto size = getSize ();
+        static spDialog dialog = [this] () {
+            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to connect to:");
+            dialog->addInput (REMOTE_ADDRESS, [] (std::string msg) {
+                logs::messageln ("Entered into field: '%s'", msg.c_str());
+            });
+            dialog->addButton ("Cancel", CLOSURE (this, & MenuScene::onJoinGame));
+            return dialog;
+        } ();
+
+        // TODO: check if *any* child is dialog
+        if (getLastChild () != dialog) {
+            addChild (dialog);
+        } else {
+            removeChild (dialog);
+        }
+    }
+    void MenuScene::joinGame (std::string address) {
         detach();
         getStage()->removeAllEventListeners();
         while (get_pointer (getStage()->getLastChild()) == this);
-        std::string ip = REMOTE_ADDRESS;
-        new GameScene (ip, SERVER_PORT);
+        new GameScene (std::move (address), SERVER_PORT);
     }
     void MenuScene::onRequestExit (Event * event) {
         core::requestQuit();

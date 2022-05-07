@@ -27,6 +27,7 @@ namespace kt {
         Input (ResAnim * animation, spText default_value, std::function <void (std::string)> && onEnter);
 
     };
+    DECLARE_SMART (Input, spInput);
 
 } // kt
 

@@ -34,7 +34,18 @@ namespace kt {
         button->setSize ({0.8f * getSize().x, 50});
         button->setPosition (0.1f * getSize().x, getSize().y / 5 + std::max (getSize().y / 10, button->getSize().y + 10) * buttons.size());
         addChild (button);
-        buttons.push_back (button);
+        buttons.emplace_back (button);
+    }
+    void Dialog::addInput (std::string default_value, std::function <void (std::string)> && callback) {
+        ResFont * font = dialogResources.getResFont ("kt-liberation");
+        spText msg = new Text (font, default_value);
+
+        ResAnim * sprite = dialogResources.getResAnim ("input");
+        spInput input = new Input (sprite, msg, std::forward <std::function <void (std::string)>> (callback));
+        input->setSize ({0.8f * getSize().x, 50});
+        input->setPosition (0.1f * getSize().x, getSize().y / 5 + std::max (getSize().y / 10, input->getSize().y + 10) * buttons.size());
+        addChild (input);
+        buttons.emplace_back (input);
     }
 }
 

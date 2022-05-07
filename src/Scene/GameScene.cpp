@@ -97,6 +97,7 @@ namespace kt {
             return dialog;
         } ();
 
+        // TODO: check if *any* child is dialog
         if (getLastChild () != dialog) {
             addChild (dialog);
         } else {

@@ -6,6 +6,7 @@
 #include "oxygine-framework.h"
 
 #include "src/UI/Dialog.h"
+#include "src/UI/Input.h"
 #include "Scene.h"
 #include "GameScene.h"
 
@@ -24,6 +25,8 @@ namespace kt {
         void onJoinGame (Event * event);
         /// Callback for when quitting the application is requested
         void onRequestExit (Event * event);
+
+        void joinGame (std::string address);
     };
     DECLARE_SMART (MenuScene, spMenuScene);
 
