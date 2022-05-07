@@ -33,6 +33,18 @@ namespace kt {
                     case SDL_SCANCODE_BACKSPACE:
                         message->setText (msg.substr (0, msg.size () - 1));
                         break;
+                    case SDL_SCANCODE_PERIOD:
+                        message->setText (msg += '.');
+                        break;
+                    case SDL_SCANCODE_0:
+                        // special case since scancodes go from 1 to 9 to 0 while ASCII goes from 0 to 9
+                        message->setText (msg += '0');
+                    default:
+                        if (keysym.scancode >= SDL_SCANCODE_A && keysym.scancode <= SDL_SCANCODE_Z) {
+                            message->setText (msg += keysym.scancode - SDL_SCANCODE_A + 'A');
+                        } else if (keysym.scancode >= SDL_SCANCODE_1 && keysym.scancode <= SDL_SCANCODE_9) {
+                            message->setText (msg += keysym.scancode - SDL_SCANCODE_1 + '1');
+                        }
                 }
             }
             first = false;
