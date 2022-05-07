@@ -9,12 +9,11 @@ namespace kt {
         addChild (dialog);
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
-            logs::messageln ("Key Down on Menu");
-            event->stopsImmediatePropagation = true;
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;
             switch (keysym.scancode) {
                 case SDL_SCANCODE_ESCAPE:
+                    event->stopImmediatePropagation();
                     onRequestExit (event);
                     break;
             }
@@ -31,8 +30,8 @@ namespace kt {
         static auto size = getSize ();
         static spDialog dialog = [this] () {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to connect to:");
-            dialog->addInput (REMOTE_ADDRESS, [] (std::string msg) {
-                logs::messageln ("Entered into field: '%s'", msg.c_str());
+            dialog->addInput (REMOTE_ADDRESS, [this] (std::string msg) {
+                joinGame (msg);
             });
             dialog->addButton ("Cancel", CLOSURE (this, & MenuScene::onJoinGame));
             return dialog;

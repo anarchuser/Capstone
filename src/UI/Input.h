@@ -13,8 +13,13 @@ namespace kt {
 
     class Input: public Sprite {
     private:
+        int listener;
+
         /// Callback function to call upon press
         std::function <void (std::string)> onEnter;
+
+        /// Text field
+        spText message;
 
         /// Click on field
         void onClick (Event * event);

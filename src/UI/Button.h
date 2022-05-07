@@ -19,6 +19,9 @@ namespace kt {
         /// Callback function to call upon press
         std::function <void (Event *)> onAction;
 
+        /// Reference to on-button text
+        spText message;
+
         /// Mouse over animation (highlight button)
         void onMouseOver (Event * event);
         /// Mouse out animation (revert highlight)
