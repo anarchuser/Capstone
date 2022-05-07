@@ -8,7 +8,7 @@ namespace kt {
         // Ensure `init` is only run once
         static bool ran = false;
         if (ran) {
-            LOG (WARNING) << "Tried to reinitialise application";
+            logs::warning ("Tried to reinitialise application");
             return;
         }
         ran = true;
@@ -34,12 +34,12 @@ namespace kt {
         // Ensure `run` is only run once
         static bool ran = false;
         if (ran) {
-            LOG (WARNING) << "Tried to start a game that has already been started";
+            logs::warning ("Tried to start a game that has already been started");
             return;
         }
         // Ensure game has been initialised already
         while (!initialised) {
-            LOG (INFO) << "Trying to start game before initialisation. Initialising now";
+            logs::messageln ("Called run before initialisation. Initialising now");
             init ();
         }
         ran = true;
@@ -49,7 +49,6 @@ namespace kt {
 
 #ifdef DEBUG
         logs::messageln ("Debug view enabled");
-        LOG (INFO) << "Debug view enabled";
         DebugActor::show();
 #endif
 

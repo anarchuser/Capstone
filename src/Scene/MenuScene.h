@@ -6,8 +6,10 @@
 #include "oxygine-framework.h"
 
 #include "src/UI/Dialog.h"
+#include "src/UI/Input.h"
 #include "Scene.h"
 #include "GameScene.h"
+#include "Backend/Connection.h"
 
 namespace kt {
     using namespace oxygine;
@@ -20,8 +22,12 @@ namespace kt {
 
         /// Callback for when starting a new game is requested
         void onNewGame (Event * event);
+        /// Callback for when joining an existing game is requested
+        void onJoinGame (Event * event);
         /// Callback for when quitting the application is requested
         void onRequestExit (Event * event);
+
+        void joinGame (std::string address);
     };
     DECLARE_SMART (MenuScene, spMenuScene);
 

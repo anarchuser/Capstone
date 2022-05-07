@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.23.1)
 project(Capstone)
 
 # Language specs
@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 # Linker & compiler flags
 set(CAPNP_LIBS "-lcapnp -lcapnp-rpc -lkj -lkj-async")
-set(CMAKE_REQUIRED_LIBRARIES "${CAPNP_LIBS} -lglog -pthread")
+set(CMAKE_CXX_FLAGS "${CAPNP_LIBS} -pthread --std=c++20")
 
 set(GEN_PROTO_FILES lib/Server/generated/synchro.capnp.*)
 add_custom_command(OUTPUT ${GEN_PROTO_FILES}
@@ -23,9 +23,9 @@ set(LIBS ${LIBS} ${GEN_PROTO_FILES})
 add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
 # Add base directories for more intuitive includes
-include_directories(${PROJECT_SOURCE_DIR})
-include_directories(${PROJECT_SOURCE_DIR}/src/)
-include_directories(${PROJECT_SOURCE_DIR}/lib/)
+target_include_directories(Capstone PUBLIC ${PROJECT_SOURCE_DIR})
+target_include_directories(Capstone PUBLIC ${PROJECT_SOURCE_DIR}/src/)
+target_include_directories(Capstone PUBLIC ${PROJECT_SOURCE_DIR}/lib/)
 
 # Propagate Debug mode by setting the `DEBUG` preprocessor macro
 message(STATUS "CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
@@ -42,9 +42,6 @@ set(CMAKE_USE_PTHREADS_INIT 1)
 find_package(Threads REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 target_link_libraries(Capstone Threads::Threads)
-
-# Google Logging Library
-target_link_libraries(Capstone glog)
 
 find_package(CapnProto REQUIRED)
 target_link_libraries(Capstone CapnProto::capnp)
@@ -80,15 +77,16 @@ if (Catch2_FOUND)
     add_subdirectory(Catch2)
     file(GLOB_RECURSE TEST_SRCS ${PROJECT_SOURCE_DIR}/test/*.c*)
     add_executable(Test ${GEN_PROTO_FILES} ${TEST_SRCS} ${SRCS} ${LIBS})
-    target_link_libraries(Test PRIVATE Catch2::Catch2WithMain)
 
-    include(CTest)
+    target_include_directories(Test PRIVATE ${PROJECT_SOURCE_DIR}/lib/)
+
+    target_link_libraries(Test PRIVATE Catch2::Catch2WithMain)
     include(Catch)
+    include(CTest)
     catch_discover_tests(Test)
 
     target_link_libraries(Test PRIVATE ${OXYGINE_CORE_LIBS})
     target_link_libraries(Test PRIVATE box2d)
-    target_link_libraries(Test PRIVATE glog)
 
     target_link_libraries(Test PRIVATE Threads::Threads)
 
@@ -96,14 +94,11 @@ if (Catch2_FOUND)
     target_link_libraries(Test PRIVATE CapnProto::capnp-rpc)
     target_link_libraries(Test PRIVATE kj)
     target_link_libraries(Test PRIVATE kj-async)
-
-    add_compile_definitions(Test PRIVATE ERRORS_AS_WARNINGS)
 endif()
 
 # Simple Target compiling a client to test RPC server connections.
 # TODO: remove
 add_executable(Client client.cpp ${GEN_PROTO_FILES} ${LIBS})
-target_link_libraries(Client PRIVATE glog)
 
 target_link_libraries(Client PRIVATE CapnProto::capnp)
 target_link_libraries(Client PRIVATE CapnProto::capnp-rpc)

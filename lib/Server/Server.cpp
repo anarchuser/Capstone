@@ -1,8 +1,14 @@
 #include "Server.h"
 
 namespace cg {
+    SynchroImpl::SynchroImpl (std::size_t seed, std::function <cg::DirectionCallback ()> && onStreamDirections)
+            : seed {seed}
+            , onStreamDirections {std::move (onStreamDirections)}
+    {
+    }
+
     void SynchroImpl::log (std::string const & msg) {
-        LOG (INFO) << "Synchro @" << this << ": '" << msg << "'";
+        // TODO: allow setting an external logging function
         std::cout << "Synchro @" << this << ": '" << msg << "'" << std::endl;
     }
 
@@ -27,8 +33,11 @@ namespace cg {
         return kj::READY_NOW;
     }
 
-    SynchroImpl::SynchroImpl (std::function <cg::DirectionCallback ()> && onStreamDirections)
-            : onStreamDirections {std::move (onStreamDirections)} {}
+    ::kj::Promise<void> SynchroImpl::randomSeed (Synchro::Server::RandomSeedContext context) {
+        context.initResults ().setSeed (seed);
+
+        return kj::READY_NOW;
+    }
 
 }
 

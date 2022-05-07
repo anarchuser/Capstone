@@ -1,8 +1,9 @@
 #include "Backend.h"
 
 namespace kt {
-    Backend::Backend (std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections)
+    Backend::Backend (std::size_t seed, std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections)
             : onStreamDirections {std::move (onStreamDirections)}
+            , seed {seed}
             , address {std::move (address)}
             , server_thread {& Backend::serve, this} {
         while (!server);
@@ -18,6 +19,7 @@ namespace kt {
     
     void Backend::serve () {
         auto impl = kj::heap <cg::SynchroImpl> (
+                seed,
                 std::function <cg::DirectionCallback ()> (onStreamDirections)
         );
         server = kj::heap <capnp::EzRpcServer> (kj::mv (impl), address);
@@ -42,7 +44,7 @@ namespace kt {
 
     void Backend::connect (Direction const * direction, std::string remote, unsigned short port) {
         connections.insert_or_assign (remote + ':' + std::to_string (port),
-                                      std::make_unique <Connection> (onStreamDirections, direction, remote, port));
+                                      std::make_unique <Connection> (onStreamDirections, seed, direction, remote, port));
     }
 
     void Backend::update () {

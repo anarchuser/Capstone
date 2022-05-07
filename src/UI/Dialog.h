@@ -4,6 +4,7 @@
 #include "config.h"
 #include "src/config.h"
 
+#include "Input.h"
 #include "Button.h"
 #include "Text.h"
 
@@ -24,7 +25,7 @@ namespace kt {
         /// Text field displayed in the dialog
         spText text;
         /// List of buttons displayed
-        std::vector <spButton> buttons;
+        std::vector <spSprite> buttons;
 
     public:
         /// Generate a new dialog of given size at given position with given message. Buttons get added later
@@ -35,6 +36,8 @@ namespace kt {
         void setMessage (std::string message);
         /// Append another button to the dialog with a callback to call upon press
         void addButton (std::string message, std::function <void (Event *)> && callback);
+        /// Append another button to the dialog with a callback to call upon press
+        void addInput (std::string default_value, std::function <void (std::string)> && callback);
     };
 
     DECLARE_SMART (Dialog, spDialog);
