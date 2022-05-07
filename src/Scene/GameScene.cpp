@@ -129,12 +129,6 @@ namespace kt {
         core::requestQuit ();
     }
 
-    void GameScene::connectNewSpaceship () {
-        if (!KeyboardSpaceship::instance) return;
-        logs::messageln ("Project our spaceship to '%s:%d'", remote.c_str(), backend.getPort());
-        backend.connect (& KeyboardSpaceship::instance->direction, remote, SERVER_PORT);
-    }
-
     std::size_t GameScene::requestSeed (std::string const & ip, short port) {
         auto client = capnp::EzRpcClient (ip, port);
         auto promise = client.getMain <Synchro> ().randomSeedRequest ().send();

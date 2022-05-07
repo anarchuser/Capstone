@@ -43,7 +43,6 @@ namespace kt {
 
         Backend backend;
 
-        void connectNewSpaceship();
         static std::size_t requestSeed (std::string const & ip, short port) ;
         void joinGame (std::string const & ip, short port);
         
