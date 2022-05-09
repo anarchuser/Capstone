@@ -24,19 +24,17 @@ namespace kt {
         kj::Own <capnp::EzRpcClient> rpcClient;
         Synchro::Client client;
         kj::WaitScope & waitscope;
-        Synchro::DirectionCallback::Client callback;
 
-        Synchro::DirectionCallback::Client initCallback (std::function <cg::DirectionCallback ()> & onStreamDirections);
+        void initCallback (cg::JoinCallback & onJoin);
 
     public:
-        Connection (std::function <cg::DirectionCallback ()> & onStreamDirections,
+        Connection (cg::JoinCallback & onStreamDirections,
                     std::size_t seed,
                     Direction const * direction,
                     std::string address,
                     unsigned short port);
         ~Connection() noexcept;
 
-        void update ();
         static bool ping (std::string const & ip, short port);
     };
 

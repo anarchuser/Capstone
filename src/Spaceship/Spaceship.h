@@ -59,7 +59,7 @@ namespace kt {
         Spaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
 
         /// Apply linear or angular impulses based on command flags
-        void update (UpdateState const & us) final;
+        virtual void update (UpdateState const & us) override;
 
         /// Wakes or puts a spaceship to sleep. Asleep spaceships have collision and gravity turned off
         void setAwake (bool awake);

@@ -18,32 +18,29 @@
 #include "Direction/Direction.h"
 
 namespace cg {
-    // TODO: Dummy struct
-    struct State;
-
     template <class R, class... Args>
     using atomic_weak_fun = std::atomic <std::weak_ptr <std::function <R (Args...)>>>;
-    typedef atomic_weak_fun <void>        DisconnectCallback;
-    typedef atomic_weak_fun <Direction>   RequestItemCallback;
+    typedef atomic_weak_fun <void>            DoneCallback;
+    typedef atomic_weak_fun <void, Direction> SendItemCallback;
 
-    class CallbackDirectionImpl final: public Synchro::Callback::Server {
+    class ItemSinkImpl final: public Synchro::ItemSink::Server {
     public:
         struct Callbacks {
-            DisconnectCallback   onDisconnect;
-            RequestItemCallback  onRequestItem;
+            DoneCallback     onDone;
+            SendItemCallback onSendItem;
         };
 
-        CallbackDirectionImpl () = default;
-        explicit CallbackDirectionImpl (Callbacks && callbacks);
-        ~CallbackDirectionImpl() = default;
+        explicit ItemSinkImpl (Callbacks && callbacks);
+        ItemSinkImpl() = default;
+        ~ItemSinkImpl() = default;
 
         /// Local function calls
-        void setOnDisconnect   (DisconnectCallback   onDisconnect);
-        void setOnRequestItem  (RequestItemCallback  onRequestItem);
+        void setOnDone (DoneCallback onDone);
+        void setOnSendItem (SendItemCallback onSendItem);
 
         /// RPC function calls
-        ::kj::Promise <void> disconnect   (DisconnectContext context)   override;
-        ::kj::Promise <void> requestItem  (RequestItemContext context)  override;
+        ::kj::Promise <void> done     (DoneContext     context) override;
+        ::kj::Promise <void> sendItem (SendItemContext context) override;
 
     private:
         Callbacks callbacks;
