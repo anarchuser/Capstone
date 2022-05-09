@@ -25,6 +25,7 @@
 namespace cg {
     template <class R, class... Args>
     using atomic_weak_fun = std::atomic <std::weak_ptr <std::function <R (Args...)>>>;
+    typedef atomic_weak_fun <CallbackDirectionImpl::Callbacks> JoinCallback;
 
 
     class SynchroImpl final: public Synchro::Server {
@@ -32,10 +33,11 @@ namespace cg {
         /// Seed used to initialise the game. Returned by `randomSeed`
         std::size_t const seed;
 
+        /// List of connected clients TODO: change to map with some identifier?
+        std::vector <Synchro::Callback::Client> callbacks;
+
         /// Callback functions for the respective RPC function calls
-        atomic_weak_fun <void> onPing;
-        atomic_weak_fun <std::size_t> onRandomSeed;
-        atomic_weak_fun <void> onJoin;
+        JoinCallback onJoin;
 
         void log (std::string const & msg);
 
@@ -43,14 +45,12 @@ namespace cg {
         explicit SynchroImpl (std::size_t seed);
 
         /// Local function calls
-        void setOnPing (atomic_weak_fun <void> onPing);
-        void setOnRandomSeed (atomic_weak_fun <std::size_t> onRandomSeed);
-        void setOnJoin (atomic_weak_fun <void> onJoin);
+        void setOnJoin (JoinCallback onJoin);
 
         /// RPC function calls
-        ::kj::Promise <void> ping (PingContext context) override;
+        ::kj::Promise <void> ping       (PingContext       context) override;
         ::kj::Promise <void> randomSeed (RandomSeedContext context) override;
-        ::kj::Promise <void> join (JoinContext context) override;
+        ::kj::Promise <void> join       (JoinContext       context) override;
     };
 } // cg
 

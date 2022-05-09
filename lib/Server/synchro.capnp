@@ -8,15 +8,20 @@ interface Synchro {
         rotateRight @3 :Int8 = -1;
     }
 
+    struct State {
+        nothing @0 :Void;
+    }
+
     struct Position {
         x @0 :Float32;
         y @1 :Float32;
     }
 
-    interface Callback(T, U) {
-        requestItem  @0 (item :T)  -> stream;
-        requestState @1 (state :U) -> (state :U);
-        done         @2 ();
+    interface Callback {
+        disconnect   @0 ();
+        requestItem  @1 () -> (item :Direction);
+        requestState @2 () -> (state :State);
+        updateState  @3 (state :State);
     }
 
     struct Maybe(T) {
@@ -26,11 +31,7 @@ interface Synchro {
         }
     }
 
-    struct Nullptr {
-        nothing @0 :Void;
-    }
-
     ping        @0 ();
     randomSeed  @1 () -> (seed :UInt64);
-    join        @2 (other :Maybe(Synchro), callback :Callback(Direction, Nullptr));
+    join        @2 (other :Maybe(Synchro), callback :Callback);
 }

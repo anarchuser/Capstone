@@ -98,7 +98,7 @@ endif()
 
 # Simple Target compiling a client to test RPC server connections.
 # TODO: remove
-add_executable(Client client.cpp ${GEN_PROTO_FILES} ${LIBS})
+add_executable(Client client.cpp config.h ${GEN_PROTO_FILES} ${LIBS})
 
 target_link_libraries(Client PRIVATE CapnProto::capnp)
 target_link_libraries(Client PRIVATE CapnProto::capnp-rpc)
