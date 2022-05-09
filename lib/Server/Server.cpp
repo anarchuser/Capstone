@@ -12,7 +12,7 @@ namespace cg {
         std::cout << "Synchro @" << this << ": '" << msg << "'" << std::endl;
     }
 
-    ::kj::Promise <void> SynchroImpl::connect (ConnectContext context) {
+    ::kj::Promise <void> SynchroImpl::ping (ConnectContext context) {
         log ("Listening");
         return kj::READY_NOW;
     }

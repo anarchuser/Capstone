@@ -29,7 +29,7 @@ namespace kt {
     void MenuScene::onJoinGame (Event * event) {
         static auto size = getSize ();
         static spDialog dialog = [this] () {
-            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to connect to:");
+            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to ping to:");
             dialog->addInput (REMOTE_ADDRESS, [this] (std::string msg) {
                 if (Connection::ping (msg, SERVER_PORT)) {
                     joinGame (msg);

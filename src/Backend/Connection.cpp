@@ -39,7 +39,7 @@ namespace kt {
             client.getMain <Synchro> ().connectRequest ().send().wait (client.getWaitScope());
             return true;
         } catch (...) {
-            logs::warning ("Failed to connect to '%s:%d'", ip.c_str(), port);
+            logs::warning ("Failed to ping to '%s:%d'", ip.c_str(), port);
         }
         return false;
     }

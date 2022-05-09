@@ -1,9 +1,6 @@
-#include "DirectionCallback.h"
+#include "Callback.h"
 
 namespace cg {
-    DirectionCallbackImpl::DirectionCallbackImpl (DirectionCallback && callback)
-            : callback {std::move (callback)} {}
-
     void DirectionCallbackImpl::log (std::string const & msg) {
         // TODO: allow setting an external logging function
         std::cout << "DirectionCallback @" << this << ": '" << msg << "'" << std::endl;

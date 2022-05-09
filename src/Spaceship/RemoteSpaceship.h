@@ -10,7 +10,7 @@
 #include "Spaceship.h"
 
 #include "Server/Server.h"
-#include "Server/Callback/DirectionCallback.h"
+#include "Server/Callback/Callback.h"
 
 #include <functional>
 
