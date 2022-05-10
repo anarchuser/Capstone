@@ -14,17 +14,25 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <thread>
 
 #include "Direction/Direction.h"
 
 namespace cg {
+    using SendSinkCallback       = std::function <void (std::string const &)>;
+    using SendSinkCallbackHandle = std::function <void (std::string const &)>;
+
     class ShipCallbackImpl final: public Synchro::ShipCallback::Server {
     private:
+        SendSinkCallback onSendSink;
+
         void log (std::string const & msg);
 
     public:
         ShipCallbackImpl() = default;
         ~ShipCallbackImpl() = default;
+
+        void setOnSendSink (SendSinkCallbackHandle const & onSendSink);
 
         ::kj::Promise<void> sendSink (SendSinkContext context) override;
     };

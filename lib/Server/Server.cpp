@@ -49,6 +49,7 @@ namespace cg {
         propagateItemSink (username);
 
         // Configure ItemSink sent back to client
+        log ("Configure ItemSink result");
         auto sink = kj::heap <ItemSinkImpl> ();
         auto handles = iterator->second.handles;
         sink->setOnSendItem (handles.sendItemCallbackHandle);
@@ -81,6 +82,7 @@ namespace cg {
     }
 
     void SynchroImpl::sendItemCallback (std::string username, Direction direction) {
+        log ("Received new Direction");
         std::for_each (connections.begin(), connections.end(),
                        [&] (std::pair<std::string const, Connection> & pair) {
             auto request = pair.second.itemSinks.at (username).sendItemRequest();
@@ -93,6 +95,7 @@ namespace cg {
         });
     }
     void SynchroImpl::doneCallback (std::string username) {
+        log ("Sink closed");
         connections.erase (username);
         std::for_each (connections.begin(), connections.end(),
                        [&] (std::pair <std::string const, Connection> & pair) {
@@ -105,16 +108,17 @@ namespace cg {
 
     void SynchroImpl::propagateItemSink (std::string const & username) {
         std::for_each (connections.begin(), connections.end(),
-                       [&, this] (std::pair <std::string const, Connection> & pair) {
-                           auto & sinks = pair.second.itemSinks;
-                           auto & shipCallback = connections.at (username).shipCallback;
-                           auto request = shipCallback.sendSinkRequest();
-                           request.setUsername (username);
-                           request.send().then (
-                                   [&, this] (capnp::Response <Synchro::ShipCallback::SendSinkResults> response) {
-                                       sinks.emplace (username, response.getShip());
-                                   });
-                       });
+               [&, this] (std::pair <std::string const, Connection> & pair) {
+                   log ("Distributing sink from " + username += " to " + pair.first);
+
+                   auto & sinks = pair.second.itemSinks;
+                   auto & shipCallback = connections.at (username).shipCallback;
+                   auto request = shipCallback.sendSinkRequest ();
+                   request.setUsername (username);
+                   sinks.emplace (username, request.send().getShip());
+
+                   sinks.at (username).doneRequest (); // TODO: remove
+        });
     }
 }
 

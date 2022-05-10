@@ -16,7 +16,7 @@ namespace kt {
     }
     
     void Backend::serve () {
-        while (! stop) {
+//        while (! stop) {
             try {
                 auto server = capnp::EzRpcServer (kj::heap <cg::SynchroImpl> (seed), address);
                 port = server.getPort().wait (server.getWaitScope());
@@ -24,16 +24,16 @@ namespace kt {
                 auto & exec = kj::getCurrentThreadExecutor();
 
                 while (! stop) {
-                    kj::getCurrentThreadExecutor ().executeAsync ([this] () {
+                    exec.executeAsync ([this] () {
                         std::this_thread::yield ();
                     }).wait (server.getWaitScope ());
                 }
                 return;
             } catch (...) {
-                logs::warning ("Failed to bind address to '%s'. Retrying...", address.c_str());
-                std::this_thread::yield();
+//                logs::warning ("Failed to bind address to '%s'. Retrying...", address.c_str());
+//                std::this_thread::yield();
             }
-        }
+//        }
     }
     
     unsigned short Backend::getPort () const {

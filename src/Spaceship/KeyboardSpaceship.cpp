@@ -9,17 +9,16 @@ namespace kt {
             , client {SERVER_FULL_ADDRESS}
             , sink {[this] () {
                 logs::messageln ("Connect to '%s'", SERVER_FULL_ADDRESS.c_str());
-                while (true) {
-                    try {
-                        auto request = client.getMain <Synchro> ().joinRequest ();
-                        request.initOther().setValue (kj::heap <cg::SynchroImpl> (1));
-                        request.setUsername (USERNAME);
-                        return request.send().wait (client.getWaitScope()).getItemSink();
-                    } catch (...) {
-                        logs::warning ("Creating keyboard-controlled spaceship before server is up. Retrying...");
-                        std::this_thread::yield();
-                    }
-                }
+
+                auto request = client.getMain <Synchro> ().joinRequest ();
+                request.initOther().setValue (kj::heap <cg::SynchroImpl> (1));
+                request.setUsername (USERNAME);
+
+                auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
+                shipCB->setOnSendSink (handle);
+                request.setShipCallback (kj::mv (shipCB));
+
+                return request.send().wait (client.getWaitScope()).getItemSink();
             }()}
             {
         setName (USERNAME);
@@ -52,19 +51,19 @@ namespace kt {
         switch (keysym.scancode) {
             case SDL_SCANCODE_UP: // accelerate
             case SDL_SCANCODE_W: // accelerate
-                direction.accelerate = key_is_down;
+                queried.accelerate = key_is_down;
                 break;
             case SDL_SCANCODE_DOWN: // decelerate
             case SDL_SCANCODE_S: // decelerate
-                direction.decelerate = key_is_down;
+                queried.decelerate = key_is_down;
                 break;
             case SDL_SCANCODE_LEFT: // turn left
             case SDL_SCANCODE_A: // turn left
-                direction.rotateLeft = key_is_down;
+                queried.rotateLeft = key_is_down;
                 break;
             case SDL_SCANCODE_RIGHT: // turn right
             case SDL_SCANCODE_D: // turn right
-                direction.rotateRight = key_is_down;
+                queried.rotateRight = key_is_down;
                 break;
         }
     }
@@ -85,6 +84,10 @@ namespace kt {
         sink.doneRequest().send().wait (client.getWaitScope());
         Spaceship::destroy();
         instance = nullptr;
+    }
+
+    void KeyboardSpaceship::onSendSinkCallback (std::string const & username) {
+        logs::messageln ("Received sink for username '%s'", username.c_str());
     }
 }
 

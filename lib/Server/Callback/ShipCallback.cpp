@@ -7,8 +7,21 @@ namespace cg {
         KJ_DLOG (INFO, ss.str());
     }
 
+    void ShipCallbackImpl::setOnSendSink (SendSinkCallbackHandle const & onSendSink) {
+        this->onSendSink = onSendSink;
+    }
+
     ::kj::Promise<void> ShipCallbackImpl::sendSink (SendSinkContext context) {
-        // TODO: Tie this to ctor of RemoteSpaceship
+        // TODO: Tie this to ctor of SpaceShip
+        auto params = context.getParams();
+        log ("New Spaceship: " + std::string (params.getUsername()));
+
+        onSendSink (params.getUsername());
+
+//        auto ptr = onSendSink;
+//        if (auto callback = ptr.lock()) {
+//            (* callback) (params.getUsername ());
+//        } else KJ_DLOG (WARNING, "onSendSink called whilst callback expired");
         return kj::READY_NOW;
     }
 }

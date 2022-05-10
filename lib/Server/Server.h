@@ -64,6 +64,7 @@ namespace cg {
     public:
         explicit SynchroImpl (std::size_t seed);
 
+
         /// RPC function calls
         ::kj::Promise <void> ping (PingContext context) override;
         ::kj::Promise <void> seed (SeedContext context) override;

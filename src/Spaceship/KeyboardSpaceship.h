@@ -12,8 +12,6 @@
 
 #include "Server/Server.h"
 
-#include <thread>
-
 #define KEYBOARD_SPACESHIP_COLOR {0, 0, 255}
 
 namespace kt {
@@ -24,8 +22,14 @@ namespace kt {
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     private:
+        void onSendSinkCallback (std::string const & username);
+
         capnp::EzRpcClient client;
         Synchro::ItemSink::Client sink;
+        cg::SendSinkCallbackHandle handle =
+                CLOSURE (this, & KeyboardSpaceship::onSendSinkCallback);
+
+        Direction queried;
 
     public:
         /// Creates a new human-controllable spaceship. Only one such ship may exist in a game

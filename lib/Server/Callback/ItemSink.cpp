@@ -25,19 +25,18 @@ namespace cg {
     }
 
     ::kj::Promise<void> ItemSinkImpl::sendItem (SendItemContext context) {
+        log ("Received direction");
+
         auto direction = context.getParams().getItem().getDirection();
 
         auto ptr = callbacks.onSendItem;
-        if (! ptr.expired()) {
-            auto callback = ptr.lock();
-            if (callback)
-                (* callback) ({
-                    direction.getAccelerate(),
-                    direction.getDecelerate(),
-                    direction.getRotateLeft(),
-                    direction.getRotateRight()
-                });
-            else KJ_DLOG (WARNING, "onRequestItem called without callback registered");
+        if (auto callback = ptr.lock()) {
+            (* callback) ({
+                direction.getAccelerate(),
+                direction.getDecelerate(),
+                direction.getRotateLeft(),
+                direction.getRotateRight()
+            });
         } else KJ_DLOG (WARNING, "onRequestItem called whilst callback expired");
 
         return kj::READY_NOW;
