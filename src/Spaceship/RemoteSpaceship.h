@@ -26,8 +26,6 @@ namespace kt {
         /// Replace current directions with new ones
         void updateDirection (Direction new_dir);
 
-        [[nodiscard]] cg::DirectionCallback getCallback();
-
         void destroy () override;
     };
 

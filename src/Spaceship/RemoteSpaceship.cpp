@@ -14,13 +14,6 @@ namespace kt {
         direction = new_dir;
     };
 
-    cg::DirectionCallback RemoteSpaceship::getCallback() {
-        return {
-            [this] (Direction dir) { updateDirection (dir); },
-            [this] () { destroy(); },
-        };
-    }
-
     void RemoteSpaceship::destroy () {
         Spaceship::destroy();
         updateScoreboard ("ghost");

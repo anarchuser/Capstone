@@ -1,60 +1,46 @@
 #include "Backend.h"
 
 namespace kt {
-    Backend::Backend (std::size_t seed, std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections)
-            : onStreamDirections {std::move (onStreamDirections)}
-            , seed {seed}
+    Backend::Backend (std::size_t seed, std::string address)
+            : seed {seed}
             , address {std::move (address)}
             , server_thread {& Backend::serve, this} {
-        while (!server);
+        getPort();
+        logs::messageln ("Set up backend at '%s'", this->address.c_str());
     }
     
     Backend::~Backend () noexcept {
-        thread_executor->executeSync ([this]() {
-            server = nullptr;
-        });
-        if (server_thread.joinable()) server_thread.join();
-//        server_thread.detach();
+        stop = true;
+        server_thread.join();
     }
     
     void Backend::serve () {
-        auto impl = kj::heap <cg::SynchroImpl> (
-                seed,
-                std::function <cg::DirectionCallback ()> (onStreamDirections)
-        );
-        server = kj::heap <capnp::EzRpcServer> (kj::mv (impl), address);
-        port = server->getPort().wait (server->getWaitScope());
-        logs::messageln ("Set up backend at '%s'", address.c_str());
-        thread_executor = & kj::getCurrentThreadExecutor();
-
-        try {
-            kj::NEVER_DONE.wait (server->getWaitScope());
-        } catch (...) {
-            logs::messageln ("Server stopped");
-        }
+        auto impl = kj::heap <cg::SynchroImpl> (seed);
+        auto server = capnp::EzRpcServer (kj::mv (impl), address);
+        port = server.getPort().wait (server.getWaitScope());
+        while (!stop) std::this_thread::yield();
     }
     
     unsigned short Backend::getPort () const {
-        while (port == -1);
+        while (port == -1) std::this_thread::yield();
         return port;
     }
     std::string const & Backend::getAddress() const {
         return address;
     }
 
-    void Backend::connect (Direction const * direction, std::string remote, unsigned short port) {
-        connections.insert_or_assign (remote + ':' + std::to_string (port),
-                                      std::make_unique <Connection> (onStreamDirections, seed, direction, remote, port));
+    void Backend::connect (std::string remote, short port) {
     }
 
-    void Backend::update () {
-        for (auto & connection : connections) {
-            connection.second->update();
+    bool Backend::ping (std::string const & ip, short port) {
+        auto client = capnp::EzRpcClient (ip, port);
+        auto request = client.getMain <Synchro>().pingRequest();
+        try {
+            request.send().wait (client.getWaitScope());
+            return true;
+        } catch (std::exception & e) {
+            logs::warning ("Backend::ping(): Connection refused:\n'%s'", e.what());
         }
-    }
-
-    void Backend::disconnectAll () {
-        connections.clear();
     }
 }
 

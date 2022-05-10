@@ -10,8 +10,9 @@ namespace cg {
 
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
-        ss << "Synchro @" << this << ": '" << msg << "'" << std::endl;
+        ss << "Synchro @" << this << ": '" << msg << "'";
         KJ_LOG (INFO, ss.str());
+        std::cout << ss.str() << std::endl;
     }
 
     ::kj::Promise <void> SynchroImpl::ping (PingContext context) {
