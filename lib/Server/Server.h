@@ -4,7 +4,6 @@
 #include "config.h"
 
 #include "lib/Server/generated/synchro.capnp.h"
-
 #include <kj/debug.h>
 #include <kj/memory.h>
 #include <capnp/ez-rpc.h>

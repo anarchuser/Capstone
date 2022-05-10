@@ -5,7 +5,23 @@ namespace kt {
     KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
 
     KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
-            : Spaceship (world, res, pos, scale) {
+            : Spaceship (world, res, pos, scale)
+            , client {SERVER_FULL_ADDRESS}
+            , sink {[this] () {
+                logs::messageln ("Connect to '%s'", SERVER_FULL_ADDRESS.c_str());
+                while (true) {
+                    try {
+                        auto request = client.getMain <Synchro> ().joinRequest ();
+                        request.initOther().setValue (kj::heap <cg::SynchroImpl> (1));
+                        request.setUsername (USERNAME);
+                        return request.send().wait (client.getWaitScope()).getItemSink();
+                    } catch (...) {
+                        logs::warning ("Creating keyboard-controlled spaceship before server is up. Retrying...");
+                        std::this_thread::yield();
+                    }
+                }
+            }()}
+            {
         setName (USERNAME);
 
         setAddColor (KEYBOARD_SPACESHIP_COLOR);
@@ -21,6 +37,10 @@ namespace kt {
         listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_DOWN, [](Event * event) {
             instance->onSteeringEvent ((KeyEvent *) event);
         }));
+    }
+
+    KeyboardSpaceship::~KeyboardSpaceship () noexcept {
+        sink.doneRequest().send().wait (client.getWaitScope());
     }
 
     void KeyboardSpaceship::onSteeringEvent (ox::KeyEvent * event) {
@@ -50,6 +70,7 @@ namespace kt {
     }
 
     void KeyboardSpaceship::destroy () {
+        sink.doneRequest().send().wait (client.getWaitScope());
         Spaceship::destroy();
         instance = nullptr;
     }

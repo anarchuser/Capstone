@@ -10,23 +10,30 @@ namespace kt {
     }
     
     Backend::~Backend () noexcept {
+        KeyboardSpaceship::instance->destroy();
         stop = true;
         server_thread.join();
     }
     
     void Backend::serve () {
-        auto impl = kj::heap <cg::SynchroImpl> (seed);
-        while (true) {
+        while (! stop) {
             try {
-                auto server = capnp::EzRpcServer (kj::mv (impl), address);
+                auto server = capnp::EzRpcServer (kj::heap <cg::SynchroImpl> (seed), address);
                 port = server.getPort().wait (server.getWaitScope());
-                break;
-            } catch (std::exception & e) {
+
+                auto & exec = kj::getCurrentThreadExecutor();
+
+                while (! stop) {
+                    kj::getCurrentThreadExecutor ().executeAsync ([this] () {
+                        std::this_thread::yield ();
+                    }).wait (server.getWaitScope ());
+                }
+                return;
+            } catch (...) {
                 logs::warning ("Failed to bind address to '%s'. Retrying...", address.c_str());
                 std::this_thread::yield();
             }
         }
-        while (!stop) std::this_thread::yield();
     }
     
     unsigned short Backend::getPort () const {

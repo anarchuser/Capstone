@@ -54,7 +54,7 @@ int main (int argc, char * argv[]) {
 
     client.pingRequest().send().then ([] (...) {
         std::cout << "Connect request finished" << std::endl;
-    });
+    }).wait (rpcClient->getWaitScope());
 
     std::string query;
     while (true) {

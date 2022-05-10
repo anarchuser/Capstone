@@ -10,7 +10,7 @@ namespace cg {
     void ItemSinkImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Callback @" << this << ": '" << msg << "'" << std::endl;
-        KJ_LOG (INFO, ss.str());
+        KJ_DLOG (INFO, ss.str());
     }
 
     ::kj::Promise<void> ItemSinkImpl::done (DoneContext context) {
@@ -19,8 +19,8 @@ namespace cg {
         if (! ptr.expired()) {
             auto callback = ptr.lock();
             if (callback) (* callback) ();
-            else KJ_LOG (WARNING, "onDisconnect called without callback registered");
-        } else KJ_LOG (WARNING, "onDisconnect called whilst callback expired");
+            else KJ_DLOG (WARNING, "onDone called without callback registered");
+        } else KJ_DLOG (WARNING, "onDone called whilst callback expired");
         return kj::READY_NOW;
     }
 
@@ -37,8 +37,8 @@ namespace cg {
                     direction.getRotateLeft(),
                     direction.getRotateRight()
                 });
-            else KJ_LOG (WARNING, "onRequestItem called without callback registered");
-        } else KJ_LOG (WARNING, "onRequestItem called whilst callback expired");
+            else KJ_DLOG (WARNING, "onRequestItem called without callback registered");
+        } else KJ_DLOG (WARNING, "onRequestItem called whilst callback expired");
 
         return kj::READY_NOW;
     }

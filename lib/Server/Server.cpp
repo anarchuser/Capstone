@@ -11,7 +11,7 @@ namespace cg {
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Synchro @" << this << ": '" << msg << "'";
-        KJ_LOG (INFO, ss.str());
+        KJ_DLOG (INFO, ss.str());
         std::cout << ss.str() << std::endl;
     }
 
@@ -26,14 +26,14 @@ namespace cg {
     }
 
     ::kj::Promise<void> SynchroImpl::join (JoinContext context) {
-        log ("Add new projected spaceship");
         auto params = context.getParams();
         auto result = context.getResults();
 
         // Check that username is unique
         // TODO: replace with UUID or ip
         std::string username = params.getUsername();
-        KJ_REQUIRE (! connections.contains (username));
+        KJ_REQUIRE (! connections.contains (username), username, "Usernames must be unique");
+        log (std::string ("Join request received from user ") + username);
 
         // Store connection details (callback handles and 'new ship' callback)
         // TODO: figure out whether to share all connections

@@ -57,9 +57,10 @@ namespace kt {
 
         /// Construct a new ship in the current world, at given position (usually centred)
         Spaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
+        ~Spaceship() noexcept = default;
 
         /// Apply linear or angular impulses based on command flags
-        virtual void update (UpdateState const & us) override;
+        void update (UpdateState const & us) override;
 
         /// Wakes or puts a spaceship to sleep. Asleep spaceships have collision and gravity turned off
         void setAwake (bool awake);

@@ -6,6 +6,7 @@
 #include "oxygine-framework.h"
 
 #include "helper.h"
+#include "Spaceship/KeyboardSpaceship.h"
 
 #include "Server/generated/synchro.capnp.h"
 #include "Server/Server.h"
