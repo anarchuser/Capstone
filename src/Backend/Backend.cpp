@@ -16,8 +16,16 @@ namespace kt {
     
     void Backend::serve () {
         auto impl = kj::heap <cg::SynchroImpl> (seed);
-        auto server = capnp::EzRpcServer (kj::mv (impl), address);
-        port = server.getPort().wait (server.getWaitScope());
+        while (true) {
+            try {
+                auto server = capnp::EzRpcServer (kj::mv (impl), address);
+                port = server.getPort().wait (server.getWaitScope());
+                break;
+            } catch (std::exception & e) {
+                logs::warning ("Failed to bind address to '%s'. Retrying...", address.c_str());
+                std::this_thread::yield();
+            }
+        }
         while (!stop) std::this_thread::yield();
     }
     

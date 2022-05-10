@@ -10,7 +10,6 @@
 #include "Server/generated/synchro.capnp.h"
 #include "Server/Server.h"
 #include <capnp/ez-rpc.h>
-#include <kj/debug.h>
 #include <thread>
 #include <atomic>
 #include <memory>
@@ -28,7 +27,6 @@ namespace kt {
     private:
         std::size_t seed;
 
-//        kj::Own <capnp::EzRpcServer> server;
         std::thread server_thread;
         std::string const address;
         std::atomic <short> port = -1;
