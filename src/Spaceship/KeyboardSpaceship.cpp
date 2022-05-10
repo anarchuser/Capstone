@@ -69,6 +69,18 @@ namespace kt {
         }
     }
 
+    void KeyboardSpaceship::update (UpdateState const & us) {
+        auto request = sink.sendItemRequest ();
+        auto dir = request.initItem().initDirection();
+        dir.setAccelerate (direction.accelerate);
+        dir.setDecelerate (direction.decelerate);
+        dir.setRotateLeft (direction.rotateLeft);
+        dir.setRotateRight (direction.rotateRight);
+        auto promise = request.send();
+        Spaceship::update (us);
+        promise.wait (client.getWaitScope());
+    }
+
     void KeyboardSpaceship::destroy () {
         sink.doneRequest().send().wait (client.getWaitScope());
         Spaceship::destroy();

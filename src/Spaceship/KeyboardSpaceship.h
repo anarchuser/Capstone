@@ -30,10 +30,12 @@ namespace kt {
     public:
         /// Creates a new human-controllable spaceship. Only one such ship may exist in a game
         KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
-        ~KeyboardSpaceship() noexcept;
+        ~KeyboardSpaceship() noexcept override;
 
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
+
+        void update (UpdateState const & us) override;
 
         void destroy () override;
 
