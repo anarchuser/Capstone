@@ -14,6 +14,9 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <unordered_map>
+
+#include <ranges>
 
 #include "Direction/Direction.h"
 #include "Callback/ItemSink.h"
@@ -26,20 +29,36 @@
 #define MAX_CONNECTIONS 256
 
 namespace cg {
+    template <class R, class... Args>
+    using   shared_fun = std::shared_ptr <std::function <R (Args...)>>;
+    typedef shared_fun <void, Direction> SendItemCallbackHandle;
+    typedef shared_fun <void> DoneCallbackHandle;
+
     class SynchroImpl final: public Synchro::Server {
     private:
-
         struct Connection {
-            std::string username;
+            struct CallbackHandles {
+                SendItemCallbackHandle sendItemCallbackHandle;
+                DoneCallbackHandle     doneCallbackHandle;
+            } handles;
+
+            Synchro::ShipCallback::Client shipCallback;
+            std::unordered_map <std::string, Synchro::ItemSink::Client> itemSinks;
+
+            explicit Connection (CallbackHandles && handle, Synchro::ShipCallback::Client && shipCallback);
         };
 
-        /// List of open connections TODO: check why std::vector causes problems for kj::heap
-        std::vector <Connection> connections;
-//        cg::ShipCallbackImpl callbacks [MAX_CONNECTIONS];
-//        std::size_t index = 0;
+        /// List of open connections per username
+        //TODO: replace username with proper UUID
+        std::unordered_map <std::string, Connection> connections;
 
         /// Seed used to initialise the game. Returned by `randomSeed`
         std::size_t const rng_seed;
+
+        void sendItemCallback (std::string username, Direction direction);
+        void doneCallback     (std::string username);
+
+        void propagateItemSink (std::string const & username);
 
         void log (std::string const & msg);
 

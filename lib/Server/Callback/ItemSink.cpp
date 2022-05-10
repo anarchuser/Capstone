@@ -1,13 +1,11 @@
 #include "ItemSink.h"
 
 namespace cg {
-    ItemSinkImpl::ItemSinkImpl (Callbacks && callbacks) {
-        callbacks.onDone.exchange     (callbacks.onDone);
-        callbacks.onSendItem.exchange (callbacks.onSendItem);
-    }
+    ItemSinkImpl::ItemSinkImpl (DoneCallback & onDone, SendItemCallback & onSendItem)
+            : callbacks {onDone, onSendItem} {}
 
-    void ItemSinkImpl::setOnDone     (DoneCallback onDone)         { callbacks.onDone.exchange     (onDone); }
-    void ItemSinkImpl::setOnSendItem (SendItemCallback onSendItem) { callbacks.onSendItem.exchange (onSendItem); }
+    void ItemSinkImpl::setOnDone     (DoneCallback && onDone)         { callbacks.onDone     = std::move (onDone); }
+    void ItemSinkImpl::setOnSendItem (SendItemCallback && onSendItem) { callbacks.onSendItem = std::move (onSendItem); }
 
     void ItemSinkImpl::log (std::string const & msg) {
         std::stringstream ss;
@@ -17,25 +15,30 @@ namespace cg {
 
     ::kj::Promise<void> ItemSinkImpl::done (DoneContext context) {
         log ("Disconnect client");
-        auto callback = callbacks.onDone.load();
-        if (! callback.expired()) (* callback.lock())();
-        else KJ_LOG (WARNING, "onDisconnect called without callback registered");
+        auto ptr = callbacks.onDone;
+        if (! ptr.expired()) {
+            auto callback = ptr.lock();
+            if (callback) (* callback) ();
+            else KJ_LOG (WARNING, "onDisconnect called without callback registered");
+        } else KJ_LOG (WARNING, "onDisconnect called whilst callback expired");
         return kj::READY_NOW;
     }
 
     ::kj::Promise<void> ItemSinkImpl::sendItem (SendItemContext context) {
         auto direction = context.getParams().getItem().getDirection();
 
-        auto callback = callbacks.onSendItem.load();
-        if (! callback.expired()) {
-            (* callback.lock()) ({
-                direction.getAccelerate(),
-                direction.getDecelerate(),
-                direction.getRotateLeft(),
-                direction.getRotateRight()
-            });
-        }
-        else KJ_LOG (WARNING, "onRequestItem called without callback registered");
+        auto ptr = callbacks.onSendItem;
+        if (! ptr.expired()) {
+            auto callback = ptr.lock();
+            if (callback)
+                (* callback) ({
+                    direction.getAccelerate(),
+                    direction.getDecelerate(),
+                    direction.getRotateLeft(),
+                    direction.getRotateRight()
+                });
+            else KJ_LOG (WARNING, "onRequestItem called without callback registered");
+        } else KJ_LOG (WARNING, "onRequestItem called whilst callback expired");
 
         return kj::READY_NOW;
     }

@@ -8,7 +8,7 @@ namespace cg {
     }
 
     ::kj::Promise<void> ShipCallbackImpl::sendSink (SendSinkContext context) {
-
+        // TODO: Tie this to ctor of RemoteSpaceship
         return kj::READY_NOW;
     }
 }

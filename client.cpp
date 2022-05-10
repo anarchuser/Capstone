@@ -52,8 +52,9 @@ int main (int argc, char * argv[]) {
     Synchro::Client client = rpcClient->getMain <Synchro> ();
     auto & waitScope = rpcClient->getWaitScope();
 
-    client.pingRequest().send().wait (waitScope);
-    std::cout << "Connect request finished" << std::endl;
+    client.pingRequest().send().then ([] (...) {
+        std::cout << "Connect request finished" << std::endl;
+    });
 
     std::string query;
     while (true) {

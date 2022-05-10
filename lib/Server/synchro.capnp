@@ -25,7 +25,7 @@ interface Synchro {
     }
 
     interface ShipCallback {
-        sendSink @0 (username :Text, ship :ItemSink) -> ();
+        sendSink @0 (username :Text) -> (ship :ItemSink);
     }
 
     ping @0 ();
