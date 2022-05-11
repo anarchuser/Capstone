@@ -24,6 +24,8 @@ namespace kt {
         /// Toggled with `` ` ``. Overlays rendered sprites with box2d primitives for debugging purposes
         spBox2DDraw debugDraw;
 
+        void onSendSink (std::string const & username);
+
     public:
         /// Physical world, i.e., box2d world responsible for the physics in the game
         b2World world;
@@ -50,6 +52,8 @@ namespace kt {
         void toggleDebugDraw ();
 
         void addChild (spActor child);
+
+        std::function <void (std::string const &)> getOnSendSink();
     };
 
     DECLARE_SMART (World, spWorld);

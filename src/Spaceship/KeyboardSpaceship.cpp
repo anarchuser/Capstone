@@ -7,7 +7,7 @@ namespace kt {
     KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
             : Spaceship (world, res, pos, scale)
             , client {SERVER_FULL_ADDRESS}
-            , sink {[this] () {
+            , sink {[this, &world] () {
                 logs::messageln ("Connect to '%s'", SERVER_FULL_ADDRESS.c_str());
 
                 auto request = client.getMain <Synchro> ().joinRequest ();
@@ -15,7 +15,7 @@ namespace kt {
                 request.setUsername (USERNAME);
 
                 auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
-                shipCB->setOnSendSink (CLOSURE (this, & KeyboardSpaceship::onSendSinkCallback));
+                shipCB->setOnSendSink (world.getOnSendSink());
                 request.setShipCallback (kj::mv (shipCB));
 
                 return request.send().wait (client.getWaitScope()).getItemSink();
@@ -84,10 +84,6 @@ namespace kt {
         sink.doneRequest().send().wait (client.getWaitScope());
         Spaceship::destroy();
         instance = nullptr;
-    }
-
-    void KeyboardSpaceship::onSendSinkCallback (std::string const & username) {
-        logs::messageln ("Received sink for username '%s'", username.c_str());
     }
 }
 
