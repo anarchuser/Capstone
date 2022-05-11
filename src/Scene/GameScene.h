@@ -49,7 +49,7 @@ namespace kt {
     public:
         /// Inject a new Game instance with random seed into the stage
         GameScene ();
-        /// Directly connect to an existing Game remotely
+        /// Directly ping to an existing Game remotely
         GameScene (std::string ip, short port);
         /// Inject a new Game instance with given seed into the stage
         explicit GameScene (std::size_t seed);

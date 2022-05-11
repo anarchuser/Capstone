@@ -10,7 +10,7 @@
 #include "Spaceship.h"
 
 #include "Server/Server.h"
-#include "Server/Callback/DirectionCallback.h"
+#include "Server/Callback/ItemSink.h"
 
 #include <functional>
 
@@ -23,13 +23,9 @@ namespace kt {
     public:
         RemoteSpaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
 
-        /// Replace current directions with new ones
-        void updateDirection (Direction new_dir);
-
-        [[nodiscard]] cg::DirectionCallback getCallback();
-
         void destroy () override;
     };
+    DECLARE_SMART (RemoteSpaceship, spRemoteSpaceship);
 
 } // kt
 
