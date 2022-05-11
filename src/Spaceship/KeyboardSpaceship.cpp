@@ -15,7 +15,7 @@ namespace kt {
                 request.setUsername (USERNAME);
 
                 auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
-                shipCB->setOnSendSink (handle);
+                shipCB->setOnSendSink (CLOSURE (this, & KeyboardSpaceship::onSendSinkCallback));
                 request.setShipCallback (kj::mv (shipCB));
 
                 return request.send().wait (client.getWaitScope()).getItemSink();

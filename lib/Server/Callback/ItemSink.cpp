@@ -29,7 +29,7 @@ namespace cg {
     }
 
     ::kj::Promise<void> ItemSinkImpl::sendItem (SendItemContext context) {
-        log ("Received direction");
+//        log ("Received direction");
 
         auto direction = context.getParams().getItem().getDirection();
         callbacks.onSendItem ({

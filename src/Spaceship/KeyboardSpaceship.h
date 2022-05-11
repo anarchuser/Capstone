@@ -26,8 +26,6 @@ namespace kt {
 
         capnp::EzRpcClient client;
         Synchro::ItemSink::Client sink;
-        cg::SendSinkCallbackHandle handle =
-                CLOSURE (this, & KeyboardSpaceship::onSendSinkCallback);
 
         Direction queried;
 
