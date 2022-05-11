@@ -113,14 +113,6 @@ namespace kt {
 
         Actor::addChild (child);
     }
-
-    void World::onSendSink (std::string const & username) {
-        logs::messageln ("Received direction stream for spaceship '%s'", username.c_str());
-    }
-
-    std::function <void (std::string const &)> World::getOnSendSink () {
-        return CLOSURE (this, & World::onSendSink);
-    }
 }
 
 /* Copyright © 2022 Aaron Alef */

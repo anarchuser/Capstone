@@ -9,20 +9,19 @@ namespace kt {
             , client {SERVER_FULL_ADDRESS}
             , sink {[this, &world] () {
                 logs::messageln ("Connect to '%s'", SERVER_FULL_ADDRESS.c_str());
+                setName (USERNAME);
 
                 auto request = client.getMain <Synchro> ().joinRequest ();
                 request.initOther().setValue (kj::heap <cg::SynchroImpl> (1));
                 request.setUsername (USERNAME);
 
                 auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
-                shipCB->setOnSendSink (world.getOnSendSink());
+                shipCB->setOnSendSink (world.onSendSink);
                 request.setShipCallback (kj::mv (shipCB));
 
                 return request.send().wait (client.getWaitScope()).getItemSink();
             }()}
             {
-        setName (USERNAME);
-
         setAddColor (KEYBOARD_SPACESHIP_COLOR);
 
         instance = this;
@@ -71,13 +70,14 @@ namespace kt {
     void KeyboardSpaceship::update (UpdateState const & us) {
         auto request = sink.sendItemRequest ();
         auto dir = request.initItem().initDirection();
-        dir.setAccelerate (direction.accelerate);
-        dir.setDecelerate (direction.decelerate);
-        dir.setRotateLeft (direction.rotateLeft);
-        dir.setRotateRight (direction.rotateRight);
+        dir.setAccelerate (queried.accelerate);
+        dir.setDecelerate (queried.decelerate);
+        dir.setRotateLeft (queried.rotateLeft);
+        dir.setRotateRight (queried.rotateRight);
         auto promise = request.send();
         Spaceship::update (us);
         promise.wait (client.getWaitScope());
+//        std::cout << "q-d:\t" << (int) * (char *) & queried << " - " << (int) * (char *) & direction << std::endl;
     }
 
     void KeyboardSpaceship::destroy () {

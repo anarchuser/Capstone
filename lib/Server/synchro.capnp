@@ -21,7 +21,7 @@ interface Synchro {
 
     interface ItemSink {
         done @0 ();
-        sendItem @1 (item :Item) -> stream;
+        sendItem @1 (item :Item) -> ();
     }
 
     interface ShipCallback {

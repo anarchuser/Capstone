@@ -23,11 +23,9 @@ namespace kt {
     public:
         RemoteSpaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
 
-        /// Replace current directions with new ones
-        void updateDirection (Direction new_dir);
-
         void destroy () override;
     };
+    DECLARE_SMART (RemoteSpaceship, spRemoteSpaceship);
 
 } // kt
 

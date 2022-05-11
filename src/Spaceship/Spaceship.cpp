@@ -67,6 +67,10 @@ namespace kt {
         }));
     }
 
+    void Spaceship::updateDirection (Direction new_dir) {
+        direction = new_dir;
+    };
+
     void Spaceship::destroy () {
         for (auto listener : listeners)
             getStage ()->removeEventListener (listener);

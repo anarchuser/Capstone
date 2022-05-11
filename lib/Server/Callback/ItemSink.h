@@ -31,13 +31,16 @@ namespace cg {
         void log (std::string const & msg);
 
     public:
-        ItemSinkImpl (DoneCallback & onDone, SendItemCallback & onSendItem);
+        ItemSinkImpl (DoneCallback const & onDone, SendItemCallback const & onSendItem);
+        ItemSinkImpl (DoneCallback && onDone, SendItemCallback && onSendItem);
         ItemSinkImpl() = default;
         ~ItemSinkImpl() = default;
 
         /// Local function calls
         void setOnDone     (DoneCallback     const & onDone);
+        void setOnDone     (DoneCallback     && onDone);
         void setOnSendItem (SendItemCallback const & onSendItem);
+        void setOnSendItem (SendItemCallback && onSendItem);
 
         /// RPC function calls
         ::kj::Promise <void> done     (DoneContext     context) override;

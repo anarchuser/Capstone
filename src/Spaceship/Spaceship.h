@@ -65,6 +65,9 @@ namespace kt {
         /// Wakes or puts a spaceship to sleep. Asleep spaceships have collision and gravity turned off
         void setAwake (bool awake);
 
+        /// Replace current directions with new ones
+        void updateDirection (Direction new_dir);
+
         virtual void destroy ();
 
         /// Counter incrementing IDs. Reset on creating a new GameScene instance

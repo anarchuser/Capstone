@@ -17,7 +17,7 @@ namespace cg {
         auto params = context.getParams();
         log ("New Spaceship: " + std::string (params.getUsername()));
 
-        onSendSink (params.getUsername());
+        context.getResults().setShip (onSendSink (params.getUsername()));
 
 //        auto ptr = onSendSink;
 //        if (auto callback = ptr.lock()) {

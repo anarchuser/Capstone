@@ -20,6 +20,26 @@ namespace kt {
 
         spWorld world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
         addChild (world);
+        world->onSendSink = [&] (std::string const & username) -> kj::Own <cg::ItemSinkImpl> {
+            logs::messageln ("Received sink for spaceship '%s'", username.c_str());
+            try {
+                spKeyboardSpaceship ship =
+                        safeSpCast <KeyboardSpaceship> (world->getChild (username));
+
+                return kj::heap <cg::ItemSinkImpl> (
+                        CLOSURE (ship.get(), & KeyboardSpaceship::destroy),
+                        CLOSURE (ship.get(), & KeyboardSpaceship::updateDirection)
+                );
+            } catch (...) {
+                spRemoteSpaceship ship =
+                        new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
+                ship->setName (username);
+                return kj::heap <cg::ItemSinkImpl> (
+                        CLOSURE (ship.get(), & RemoteSpaceship::destroy),
+                        CLOSURE (ship.get(), & RemoteSpaceship::updateDirection)
+                );
+            }
+        };
 
         // Generate a couple of planets, number based on world size
         auto planetAnimation = gameResources.getResAnim ("venus");

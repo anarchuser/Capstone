@@ -4,6 +4,7 @@
 #include "config.h"
 
 #include "Server/generated/synchro.capnp.h"
+#include "ItemSink.h"
 
 #include <kj/debug.h>
 #include <kj/memory.h>
@@ -19,8 +20,8 @@
 #include "Direction/Direction.h"
 
 namespace cg {
-    using SendSinkCallback       = std::function <void (std::string const &)>;
-    using SendSinkCallbackHandle = std::function <void (std::string const &)>;
+    using SendSinkCallback       = std::function <kj::Own <cg::ItemSinkImpl> (std::string const &)>;
+    using SendSinkCallbackHandle = std::function <kj::Own <cg::ItemSinkImpl> (std::string const &)>;
 
     class ShipCallbackImpl final: public Synchro::ShipCallback::Server {
     private:

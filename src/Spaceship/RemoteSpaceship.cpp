@@ -10,10 +10,6 @@ namespace kt {
         setAwake (true);
     }
 
-    void RemoteSpaceship::updateDirection (Direction new_dir) {
-        direction = new_dir;
-    };
-
     void RemoteSpaceship::destroy () {
         Spaceship::destroy();
         updateScoreboard ("ghost");

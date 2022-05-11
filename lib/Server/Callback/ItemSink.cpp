@@ -1,11 +1,15 @@
 #include "ItemSink.h"
 
 namespace cg {
-    ItemSinkImpl::ItemSinkImpl (DoneCallback & onDone, SendItemCallback & onSendItem)
+    ItemSinkImpl::ItemSinkImpl (DoneCallback && onDone, SendItemCallback && onSendItem)
+            : callbacks {std::move (onDone), std::move (onSendItem)} {}
+    ItemSinkImpl::ItemSinkImpl (DoneCallback const & onDone, SendItemCallback const & onSendItem)
             : callbacks {onDone, onSendItem} {}
 
     void ItemSinkImpl::setOnDone     (DoneCallback     const & onDone)     { callbacks.onDone     = onDone; }
+    void ItemSinkImpl::setOnDone     (DoneCallback     && onDone)     { callbacks.onDone     = std::move (onDone); }
     void ItemSinkImpl::setOnSendItem (SendItemCallback const & onSendItem) { callbacks.onSendItem = onSendItem; }
+    void ItemSinkImpl::setOnSendItem (SendItemCallback && onSendItem) { callbacks.onSendItem = std::move (onSendItem); }
 
     void ItemSinkImpl::log (std::string const & msg) {
         std::stringstream ss;
