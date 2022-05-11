@@ -44,7 +44,7 @@ namespace kt {
         Backend backend;
 
         static std::size_t requestSeed (std::string const & ip, short port) ;
-        void joinGame (std::string const & ip, short port);
+        void joinGame (std::string ip, short port);
         
     public:
         /// Inject a new Game instance with random seed into the stage
@@ -52,7 +52,7 @@ namespace kt {
         /// Directly ping to an existing Game remotely
         GameScene (std::string ip, short port);
         /// Inject a new Game instance with given seed into the stage
-        explicit GameScene (std::size_t seed);
+        explicit GameScene (std::size_t seed, bool join = false);
         ~GameScene() noexcept override;
 
         /// Updates its children, given that the game is not paused (i.e., hard and soft pause set to false)

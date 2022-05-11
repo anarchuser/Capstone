@@ -3,11 +3,11 @@
 namespace kt {
     GameScene::GameScene () : GameScene (generateSeed ()) {}
 
-    GameScene::GameScene (std::string ip, short port): GameScene (requestSeed (ip, port)) {
+    GameScene::GameScene (std::string ip, short port): GameScene (requestSeed (ip, port), true) {
         joinGame (ip, port);
     }
 
-    GameScene::GameScene (std::size_t seed)
+    GameScene::GameScene (std::size_t seed, bool join)
             : Scene ()
             , rng (seed)
             , backend {seed, SERVER_FULL_ADDRESS}
@@ -22,26 +22,24 @@ namespace kt {
         addChild (world);
         world->onSendSink = [&] (std::string const & username) -> kj::Own <cg::ItemSinkImpl> {
             logs::messageln ("Received sink for spaceship '%s'", username.c_str());
-            try {
-                spActor child = world->getChild (username);
-                if (child.get() == KeyboardSpaceship::instance) {
-                    spKeyboardSpaceship ship = safeSpCast <KeyboardSpaceship> (child);
-                    return kj::heap <cg::ItemSinkImpl> (
-                            CLOSURE (ship.get(), & KeyboardSpaceship::destroy),
-                            CLOSURE (ship.get(), & KeyboardSpaceship::updateDirection));
-                } else {
-                    spSpaceship ship = safeSpCast <Spaceship> (child);
-                    return kj::heap <cg::ItemSinkImpl> (
-                            CLOSURE (ship.get(), & Spaceship::destroy),
-                            CLOSURE (ship.get(), & Spaceship::updateDirection));
-                }
-            } catch (...) {
+            spActor child = world->getChild (username, oxygine::ep_ignore_error);
+            if (child.get() == KeyboardSpaceship::instance) {
+                spKeyboardSpaceship ship = safeSpCast <KeyboardSpaceship> (child);
+                return kj::heap <cg::ItemSinkImpl> (
+                        CLOSURE (ship.get(), & KeyboardSpaceship::destroy),
+                        CLOSURE (ship.get(), & KeyboardSpaceship::updateDirection));
+            } else if (child.get() == nullptr) {
                 spRemoteSpaceship ship =
                         new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
                 ship->setName (username);
                 return kj::heap <cg::ItemSinkImpl> (
                         CLOSURE (ship.get(), & RemoteSpaceship::destroy),
                         CLOSURE (ship.get(), & RemoteSpaceship::updateDirection));
+            } else {
+                spSpaceship ship = safeSpCast <Spaceship> (child);
+                return kj::heap <cg::ItemSinkImpl> (
+                        CLOSURE (ship.get(), & Spaceship::destroy),
+                        CLOSURE (ship.get(), & Spaceship::updateDirection));
             }
         };
 
@@ -55,7 +53,8 @@ namespace kt {
         }
 
         Spaceship::ship_counter = 0;
-        new KeyboardSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
+        if (!join)
+            new KeyboardSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE, SERVER_FULL_ADDRESS);
 
         getStage ()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
@@ -150,10 +149,10 @@ namespace kt {
         return promise.wait (client.getWaitScope()).getSeed();
     }
 
-    void GameScene::joinGame (std::string const & ip, short port) {
-        if (!KeyboardSpaceship::instance) return;
-        logs::messageln ("Project our spaceship to '%s:%d'", ip.c_str(), port);
-        backend.connect (ip, port);
+    void GameScene::joinGame (std::string ip, short port) {
+        if (!KeyboardSpaceship::instance) {
+            new KeyboardSpaceship (* safeSpCast <World> (getFirstChild()), gameResources, getSize() * 0.5, SPACESHIP_SCALE, std::string (ip) + ":44444");
+        }
     }
 }
 

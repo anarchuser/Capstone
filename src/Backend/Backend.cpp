@@ -45,6 +45,7 @@ namespace kt {
     }
 
     void Backend::connect (std::string remote, short port) {
+
     }
 
     bool Backend::ping (std::string const & ip, short port) {

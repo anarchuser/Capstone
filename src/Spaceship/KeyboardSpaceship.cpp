@@ -4,11 +4,11 @@ namespace kt {
 
     KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
 
-    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
+    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale, std::string address)
             : Spaceship (world, res, pos, scale)
-            , client {SERVER_FULL_ADDRESS}
-            , sink {[this, &world] () {
-                logs::messageln ("Connect to '%s'", SERVER_FULL_ADDRESS.c_str());
+            , client {address}
+            , sink {[&, this, address] () {
+                logs::messageln ("Connect to '%s'", address.c_str());
                 setName (USERNAME);
 
                 auto request = client.getMain <Synchro> ().joinRequest ();
