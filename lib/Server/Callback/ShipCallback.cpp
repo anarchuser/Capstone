@@ -3,8 +3,9 @@
 namespace cg {
     void ShipCallbackImpl::log (std::string const & msg) {
         std::stringstream ss;
-        ss << "Callback @" << this << ": '" << msg << "'" << std::endl;
+        ss << "ShipCallback @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
+        std::cout << ss.str() << std::endl;
     }
 
     void ShipCallbackImpl::setOnSendSink (SendSinkCallbackHandle const & onSendSink) {

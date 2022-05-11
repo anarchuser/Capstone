@@ -37,14 +37,12 @@ namespace cg {
 
         // Store connection details (callback handles and 'new ship' callback)
         // TODO: figure out whether to share all connections
-        auto [iterator, success] = connections.emplace (
-                username, Connection ({
-                    std::make_shared <std::function<void (Direction)>> (
-                            [this, username] (Direction direction) { sendItemCallback (username, direction); }),
-                    std::make_shared <std::function<void ()>> (
-                            [this, username] () { doneCallback (username); }) // TODO: implement this
-                }, params.getShipCallback()
-                ));
+        auto [iterator, success] = connections.emplace (username, Connection (
+                { [this, username] (Direction direction) {
+                    sendItemCallback (username, direction); }
+                , [this, username] () {
+                    doneCallback (username);
+                }}, params.getShipCallback()));
         KJ_ASSERT (success);
         propagateItemSink (username);
 
@@ -82,7 +80,6 @@ namespace cg {
     }
 
     void SynchroImpl::sendItemCallback (std::string username, Direction direction) {
-        log ("Received new Direction");
         std::for_each (connections.begin(), connections.end(),
                        [&] (std::pair<std::string const, Connection> & pair) {
             auto request = pair.second.itemSinks.at (username).sendItemRequest();
@@ -95,7 +92,6 @@ namespace cg {
         });
     }
     void SynchroImpl::doneCallback (std::string username) {
-        log ("Sink closed");
         connections.erase (username);
         std::for_each (connections.begin(), connections.end(),
                        [&] (std::pair <std::string const, Connection> & pair) {

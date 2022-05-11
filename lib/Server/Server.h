@@ -28,17 +28,15 @@
 #define MAX_CONNECTIONS 256
 
 namespace cg {
-    template <class R, class... Args>
-    using   shared_fun = std::shared_ptr <std::function <R (Args...)>>;
-    typedef shared_fun <void, Direction> SendItemCallbackHandle;
-    typedef shared_fun <void> DoneCallbackHandle;
+//    typedef std::function <void (Direction)> SendItemCallbackHandle;
+//    typedef std::function <void ()> DoneCallbackHandle;
 
     class SynchroImpl final: public Synchro::Server {
     private:
         struct Connection {
             struct CallbackHandles {
-                SendItemCallbackHandle sendItemCallbackHandle;
-                DoneCallbackHandle     doneCallbackHandle;
+                SendItemCallback sendItemCallbackHandle;
+                DoneCallback     doneCallbackHandle;
             } handles;
 
             Synchro::ShipCallback::Client shipCallback;

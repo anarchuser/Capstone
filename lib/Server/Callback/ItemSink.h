@@ -18,10 +18,8 @@
 #include "Direction/Direction.h"
 
 namespace cg {
-    template <class R, class... Args>
-    using   weak_fun = std::weak_ptr <std::function <R (Args...)>>;
-    typedef weak_fun <void>            DoneCallback;
-    typedef weak_fun <void, Direction> SendItemCallback;
+    typedef std::function <void ()> DoneCallback;
+    typedef std::function <void (Direction)> SendItemCallback;
 
     class ItemSinkImpl final: public Synchro::ItemSink::Server {
     private:
@@ -38,8 +36,8 @@ namespace cg {
         ~ItemSinkImpl() = default;
 
         /// Local function calls
-        void setOnDone     (DoneCallback     && onDone);
-        void setOnSendItem (SendItemCallback && onSendItem);
+        void setOnDone     (DoneCallback     const & onDone);
+        void setOnSendItem (SendItemCallback const & onSendItem);
 
         /// RPC function calls
         ::kj::Promise <void> done     (DoneContext     context) override;
