@@ -23,21 +23,25 @@ namespace kt {
         world->onSendSink = [&] (std::string const & username) -> kj::Own <cg::ItemSinkImpl> {
             logs::messageln ("Received sink for spaceship '%s'", username.c_str());
             try {
-                spKeyboardSpaceship ship =
-                        safeSpCast <KeyboardSpaceship> (world->getChild (username));
-
-                return kj::heap <cg::ItemSinkImpl> (
-                        CLOSURE (ship.get(), & KeyboardSpaceship::destroy),
-                        CLOSURE (ship.get(), & KeyboardSpaceship::updateDirection)
-                );
+                spActor child = world->getChild (username);
+                if (child.get() == KeyboardSpaceship::instance) {
+                    spKeyboardSpaceship ship = safeSpCast <KeyboardSpaceship> (child);
+                    return kj::heap <cg::ItemSinkImpl> (
+                            CLOSURE (ship.get(), & KeyboardSpaceship::destroy),
+                            CLOSURE (ship.get(), & KeyboardSpaceship::updateDirection));
+                } else {
+                    spSpaceship ship = safeSpCast <Spaceship> (child);
+                    return kj::heap <cg::ItemSinkImpl> (
+                            CLOSURE (ship.get(), & Spaceship::destroy),
+                            CLOSURE (ship.get(), & Spaceship::updateDirection));
+                }
             } catch (...) {
                 spRemoteSpaceship ship =
                         new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
                 ship->setName (username);
                 return kj::heap <cg::ItemSinkImpl> (
                         CLOSURE (ship.get(), & RemoteSpaceship::destroy),
-                        CLOSURE (ship.get(), & RemoteSpaceship::updateDirection)
-                );
+                        CLOSURE (ship.get(), & RemoteSpaceship::updateDirection));
             }
         };
 
