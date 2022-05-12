@@ -3,7 +3,7 @@
 namespace kt {
     GameScene::GameScene () : GameScene (generateSeed ()) {}
 
-    GameScene::GameScene (std::string ip, short port): GameScene (requestSeed (ip, port), true) {
+    GameScene::GameScene (std::string const & ip, unsigned short port): GameScene (requestSeed (ip, port), true) {
         joinGame (ip, port);
     }
 
@@ -143,15 +143,17 @@ namespace kt {
         core::requestQuit ();
     }
 
-    std::size_t GameScene::requestSeed (std::string const & ip, short port) {
+    std::size_t GameScene::requestSeed (std::string const & ip, unsigned short port) {
         auto client = capnp::EzRpcClient (ip, port);
         auto promise = client.getMain <Synchro> ().seedRequest ().send();
         return promise.wait (client.getWaitScope()).getSeed();
     }
 
-    void GameScene::joinGame (std::string ip, short port) {
+    void GameScene::joinGame (std::string const & ip, unsigned short port) {
         if (!KeyboardSpaceship::instance) {
-            new KeyboardSpaceship (* safeSpCast <World> (getFirstChild()), gameResources, getSize() * 0.5, SPACESHIP_SCALE, std::string (ip) + ":44444");
+            new KeyboardSpaceship (* safeSpCast <World> (getFirstChild()), gameResources, getSize() * 0.5, SPACESHIP_SCALE, ip + ":" + std::to_string (port));
+        } else {
+            logs::warning ("Joining Game whilst Spaceship already present");
         }
     }
 }

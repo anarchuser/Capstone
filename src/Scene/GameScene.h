@@ -43,14 +43,14 @@ namespace kt {
 
         Backend backend;
 
-        static std::size_t requestSeed (std::string const & ip, short port) ;
-        void joinGame (std::string ip, short port);
+        static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
+        void joinGame (std::string const & ip, unsigned short port);
         
     public:
         /// Inject a new Game instance with random seed into the stage
         GameScene ();
         /// Directly ping to an existing Game remotely
-        GameScene (std::string ip, short port);
+        GameScene (std::string const & ip, unsigned short port);
         /// Inject a new Game instance with given seed into the stage
         explicit GameScene (std::size_t seed, bool join = false);
         ~GameScene() noexcept override;

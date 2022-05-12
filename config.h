@@ -5,10 +5,9 @@
 namespace fs = std::filesystem;
 fs::path const DATA_DIR = PROJECT_ROOT "/data";
 
-//#define USERNAME ("azazel_" + std::to_string (__COUNTER__))
-#define USERNAME "azazel"
+#define USERNAME "lucifer"
 #define SERVER_ADDRESS "*"
-#define REMOTE_ADDRESS "192.168.43.85"
+#define REMOTE_ADDRESS "192.168.178.36"
 #define SERVER_PORT    44444
 #define SERVER_FULL_ADDRESS (std::string (SERVER_ADDRESS)  + ":" + std::to_string (SERVER_PORT))
 
