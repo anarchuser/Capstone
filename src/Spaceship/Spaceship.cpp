@@ -95,6 +95,8 @@ namespace kt {
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
+        updateScoreboard ();
+
         // Update ship velocity
         if (direction.decelerate && !direction.accelerate) {
             // Decelerate spaceship. Works as universal brake, e.g., against gravity

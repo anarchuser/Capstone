@@ -36,6 +36,9 @@ namespace kt {
         /// ID of this spaceship. IDs increment with each ship, starting from 0 each game
         std::size_t const id = ship_counter++;
 
+        /// HUD showing current health of this ship
+        spText scoreboard = nullptr;
+
     protected:
         std::vector <int> listeners;
 
@@ -44,9 +47,6 @@ namespace kt {
 
         /// Physical body representing this spaceship in the physical world
         b2Body * body = nullptr;
-
-        /// HUD showing current health of this ship
-        spText scoreboard = nullptr;
 
         /// Update personal scoreboard based on current health
         void updateScoreboard (std::string msg = "");

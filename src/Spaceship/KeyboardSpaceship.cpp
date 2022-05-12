@@ -28,7 +28,6 @@ namespace kt {
 
         // TODO: remove this
         setAwake (true);
-        updateScoreboard();
 
         listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
             instance->onSteeringEvent ((KeyEvent *) event);

@@ -56,6 +56,7 @@ namespace kt {
 
         void addChild (spActor child);
 
+        static World * instance;
     };
 
     DECLARE_SMART (World, spWorld);

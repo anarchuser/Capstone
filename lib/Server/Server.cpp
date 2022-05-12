@@ -33,7 +33,7 @@ namespace cg {
         // Check that username is unique
         // TODO: replace with UUID or ip
         std::string username = params.getUsername();
-        KJ_REQUIRE (! connections.contains (username), username, "Usernames must be unique");
+        KJ_REQUIRE (! connections.contains (username), username, "Username already in use");
         log (std::string ("Join request received from user ") + username);
 
         // Store connection details (callback handles and 'new ship' callback)

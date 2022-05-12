@@ -33,16 +33,16 @@ namespace kt {
                         CLOSURE (KeyboardSpaceship::instance, & KeyboardSpaceship::updateDirection));
             }
             // TODO: ensure usernames are unique
-//            spActor child = world->getChild (username, oxygine::ep_ignore_error);
-//
-//            spRemoteSpaceship ship =
-//                    new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
-//            ship->setName (username);
-//            return kj::heap <cg::ItemSinkImpl> (
-//                    CLOSURE (ship.get(), & RemoteSpaceship::destroy),
-//                    CLOSURE (ship.get(), & RemoteSpaceship::updateDirection));
+            spWorld world = World::instance;
+            spActor child = world->getChild (username, oxygine::ep_ignore_error);
+            OX_ASSERT (! child.get());
 
-            return kj::heap <cg::ItemSinkImpl> ();
+            spRemoteSpaceship ship =
+                    new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
+            ship->setName (username);
+            return kj::heap <cg::ItemSinkImpl> (
+                    CLOSURE (ship.get(), & RemoteSpaceship::destroy),
+                    CLOSURE (ship.get(), & RemoteSpaceship::updateDirection));
         };
 
         // Generate a couple of planets, number based on world size
