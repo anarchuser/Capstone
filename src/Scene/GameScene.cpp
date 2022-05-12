@@ -23,22 +23,17 @@ namespace kt {
         world->onSendSink = [&] (std::string const & username) -> kj::Own <cg::ItemSinkImpl> {
             logs::messageln ("Received sink for spaceship '%s'", username.c_str());
 
-            static bool once = true;
-            if (once) {
-                once = false;
-                OX_ASSERT (KeyboardSpaceship::instance);
-                OX_ASSERT (KeyboardSpaceship::instance->getName() == username);
+            if (KeyboardSpaceship::instance && KeyboardSpaceship::instance->getName() == username)
                 return kj::heap <cg::ItemSinkImpl> (
                         CLOSURE (KeyboardSpaceship::instance, & KeyboardSpaceship::destroy),
                         CLOSURE (KeyboardSpaceship::instance, & KeyboardSpaceship::updateDirection));
-            }
-            // TODO: ensure usernames are unique
-            spWorld world = World::instance;
-            spActor child = world->getChild (username, oxygine::ep_ignore_error);
-            OX_ASSERT (! child.get());
 
-            spRemoteSpaceship ship =
-                    new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
+            spWorld world = World::instance;
+            OX_ASSERT (world);
+            spActor child = world->getChild (username, oxygine::ep_ignore_error);
+            OX_ASSERT (! child);
+
+            spRemoteSpaceship ship = new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
             ship->setName (username);
             return kj::heap <cg::ItemSinkImpl> (
                     CLOSURE (ship.get(), & RemoteSpaceship::destroy),
