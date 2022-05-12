@@ -44,7 +44,7 @@ namespace cg {
                     doneCallback (username);
                 }}, params.getShipCallback()));
         KJ_ASSERT (success);
-        propagateItemSink (username);
+        broadcastSpaceship (username);
 
         // Configure ItemSink sent back to client
         log ("Configure ItemSink result");
@@ -79,13 +79,16 @@ namespace cg {
         return kj::READY_NOW;
     }
 
-    void SynchroImpl::sendItemCallback (std::string username, Direction direction) {
+    void SynchroImpl::sendItemCallback (std::string sender, Direction direction) {
         std::for_each (connections.begin(), connections.end(),
                        [&] (std::pair<std::string const, Connection> & pair) {
+            auto & receiver = pair.first;
             auto & sinks = pair.second.itemSinks;
 
-            KJ_REQUIRE (sinks.contains (username));
-            auto request = sinks.at (username).sendItemRequest();
+            if (! sinks.contains (sender)) {
+                distributeSpaceship (sender, receiver);
+            }
+            auto request = sinks.at (sender).sendItemRequest();
             auto request_direction = request.initItem().initDirection();
 
             request_direction.setAccelerate (direction.accelerate);
@@ -97,31 +100,41 @@ namespace cg {
         });
     }
     void SynchroImpl::doneCallback (std::string username) {
+        log ("Closing sinks from " + username);
+
         connections.erase (username);
         std::for_each (connections.begin(), connections.end(),
                        [&] (std::pair <std::string const, Connection> & pair) {
             auto & sinks = pair.second.itemSinks;
-
-            KJ_REQUIRE (sinks.contains (username));
-            sinks.at (username).doneRequest().send().then ([&] (...) {
-                sinks.erase (username);
-            });
+            if (sinks.contains (username)) {
+                sinks.at (username).doneRequest ().send ()
+                .then ([&] (...) {
+                    sinks.erase (username);
+                });
+            }
         });
     }
 
-    void SynchroImpl::propagateItemSink (std::string const & username) {
+    void SynchroImpl::distributeSpaceship (std::string const & sender, std::string const & receiver) {
+        log ("Distribute sink from " + sender += " to " + receiver);
+
+        KJ_REQUIRE (connections.contains (sender));
+        KJ_REQUIRE (connections.contains (receiver));
+
+        if (connections.at (receiver).itemSinks.contains (sender))
+            return;
+
+        auto & shipCallback = connections.at (sender).shipCallback;
+        auto & sinks = connections.at (receiver).itemSinks;
+        auto request = shipCallback.sendSinkRequest ();
+        request.setUsername (sender);
+        sinks.emplace (sender, request.send().getShip());
+    }
+
+    void SynchroImpl::broadcastSpaceship (std::string const & sender) {
         std::for_each (connections.begin(), connections.end(),
-               [&, this] (std::pair <std::string const, Connection> & pair) {
-                   log ("Distributing sink from " + username += " to " + pair.first);
-                   auto & sinks = pair.second.itemSinks;
-
-                   KJ_REQUIRE (connections.contains (username));
-                   auto & shipCallback = connections.at (username).shipCallback;
-                   auto request = shipCallback.sendSinkRequest ();
-                   request.setUsername (username);
-                   sinks.emplace (username, request.send().getShip());
-
-                   sinks.at (username).doneRequest (); // TODO: remove
+                       [&, this] (std::pair <std::string const, Connection> & pair) {
+            distributeSpaceship (sender, pair.first);
         });
     }
 }

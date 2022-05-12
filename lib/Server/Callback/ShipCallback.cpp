@@ -14,10 +14,11 @@ namespace cg {
 
     ::kj::Promise<void> ShipCallbackImpl::sendSink (SendSinkContext context) {
         auto params = context.getParams();
-        log ("New Spaceship: " + std::string (params.getUsername()));
+        auto username = params.getUsername();
+        log ("New Spaceship: " + std::string (username));
 
         try {
-            context.getResults().setShip (onSendSink (params.getUsername()));
+            context.getResults().setShip (onSendSink (username));
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipCallback::sendSink called without valid callback registered");
         }
