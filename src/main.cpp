@@ -19,16 +19,7 @@
 
 #include "Game.h"
 
-#include <iostream>
-#include <string>
-
 int main (int argc, char * argv[]) {
-    google::InitGoogleLogging (argv[0]);
-
-    LOG (INFO) << "Start game client";
-
     // Start game, runs endlessly
     kt::Game::run();
-
-    LOG (INFO) << "Game client finished";
 }

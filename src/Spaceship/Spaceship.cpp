@@ -4,7 +4,6 @@ namespace kt {
     std::size_t Spaceship::ship_counter = 0;
 
     Spaceship::Spaceship (World & world, Resources & res, Vector2 const & pos, float scale) {
-        setName ("Spaceship");
         attachTo (& world);
         setPosition (pos);
         setRotation (1.5 * b2_pi);
@@ -52,7 +51,7 @@ namespace kt {
         body->CreateFixture (& rearFixture);
 
         scoreboard = new Text (res.getResFont ("kt-liberation"));
-        scoreboard->setPosition (0.85 * getParent()->getSize().x, 10 + id * 40);
+        scoreboard->setPosition (0.80 * getParent()->getSize().x, 10 + id * 40);
         getParent()->addChild (scoreboard);
         updateScoreboard();
 
@@ -60,17 +59,21 @@ namespace kt {
             if (!body->IsAwake()) return;
 //            spSprite other = safeCast <CollisionEvent *> (event)->other;
             --health;
-            updateScoreboard();
+            updateScoreboard("");
             if (health <= 0) {
                 destroy();
             }
         }));
     }
 
+    void Spaceship::updateDirection (Direction new_dir) {
+        direction = new_dir;
+    };
+
     void Spaceship::destroy () {
         for (auto listener : listeners)
             getStage ()->removeEventListener (listener);
-        scoreboard->setText (std::to_string (id) + ": dead");
+        updateScoreboard ("dead");
         setAwake (false);
         if (body) body->GetUserData().pointer = 0;
         body = nullptr;
@@ -79,7 +82,7 @@ namespace kt {
 
     void Spaceship::updateScoreboard (std::string msg) {
         if (msg.empty()) msg = std::to_string (health) + " hp";
-        scoreboard->setText (std::to_string (id) + ": " + msg);
+        scoreboard->setText (getName() + ": " + msg);
     }
 
     void Spaceship::setAwake (bool awake) {
@@ -92,6 +95,8 @@ namespace kt {
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
+        updateScoreboard ();
+
         // Update ship velocity
         if (direction.decelerate && !direction.accelerate) {
             // Decelerate spaceship. Works as universal brake, e.g., against gravity

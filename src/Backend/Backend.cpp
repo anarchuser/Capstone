@@ -1,55 +1,62 @@
 #include "Backend.h"
 
 namespace kt {
-    Backend::Backend (std::string address, std::function <cg::DirectionCallback ()> && onStreamDirections)
-            : address {std::move (address)}
-            , server_thread {& Backend::serve, this, std::move (onStreamDirections)} {
-        while (!server);
+    Backend::Backend (std::size_t seed, std::string address)
+            : seed {seed}
+            , address {std::move (address)}
+            , server_thread {& Backend::serve, this} {
+        getPort();
+        logs::messageln ("Set up backend at '%s'", this->address.c_str());
     }
     
     Backend::~Backend () noexcept {
-        thread_executor->executeSync ([this]() {
-            server = nullptr;
-        });
-        if (server_thread.joinable()) server_thread.join();
-//        server_thread.detach();
+        KeyboardSpaceship::instance->destroy();
+        stop = true;
+        server_thread.join();
     }
     
-    void Backend::serve (std::function <cg::DirectionCallback ()> && onStreamDirections) {
-        server = kj::heap <capnp::EzRpcServer> (
-                kj::heap <cg::SynchroImpl> (
-                        std::forward <std::function <cg::DirectionCallback ()>> (onStreamDirections)
-                ), address);
-        port = server->getPort().wait (server->getWaitScope());
-        logs::messageln ("Set up backend at '%s:%d'", address.c_str(), (int) port);
-        thread_executor = & kj::getCurrentThreadExecutor();
+    void Backend::serve () {
+//        while (! stop) {
+            try {
+                auto server = capnp::EzRpcServer (kj::heap <cg::SynchroImpl> (seed), address);
+                port = server.getPort().wait (server.getWaitScope());
 
-        try {
-            kj::NEVER_DONE.wait (server->getWaitScope());
-        } catch (...) {
-            logs::messageln ("Server stopped");
-        }
+                auto & exec = kj::getCurrentThreadExecutor();
+
+                while (! stop) {
+                    exec.executeAsync ([this] () {
+                        std::this_thread::yield ();
+                    }).wait (server.getWaitScope ());
+                }
+                return;
+            } catch (...) {
+//                logs::warning ("Failed to bind address to '%s'. Retrying...", address.c_str());
+//                std::this_thread::yield();
+            }
+//        }
     }
     
     unsigned short Backend::getPort () const {
-        while (port == -1);
+        while (port == -1) std::this_thread::yield();
         return port;
     }
     std::string const & Backend::getAddress() const {
         return address;
     }
 
-    void Backend::connect (Direction const * direction, std::string address, unsigned short port) {
-        connections.push_back (std::make_unique <Connection> (direction, address, port));
-    }
-    void Backend::update () {
-        for (auto & connection : connections) {
-            connection->update();
-        }
+    void Backend::connect (std::string remote, short port) {
+
     }
 
-    void Backend::disconnectAll () {
-        connections.clear();
+    bool Backend::ping (std::string const & ip, short port) {
+        auto client = capnp::EzRpcClient (ip, port);
+        auto request = client.getMain <Synchro>().pingRequest();
+        try {
+            request.send().wait (client.getWaitScope());
+            return true;
+        } catch (std::exception & e) {
+            logs::warning ("Backend::ping(): Connection refused:\n'%s'", e.what());
+        }
     }
 }
 

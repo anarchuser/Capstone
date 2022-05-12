@@ -1,7 +1,10 @@
 #include "World.h"
 
 namespace kt {
+    World * World::instance = nullptr;
+
     World::World (ResAnim * background, b2Vec2 size): world (b2Vec2_zero), world_size {size} {
+        instance = this;
         setName ("World");
         setResAnim (background);
     

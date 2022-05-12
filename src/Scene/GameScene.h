@@ -43,13 +43,16 @@ namespace kt {
 
         Backend backend;
 
-        void connectNewSpaceship();
+        static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
+        void joinGame (std::string const & ip, unsigned short port);
         
     public:
         /// Inject a new Game instance with random seed into the stage
         GameScene ();
+        /// Directly ping to an existing Game remotely
+        GameScene (std::string const & ip, unsigned short port);
         /// Inject a new Game instance with given seed into the stage
-        explicit GameScene (std::size_t seed);
+        explicit GameScene (std::size_t seed, bool join = false);
         ~GameScene() noexcept override;
 
         /// Updates its children, given that the game is not paused (i.e., hard and soft pause set to false)
@@ -62,7 +65,7 @@ namespace kt {
         /// Start game with new, random seed
         void onNewGame (Event * event);
         /// Quit game and return to main menu
-        void onAbandon (Event * event);
+        void onDisconnect (Event * event);
         /// Quit game and close application
         void onQuit (Event * event);
     };

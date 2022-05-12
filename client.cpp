@@ -43,7 +43,6 @@ void updateDirection (Synchro::Direction::Builder && direction, std::string dire
 }
 
 int main (int argc, char * argv[]) {
-    google::InitGoogleLogging (argv[0]);
     std::cout << "Simple client for testing RpcServer connections" << std::endl;
 
     std::string address = "localhost";
@@ -53,9 +52,9 @@ int main (int argc, char * argv[]) {
     Synchro::Client client = rpcClient->getMain <Synchro> ();
     auto & waitScope = rpcClient->getWaitScope();
 
-    client.connectRequest ().send().wait (waitScope);
-//    client.connectRequest ().send();
-    std::cout << "Connect request finished" << std::endl;
+    client.pingRequest().send().then ([] (...) {
+        std::cout << "Connect request finished" << std::endl;
+    }).wait (rpcClient->getWaitScope());
 
     std::string query;
     while (true) {
@@ -71,13 +70,12 @@ int main (int argc, char * argv[]) {
         }
 
         if (query == "ping") {
-            client.connectRequest ().send().wait (waitScope);
+            client.pingRequest().send().wait (waitScope);
             continue;
         }
 
         try {
-            auto request = client.updateDirectionRequest ();
-            updateDirection (request.initDirection(), query);
+            auto request = client.pingRequest();
             request.send().wait (waitScope);
         } catch (std::exception & e) {
             std::cout << "Server: '" << e.what() << "'" << std::endl;

@@ -1,8 +1,10 @@
 #include "Button.h"
 
 namespace kt {
-    Button::Button (ResAnim * animation, spText message, std::function<void (Event *)> && onAction):
-            onAction{std::move (onAction)} {
+    Button::Button (ResAnim * animation, spText message, std::function<void (Event *)> && onAction)
+            : onAction {std::move (onAction)}
+            , message {message}
+            {
 
         setResAnim (animation);
 

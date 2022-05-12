@@ -9,6 +9,8 @@
 #include "src/debug/Box2DDebugDraw.h"
 #include "src/Collision/CollisionListener.h"
 
+#include "Server/Server.h"
+
 /// Size of the physical world. Determines x/y ratio and size of objects contained
 #define WORLD_SIZE {10, 10}
 
@@ -30,6 +32,9 @@ namespace kt {
         /// Size of physical world
         b2Vec2 const world_size;
 
+        /// Callback used when new spaceship direction streams are registered
+        std::function <kj::Own <cg::ItemSinkImpl> (std::string const &)> onSendSink;
+
         /// Construct a new world with the given background and size
         World (ResAnim * background, b2Vec2 size);
 
@@ -50,6 +55,8 @@ namespace kt {
         void toggleDebugDraw ();
 
         void addChild (spActor child);
+
+        static World * instance;
     };
 
     DECLARE_SMART (World, spWorld);

@@ -10,6 +10,7 @@
 		<image file="dialog.png"/>
 		<image file="sky.png"/>
 		<image file="button.png"/>
+		<image file="input.png"/>
 	</atlas>
 
 	<set path = "./fonts"/>

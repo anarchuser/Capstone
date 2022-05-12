@@ -1,6 +1,13 @@
 @0x8b03f59616e377c8;
 
 interface Synchro {
+    struct Maybe(T) {
+        union {
+            nothing @0 :Void;
+            value   @1 :T;
+        }
+    }
+
     struct Direction {
         accelerate  @0 :Int8 = -1;
         decelerate  @1 :Int8 = -1;
@@ -8,16 +15,21 @@ interface Synchro {
         rotateRight @3 :Int8 = -1;
     }
 
-    struct Position {
-        x @0 :Float32;
-        y @1 :Float32;
+    struct Item {
+        direction @0 :Direction;
     }
 
-    interface DirectionCallback {
-        sendDirection @0 (direction :Direction) -> stream;
-        done @1 ();
+    interface ItemSink {
+        done @0 ();
+        sendItem @1 (item :Item) -> ();
     }
 
-    connect @0 () -> ();
-    streamDirections @1 () -> (callback :DirectionCallback);
+    interface ShipCallback {
+        sendSink @0 (username :Text) -> (ship :ItemSink);
+    }
+
+    ping @0 ();
+    seed @1 () -> (seed :UInt64);
+    join @2 (username :Text, other :Maybe(Synchro), shipCallback :ShipCallback) -> (itemSink :ItemSink);
+    waitScope @3 (scope :UInt64);
 }

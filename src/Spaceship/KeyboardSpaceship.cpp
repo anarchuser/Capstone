@@ -4,15 +4,27 @@ namespace kt {
 
     KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
 
-    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale)
-            : Spaceship (world, res, pos, scale) {
-        // TODO: Is a special tag needed? Default is "Spaceship"
-        // TODO: replace by player names?
-//        setName ("KeyboardSpaceship");
+    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale, std::string address)
+            : Spaceship (world, res, pos, scale)
+            , client {address}
+            , sink {[&, this, address] () {
+                instance = this;
 
+                logs::messageln ("Connect to '%s'", address.c_str());
+                setName (USERNAME);
+
+                auto request = client.getMain <Synchro> ().joinRequest ();
+                request.initOther().setValue (kj::heap <cg::SynchroImpl> (1));
+                request.setUsername (USERNAME);
+
+                auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
+                shipCB->setOnSendSink (world.onSendSink);
+                request.setShipCallback (kj::mv (shipCB));
+
+                return request.send().wait (client.getWaitScope()).getItemSink();
+            }()}
+            {
         setAddColor (KEYBOARD_SPACESHIP_COLOR);
-
-        instance = this;
 
         // TODO: remove this
         setAwake (true);
@@ -25,6 +37,10 @@ namespace kt {
         }));
     }
 
+    KeyboardSpaceship::~KeyboardSpaceship () noexcept {
+        sink.doneRequest().send().wait (client.getWaitScope());
+    }
+
     void KeyboardSpaceship::onSteeringEvent (ox::KeyEvent * event) {
         auto keysym = event->data->keysym;
         bool key_is_down = event->type == ox::KeyEvent::KEY_DOWN;
@@ -34,24 +50,37 @@ namespace kt {
         switch (keysym.scancode) {
             case SDL_SCANCODE_UP: // accelerate
             case SDL_SCANCODE_W: // accelerate
-                direction.accelerate = key_is_down;
+                queried.accelerate = key_is_down;
                 break;
             case SDL_SCANCODE_DOWN: // decelerate
             case SDL_SCANCODE_S: // decelerate
-                direction.decelerate = key_is_down;
+                queried.decelerate = key_is_down;
                 break;
             case SDL_SCANCODE_LEFT: // turn left
             case SDL_SCANCODE_A: // turn left
-                direction.rotateLeft = key_is_down;
+                queried.rotateLeft = key_is_down;
                 break;
             case SDL_SCANCODE_RIGHT: // turn right
             case SDL_SCANCODE_D: // turn right
-                direction.rotateRight = key_is_down;
+                queried.rotateRight = key_is_down;
                 break;
         }
     }
 
+    void KeyboardSpaceship::update (UpdateState const & us) {
+        auto request = sink.sendItemRequest ();
+        auto dir = request.initItem().initDirection();
+        dir.setAccelerate (queried.accelerate);
+        dir.setDecelerate (queried.decelerate);
+        dir.setRotateLeft (queried.rotateLeft);
+        dir.setRotateRight (queried.rotateRight);
+        auto promise = request.send();
+        Spaceship::update (us);
+        promise.wait (client.getWaitScope());
+    }
+
     void KeyboardSpaceship::destroy () {
+        sink.doneRequest().send().wait (client.getWaitScope());
         Spaceship::destroy();
         instance = nullptr;
     }
