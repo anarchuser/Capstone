@@ -116,16 +116,18 @@ namespace cg {
     }
 
     void SynchroImpl::distributeSpaceship (std::string const & sender, std::string const & receiver) {
-        log ("Distribute sink from " + sender += " to " + receiver);
+        log ("Relay directions from " + sender += " to " + receiver);
 
         KJ_REQUIRE (connections.contains (sender));
         KJ_REQUIRE (connections.contains (receiver));
 
-        if (connections.at (receiver).itemSinks.contains (sender))
+        if (connections.at (sender).itemSinks.contains (receiver)) {
+            log ("Connection exists already");
             return;
+        }
 
-        auto & shipCallback = connections.at (sender).shipCallback;
-        auto & sinks = connections.at (receiver).itemSinks;
+        auto & shipCallback = connections.at (receiver).shipCallback;
+        auto & sinks = connections.at (sender).itemSinks;
         auto request = shipCallback.sendSinkRequest ();
         request.setUsername (sender);
         sinks.emplace (sender, request.send().getShip());
