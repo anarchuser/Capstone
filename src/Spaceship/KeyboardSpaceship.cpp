@@ -28,6 +28,7 @@ namespace kt {
 
         // TODO: remove this
         setAwake (true);
+        updateScoreboard();
 
         listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
             instance->onSteeringEvent ((KeyEvent *) event);
@@ -77,7 +78,6 @@ namespace kt {
         auto promise = request.send();
         Spaceship::update (us);
         promise.wait (client.getWaitScope());
-//        std::cout << "q-d:\t" << (int) * (char *) & queried << " - " << (int) * (char *) & direction << std::endl;
     }
 
     void KeyboardSpaceship::destroy () {

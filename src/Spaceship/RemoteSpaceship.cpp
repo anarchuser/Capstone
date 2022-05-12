@@ -8,6 +8,8 @@ namespace kt {
         setAddColor (REMOTE_SPACESHIP_COLOR);
 
         setAwake (true);
+
+        updateScoreboard();
     }
 
     void RemoteSpaceship::destroy () {

@@ -22,8 +22,6 @@ namespace kt {
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     private:
-        void onSendSinkCallback (std::string const & username);
-
         capnp::EzRpcClient client;
         Synchro::ItemSink::Client sink;
 
