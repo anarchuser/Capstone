@@ -82,12 +82,17 @@ namespace cg {
     void SynchroImpl::sendItemCallback (std::string username, Direction direction) {
         std::for_each (connections.begin(), connections.end(),
                        [&] (std::pair<std::string const, Connection> & pair) {
-            auto request = pair.second.itemSinks.at (username).sendItemRequest();
+            auto & sinks = pair.second.itemSinks;
+
+            KJ_REQUIRE (sinks.contains (username));
+            auto request = sinks.at (username).sendItemRequest();
             auto request_direction = request.initItem().initDirection();
+
             request_direction.setAccelerate (direction.accelerate);
             request_direction.setDecelerate (direction.decelerate);
             request_direction.setRotateLeft (direction.rotateLeft);
             request_direction.setRotateRight (direction.rotateRight);
+
             request.send();
         });
     }
@@ -96,6 +101,8 @@ namespace cg {
         std::for_each (connections.begin(), connections.end(),
                        [&] (std::pair <std::string const, Connection> & pair) {
             auto & sinks = pair.second.itemSinks;
+
+            KJ_REQUIRE (sinks.contains (username));
             sinks.at (username).doneRequest().send().then ([&] (...) {
                 sinks.erase (username);
             });
@@ -106,8 +113,9 @@ namespace cg {
         std::for_each (connections.begin(), connections.end(),
                [&, this] (std::pair <std::string const, Connection> & pair) {
                    log ("Distributing sink from " + username += " to " + pair.first);
-
                    auto & sinks = pair.second.itemSinks;
+
+                   KJ_REQUIRE (connections.contains (username));
                    auto & shipCallback = connections.at (username).shipCallback;
                    auto request = shipCallback.sendSinkRequest ();
                    request.setUsername (username);
