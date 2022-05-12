@@ -101,7 +101,7 @@ namespace kt {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
             dialog->addButton ("Restart", CLOSURE (this, & GameScene::onRestart));
             dialog->addButton ("New game", CLOSURE (this, & GameScene::onNewGame));
-            dialog->addButton ("Abandon", CLOSURE (this, & GameScene::onAbandon));
+            dialog->addButton ("Disconnect", CLOSURE (this, & GameScene::onDisconnect));
             dialog->addButton ("Quit", CLOSURE (this, & GameScene::onQuit));
             dialog->addButton ("Cancel", CLOSURE (this, & GameScene::onMenu));
             return dialog;
@@ -129,7 +129,7 @@ namespace kt {
         new GameScene (RANDOM_SEED);
     }
 
-    void GameScene::onAbandon (Event * event) {
+    void GameScene::onDisconnect (Event * event) {
         detach ();
         getStage ()->removeAllEventListeners ();
         while (get_pointer (getStage ()->getLastChild ()) == this);

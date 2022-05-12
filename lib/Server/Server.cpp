@@ -59,23 +59,23 @@ namespace cg {
         // TODO: figure out when this is needed
         // TODO: figure out whether / how to share all current connections
         // If a remote Synchro handle is attached connect back to it
-//        if (params.getOther().isValue()) {
-//            log ("Establish connection back");
-//
-//            auto client = params.getOther().getValue();
-//
-//            // Ensure other client uses same seed
-//            client.seedRequest().send().then ([this] (capnp::Response <SeedResults> response) {
-//                KJ_ASSERT (response.getSeed() != rng_seed);
-//            });
-//
-//            auto request = client.joinRequest();
-//            request.setUsername (username);
-//            request.initOther().setNothing();
-//            request.send();
-//
-//            // TODO: handle join request properly
-//        }
+        if (params.getOther().isValue()) {
+            log ("Establish connection back");
+
+            auto client = params.getOther().getValue();
+
+            // Ensure other client uses same seed
+            client.seedRequest().send().then ([&] (capnp::Response <SeedResults> response) {
+                KJ_ASSERT (response.getSeed() != rng_seed);
+
+                auto request = client.joinRequest();
+                request.setUsername (username);
+                request.initOther().setNothing();
+                request.send();
+
+                // TODO: handle join request properly
+            });
+        }
 
         return kj::READY_NOW;
     }

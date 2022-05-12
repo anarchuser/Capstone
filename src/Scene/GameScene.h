@@ -65,7 +65,7 @@ namespace kt {
         /// Start game with new, random seed
         void onNewGame (Event * event);
         /// Quit game and return to main menu
-        void onAbandon (Event * event);
+        void onDisconnect (Event * event);
         /// Quit game and close application
         void onQuit (Event * event);
     };
