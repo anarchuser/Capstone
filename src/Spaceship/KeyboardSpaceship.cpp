@@ -8,6 +8,8 @@ namespace kt {
             : Spaceship (world, res, pos, scale)
             , client {address}
             , sink {[&, this, address] () {
+                instance = this;
+
                 logs::messageln ("Connect to '%s'", address.c_str());
                 setName (USERNAME);
 
@@ -23,8 +25,6 @@ namespace kt {
             }()}
             {
         setAddColor (KEYBOARD_SPACESHIP_COLOR);
-
-        instance = this;
 
         // TODO: remove this
         setAwake (true);

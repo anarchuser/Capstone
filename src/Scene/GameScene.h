@@ -24,7 +24,7 @@
 #include <string>
 
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
-#define RANDOM_SEED 1
+#define RANDOM_SEED
 
 namespace kt {
     using namespace oxygine;

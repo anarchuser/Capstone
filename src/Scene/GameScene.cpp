@@ -22,26 +22,27 @@ namespace kt {
         addChild (world);
         world->onSendSink = [&] (std::string const & username) -> kj::Own <cg::ItemSinkImpl> {
             logs::messageln ("Received sink for spaceship '%s'", username.c_str());
-            spActor child = world->getChild (username, oxygine::ep_ignore_error);
-            if (child.get() == KeyboardSpaceship::instance) {
-                spKeyboardSpaceship ship = safeSpCast <KeyboardSpaceship> (child);
+
+            static bool once = true;
+            if (once) {
+                once = false;
+                OX_ASSERT (KeyboardSpaceship::instance);
+                OX_ASSERT (KeyboardSpaceship::instance->getName() == username);
                 return kj::heap <cg::ItemSinkImpl> (
-                        CLOSURE (ship.get(), & KeyboardSpaceship::destroy),
-                        CLOSURE (ship.get(), & KeyboardSpaceship::updateDirection));
-            } else if (child.get() == nullptr) {
-                spRemoteSpaceship ship =
-                        new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
-                ship->setName (username);
-                return kj::heap <cg::ItemSinkImpl> (
-                        CLOSURE (ship.get(), & RemoteSpaceship::destroy),
-                        CLOSURE (ship.get(), & RemoteSpaceship::updateDirection));
-            } else {
-                spSpaceship ship = safeSpCast <Spaceship> (child);
-                return kj::heap <cg::ItemSinkImpl> (
-                        CLOSURE (ship.get(), & Spaceship::destroy),
-                        CLOSURE (ship.get(), & Spaceship::updateDirection));
+                        CLOSURE (KeyboardSpaceship::instance, & KeyboardSpaceship::destroy),
+                        CLOSURE (KeyboardSpaceship::instance, & KeyboardSpaceship::updateDirection));
             }
-//            return kj::heap <cg::ItemSinkImpl> ();
+            // TODO: ensure usernames are unique
+//            spActor child = world->getChild (username, oxygine::ep_ignore_error);
+//
+//            spRemoteSpaceship ship =
+//                    new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
+//            ship->setName (username);
+//            return kj::heap <cg::ItemSinkImpl> (
+//                    CLOSURE (ship.get(), & RemoteSpaceship::destroy),
+//                    CLOSURE (ship.get(), & RemoteSpaceship::updateDirection));
+
+            return kj::heap <cg::ItemSinkImpl> ();
         };
 
         // Generate a couple of planets, number based on world size
