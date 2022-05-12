@@ -16,11 +16,12 @@ namespace cg {
     }
 
     ::kj::Promise <void> SynchroImpl::ping (PingContext context) {
-        log ("Received Ping");
+        log ("Ping");
         return kj::READY_NOW;
     }
 
     ::kj::Promise<void> SynchroImpl::seed (SeedContext context) {
+        log ("RNG Seed (" + std::to_string (rng_seed) + ") requested");
         context.initResults().setSeed (rng_seed);
         return kj::READY_NOW;
     }
@@ -88,6 +89,8 @@ namespace cg {
             if (! sinks.contains (sender)) {
                 distributeSpaceship (sender, receiver);
             }
+
+            KJ_REQUIRE (sinks.contains (sender));
             auto request = sinks.at (sender).sendItemRequest();
             auto request_direction = request.initItem().initDirection();
 
@@ -121,13 +124,13 @@ namespace cg {
         KJ_REQUIRE (connections.contains (sender));
         KJ_REQUIRE (connections.contains (receiver));
 
-        if (connections.at (sender).itemSinks.contains (receiver)) {
+        if (connections.at (receiver).itemSinks.contains (sender)) {
             log ("Connection exists already");
             return;
         }
 
         auto & shipCallback = connections.at (receiver).shipCallback;
-        auto & sinks = connections.at (sender).itemSinks;
+        auto & sinks = connections.at (receiver).itemSinks;
         auto request = shipCallback.sendSinkRequest ();
         request.setUsername (sender);
         sinks.emplace (sender, request.send().getShip());

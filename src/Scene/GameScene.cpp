@@ -41,6 +41,7 @@ namespace kt {
                         CLOSURE (ship.get(), & Spaceship::destroy),
                         CLOSURE (ship.get(), & Spaceship::updateDirection));
             }
+//            return kj::heap <cg::ItemSinkImpl> ();
         };
 
         // Generate a couple of planets, number based on world size
