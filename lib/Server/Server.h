@@ -48,7 +48,7 @@ namespace cg {
         /// Seed used to initialise the game. Returned by `randomSeed`
         std::size_t const rng_seed;
 
-        void sendItemCallback (std::string sender, Direction direction);
+        void sendItemCallback (std::string const & sender, Direction direction);
         void doneCallback     (std::string username);
 
         void distributeSpaceship (Spaceship const & sender, std::string const & receiver);

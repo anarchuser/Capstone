@@ -37,7 +37,9 @@ interface Synchro {
     }
 
     interface ShipCallback {
-        sendSink @0 (spaceship :Spaceship) -> (ship :ItemSink);
+        sendSink @0 (spaceship :Spaceship) -> (sink :ItemSink);
+        getSpaceship @1 () -> (spaceship :Spaceship);
+        setSpaceship @2 (spaceship :Spaceship) -> ();
     }
 
     ping @0 ();

@@ -11,6 +11,7 @@
 #include "Spaceship.h"
 
 #include "Server/Server.h"
+#include "Data/Spaceship.h"
 
 #define KEYBOARD_SPACESHIP_COLOR {0, 0, 255}
 

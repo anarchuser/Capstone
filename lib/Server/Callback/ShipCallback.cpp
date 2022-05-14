@@ -11,27 +11,47 @@ namespace cg {
     void ShipCallbackImpl::setOnSendSink (SendSinkCallbackHandle const & onSendSink) {
         this->onSendSink = onSendSink;
     }
+    void ShipCallbackImpl::setOnGetSpaceship (GetSpaceshipCallbackHandle const & onGetSpaceship) {
+        this->onGetSpaceship = onGetSpaceship;
+    }
+    void ShipCallbackImpl::setOnSetSpaceship (SetSpaceshipCallbackHandle const & onSetSpaceship) {
+        this->onSetSpaceship = onSetSpaceship;
+    }
 
     ::kj::Promise<void> ShipCallbackImpl::sendSink (SendSinkContext context) {
         auto spaceship = context.getParams().getSpaceship();
-        auto position = spaceship.getPosition();
-        auto velocity = spaceship.getVelocity();
         auto username = spaceship.getUsername();
-        auto angle    = spaceship.getAngle();
         log ("New Spaceship: " + std::string (username));
 
         try {
-            context.getResults().setShip (onSendSink ({
-                username, {
-                    position.getX(),
-                    position.getY()
-                }, {
-                    velocity.getX(),
-                    velocity.getY()
-                }, angle
-                }));
+            context.getResults().setSink (onSendSink (Spaceship (spaceship)));
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipCallback::sendSink called without valid callback registered");
+        }
+
+        return kj::READY_NOW;
+    }
+
+    ::kj::Promise<void> ShipCallbackImpl::getSpaceship (GetSpaceshipContext context) {
+        try {
+            onGetSpaceship ()
+                .initialise (context.getResults().getSpaceship());
+
+        } catch (std::bad_function_call & e) {
+            KJ_DLOG (WARNING, "ShipCallback::getSpaceship called without valid callback registered");
+        }
+
+        return kj::READY_NOW;
+    }
+
+    ::kj::Promise<void> ShipCallbackImpl::setSpaceship (SetSpaceshipContext context) {
+        Spaceship ship (context.getParams().getSpaceship());
+
+        try {
+            onSetSpaceship (ship);
+
+        } catch (std::bad_function_call & e) {
+            KJ_DLOG (WARNING, "ShipCallback::setSpaceship called without valid callback registered");
         }
 
         return kj::READY_NOW;
