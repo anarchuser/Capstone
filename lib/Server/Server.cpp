@@ -100,7 +100,9 @@ namespace cg {
                 connections.at (sender).shipCallback.getSpaceshipRequest().send().then (
                         [&] (capnp::Response<Synchro::ShipCallback::GetSpaceshipResults> response) {
                     distributeSpaceship (Spaceship (response.getSpaceship()), receiver);
+                    sendItemCallback (sender, direction);
                 });
+                return;
             }
 
             KJ_REQUIRE (sinks.contains (sender));
