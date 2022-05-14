@@ -107,6 +107,7 @@ namespace cg {
             auto & sinks = pair.second.itemSinks;
 
             if (! sinks.contains (sender)) {
+                // TODO: transmit position / velocity / angle...?
                 distributeSpaceship ({sender}, receiver);
             }
 
