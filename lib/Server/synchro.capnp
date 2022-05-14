@@ -19,17 +19,28 @@ interface Synchro {
         direction @0 :Direction;
     }
 
+    struct Spaceship {
+        username @0 :Text;
+        position @1 :Vector;
+        velocity @2 :Vector;
+    }
+
+    struct Vector {
+        x @0 :Float32;
+        y @1 :Float32;
+    }
+
     interface ItemSink {
         done @0 ();
         sendItem @1 (item :Item) -> ();
     }
 
     interface ShipCallback {
-        sendSink @0 (username :Text) -> (ship :ItemSink);
+        sendSink @0 (spaceship :Spaceship) -> (ship :ItemSink);
     }
 
     ping @0 ();
     seed @1 () -> (seed :UInt64);
-    join @2 (username :Text, other :Maybe(Synchro), shipCallback :ShipCallback) -> (itemSink :ItemSink);
+    join @2 (spaceship :Spaceship, other :Maybe(Synchro), shipCallback :ShipCallback) -> (itemSink :ItemSink);
     waitScope @3 (scope :UInt64);
 }
