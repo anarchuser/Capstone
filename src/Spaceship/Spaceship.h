@@ -12,6 +12,7 @@
 #include "src/Collision/CollisionEvent.h"
 #include "src/UI/Text.h"
 #include "Data/Direction.h"
+#include "Data/Spaceship.h"
 
 /// Relative spaceship size
 #define SPACESHIP_SCALE     2e-1
@@ -75,6 +76,9 @@ namespace kt {
 
         void setPhysicalTransform (b2Vec2 pos, float angle);
         void setPhysicalVelocity (b2Vec2 vel);
+
+        cg::Spaceship getData () const;
+        void setData (cg::Spaceship const & spaceship);
 
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
         static std::size_t ship_counter;

@@ -11,6 +11,14 @@ namespace cg {
             {
             }
 
+    Spaceship::Spaceship (std::string username, vector2 position, vector2 velocity, float angle)
+            : username {std::move (username)}
+            , position {position}
+            , velocity {velocity}
+            , angle {angle}
+            {
+            }
+
     void Spaceship::initialise (Synchro::Spaceship::Builder builder) const {
         builder.setUsername (username);
 

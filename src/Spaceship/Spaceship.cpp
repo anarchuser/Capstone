@@ -144,6 +144,24 @@ namespace kt {
     void Spaceship::setPhysicalVelocity (b2Vec2 vel) {
         body->SetLinearVelocity (vel);
     }
+
+    cg::Spaceship Spaceship::getData () const {
+        return {
+            getName(), {
+                getPhysicalPosition().x,
+                getPhysicalPosition().y
+            }, {
+                getPhysicalVelocity().x,
+                getPhysicalVelocity().y
+            },
+            getRotation()
+        };
+    }
+    void Spaceship::setData (cg::Spaceship const & spaceship) {
+        setName (spaceship.username);
+        setPhysicalTransform ({spaceship.position[0], spaceship.position[1]}, spaceship.angle);
+        setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

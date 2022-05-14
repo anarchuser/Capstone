@@ -15,22 +15,12 @@ namespace kt {
 
                 auto request = client.getMain <Synchro> ().joinRequest ();
                 request.initOther().setValue (kj::heap <cg::SynchroImpl> (1));
-                {
-                    auto ship = request.initSpaceship();
-                    ship.setUsername (USERNAME);
-                    auto pos = ship.initPosition();
-                    auto real_pos = getPhysicalPosition();
-                    pos.setX (real_pos.x);
-                    pos.setY (real_pos.y);
-                    auto vel = ship.initVelocity();
-                    auto real_vel = getPhysicalVelocity();
-                    vel.setX (real_vel.x);
-                    vel.setY (real_vel.y);
-                    ship.setAngle (getRotation());
-                }
+                getData().initialise (request.initSpaceship());
 
                 auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
                 shipCB->setOnSendSink (world.onSendSink);
+                shipCB->setOnGetSpaceship (CLOSURE (this, & Spaceship::getData));
+                shipCB->setOnSetSpaceship (CLOSURE (this, & Spaceship::setData));
                 request.setShipCallback (kj::mv (shipCB));
 
                 return request.send().wait (client.getWaitScope()).getItemSink();
