@@ -66,7 +66,7 @@ namespace kt {
         }));
     }
 
-    void Spaceship::updateDirection (Direction new_dir) {
+    void Spaceship::updateDirection (cg::Direction new_dir) {
         direction = new_dir;
     };
 
@@ -127,6 +127,22 @@ namespace kt {
         }
 
         Actor::update (us);
+    }
+
+    b2Vec2 Spaceship::getPhysicalPosition () const {
+        return body->GetLinearVelocity();
+    }
+
+    b2Vec2 Spaceship::getPhysicalVelocity () const {
+        return body->GetPosition();
+    }
+
+    void Spaceship::setPhysicalTransform (b2Vec2 pos, float angle) {
+        body->SetTransform (pos, angle);
+    }
+
+    void Spaceship::setPhysicalVelocity (b2Vec2 vel) {
+        body->SetLinearVelocity (vel);
     }
 }
 

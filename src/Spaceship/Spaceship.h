@@ -53,11 +53,11 @@ namespace kt {
 
     public:
         /// Current issued direction:
-        Direction direction;
+        cg::Direction direction;
 
         /// Construct a new ship in the current world, at given position (usually centred)
         Spaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
-        ~Spaceship() noexcept = default;
+        ~Spaceship() noexcept override = default;
 
         /// Apply linear or angular impulses based on command flags
         void update (UpdateState const & us) override;
@@ -66,9 +66,15 @@ namespace kt {
         void setAwake (bool awake);
 
         /// Replace current directions with new ones
-        void updateDirection (Direction new_dir);
+        void updateDirection (cg::Direction new_dir);
 
         virtual void destroy ();
+
+        b2Vec2 getPhysicalPosition () const;
+        b2Vec2 getPhysicalVelocity () const;
+
+        void setPhysicalTransform (b2Vec2 pos, float angle);
+        void setPhysicalVelocity (b2Vec2 vel);
 
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
         static std::size_t ship_counter;

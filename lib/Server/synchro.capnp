@@ -23,11 +23,12 @@ interface Synchro {
         username @0 :Text;
         position @1 :Vector;
         velocity @2 :Vector;
+        angle    @3 :Float32;
     }
 
     struct Vector {
-        x @0 :Float32 = 0.0;
-        y @1 :Float32 = 0.0;
+        x @0 :Float32;
+        y @1 :Float32;
     }
 
     interface ItemSink {

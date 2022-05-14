@@ -25,7 +25,7 @@ namespace kt {
         capnp::EzRpcClient client;
         Synchro::ItemSink::Client sink;
 
-        Direction queried;
+        cg::Direction queried;
 
     public:
         /// Creates a new human-controllable spaceship. Only one such ship may exist in a game

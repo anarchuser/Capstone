@@ -17,6 +17,7 @@ namespace cg {
         auto position = spaceship.getPosition();
         auto velocity = spaceship.getVelocity();
         auto username = spaceship.getUsername();
+        auto angle    = spaceship.getAngle();
         log ("New Spaceship: " + std::string (username));
 
         try {
@@ -27,7 +28,8 @@ namespace cg {
                 }, {
                     velocity.getX(),
                     velocity.getY()
-                }}));
+                }, angle
+                }));
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipCallback::sendSink called without valid callback registered");
         }

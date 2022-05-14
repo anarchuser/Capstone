@@ -20,13 +20,21 @@ namespace kt {
 
         spWorld world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
         addChild (world);
-        world->onSendSink = [&] (std::string const & username) -> kj::Own <cg::ItemSinkImpl> {
+        world->onSendSink = [&] (cg::Spaceship const & spaceship) -> kj::Own <cg::ItemSinkImpl> {
+            auto & username = spaceship.username;
             logs::messageln ("Received sink for spaceship '%s'", username.c_str());
 
-            if (KeyboardSpaceship::instance && KeyboardSpaceship::instance->getName() == username)
-                return kj::heap <cg::ItemSinkImpl> (
-                        CLOSURE (KeyboardSpaceship::instance, & KeyboardSpaceship::destroy),
-                        CLOSURE (KeyboardSpaceship::instance, & KeyboardSpaceship::updateDirection));
+            {
+                auto ship = KeyboardSpaceship::instance;
+                if (ship && ship->getName () == username) {
+                    ship->setPhysicalTransform ({spaceship.position[0], spaceship.position[1]},
+                                                ship->getRotation ());
+                    ship->setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
+                    return kj::heap<cg::ItemSinkImpl> (
+                            CLOSURE (ship, & KeyboardSpaceship::destroy),
+                            CLOSURE (ship, & KeyboardSpaceship::updateDirection));
+                }
+            }
 
             spWorld world = World::instance;
             OX_ASSERT (world);
@@ -35,6 +43,8 @@ namespace kt {
 
             spRemoteSpaceship ship = new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
             ship->setName (username);
+            ship->setPhysicalTransform ({spaceship.position[0], spaceship.position[1]}, ship->getRotation());
+            ship->setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
             return kj::heap <cg::ItemSinkImpl> (
                     CLOSURE (ship.get(), & RemoteSpaceship::destroy),
                     CLOSURE (ship.get(), & RemoteSpaceship::updateDirection));

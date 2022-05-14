@@ -38,7 +38,8 @@ namespace cg {
                 }, {
                     param_ship.getVelocity().getX(),
                     param_ship.getVelocity().getY(),
-                }
+                },
+                param_ship.getAngle()
         };
 
         // Check that username is unique
@@ -145,14 +146,15 @@ namespace cg {
         auto & sinks = connections.at (receiver).itemSinks;
         auto request = shipCallback.sendSinkRequest ();
         {
-            auto request_ship = request.initSpaceship();
-            request_ship.setUsername (sender.username);
-            auto pos = request_ship.initPosition();
+            auto ship = request.initSpaceship();
+            ship.setUsername (sender.username);
+            auto pos = ship.initPosition();
             pos.setX (sender.position[0]);
             pos.setY (sender.position[1]);
-            auto vel = request_ship.initVelocity();
+            auto vel = ship.initVelocity();
             vel.setX (sender.velocity[0]);
             vel.setY (sender.velocity[1]);
+            ship.setAngle (sender.angle);
         }
         sinks.emplace (sender.username, request.send().getShip());
     }
