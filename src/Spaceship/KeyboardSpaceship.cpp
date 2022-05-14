@@ -81,11 +81,8 @@ namespace kt {
 
     void KeyboardSpaceship::update (UpdateState const & us) {
         auto request = sink.sendItemRequest ();
-        auto dir = request.initItem().initDirection();
-        dir.setAccelerate (queried.accelerate);
-        dir.setDecelerate (queried.decelerate);
-        dir.setRotateLeft (queried.rotateLeft);
-        dir.setRotateRight (queried.rotateRight);
+        queried.initialise (request.initItem().initDirection());
+
         auto promise = request.send();
         Spaceship::update (us);
         promise.wait (client.getWaitScope());

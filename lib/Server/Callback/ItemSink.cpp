@@ -33,14 +33,10 @@ namespace cg {
     ::kj::Promise<void> ItemSinkImpl::sendItem (SendItemContext context) {
         try {
             auto direction = context.getParams ().getItem ().getDirection ();
-            callbacks.onSendItem ({
-                direction.getAccelerate (),
-                direction.getDecelerate (),
-                direction.getRotateLeft (),
-                direction.getRotateRight ()
-            });
+            callbacks.onSendItem (Direction (direction));
+
         } catch (std::bad_function_call & e) {
-//            KJ_DLOG (WARNING, "ItemSink::sendItem called without valid callback registered");
+            KJ_DLOG (WARNING, "ItemSink::sendItem called without valid callback registered");
         }
 
         return kj::READY_NOW;

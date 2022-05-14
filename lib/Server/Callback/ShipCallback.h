@@ -22,11 +22,17 @@
 
 namespace cg {
     using SendSinkCallback       = std::function <kj::Own <cg::ItemSinkImpl> (Spaceship)>;
-    using SendSinkCallbackHandle = std::function <kj::Own <cg::ItemSinkImpl> (Spaceship)>;
+    using SendSinkCallbackHandle = SendSinkCallback;
+    using GetSpaceshipCallback       = std::function <Spaceship ()>;
+    using GetSpaceshipCallbackHandle = GetSpaceshipCallback;
+    using SetSpaceshipCallback       = std::function <void (Spaceship)>;
+    using SetSpaceshipCallbackHandle = SetSpaceshipCallback;
 
     class ShipCallbackImpl final: public Synchro::ShipCallback::Server {
     private:
         SendSinkCallback onSendSink;
+        GetSpaceshipCallback onGetSpaceship;
+        SetSpaceshipCallback onSetSpaceship;
 
         void log (std::string const & msg);
 
@@ -35,8 +41,12 @@ namespace cg {
         ~ShipCallbackImpl() = default;
 
         void setOnSendSink (SendSinkCallbackHandle const & onSendSink);
+        void setOnGetSpaceship (GetSpaceshipCallbackHandle const & onGetSpaceship);
+        void setOnSetSpaceship (SetSpaceshipCallbackHandle const & onSetSpaceship);
 
         ::kj::Promise<void> sendSink (SendSinkContext context) override;
+        ::kj::Promise<void> getSpaceship (GetSpaceshipContext context) override;
+        ::kj::Promise<void> setSpaceship (SetSpaceshipContext context) override;
     };
 } // cg
 

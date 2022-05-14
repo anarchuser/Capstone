@@ -28,19 +28,8 @@ namespace cg {
 
     ::kj::Promise<void> SynchroImpl::join (JoinContext context) {
         auto params = context.getParams();
-        auto param_ship = params.getSpaceship();
         auto result = context.getResults();
-
-        Spaceship spaceship = {
-                param_ship.getUsername(), {
-                    param_ship.getPosition().getX(),
-                    param_ship.getPosition().getY()
-                }, {
-                    param_ship.getVelocity().getX(),
-                    param_ship.getVelocity().getY(),
-                },
-                param_ship.getAngle()
-        };
+        Spaceship spaceship (params.getSpaceship());
 
         // Check that username is unique
         // TODO: replace with UUID or ip
@@ -87,6 +76,7 @@ namespace cg {
                 KJ_ASSERT (response.getSeed() != rng_seed);
 
                 auto request = client.joinRequest();
+                // TODO: figure out the KeyboardSpaceship of the local client's game
                 auto request_ship = request.initSpaceship();
                 request_ship.setUsername (username);
                 // TODO: set real spaceship position + velocity (currently defaults to 0.0)
@@ -100,15 +90,17 @@ namespace cg {
         return kj::READY_NOW;
     }
 
-    void SynchroImpl::sendItemCallback (std::string sender, Direction direction) {
+    void SynchroImpl::sendItemCallback (std::string const & sender, Direction direction) {
         std::for_each (connections.begin(), connections.end(),
                        [&] (std::pair<std::string const, Connection> & pair) {
             auto & receiver = pair.first;
             auto & sinks = pair.second.itemSinks;
 
             if (! sinks.contains (sender)) {
-                // TODO: transmit position / velocity / angle...?
-                distributeSpaceship ({sender}, receiver);
+                connections.at (sender).shipCallback.getSpaceshipRequest().send().then (
+                        [&] (capnp::Response<Synchro::ShipCallback::GetSpaceshipResults> response) {
+                    distributeSpaceship (Spaceship (response.getSpaceship()), receiver);
+                });
             }
 
             KJ_REQUIRE (sinks.contains (sender));
@@ -153,17 +145,7 @@ namespace cg {
         auto & shipCallback = connections.at (receiver).shipCallback;
         auto & sinks = connections.at (receiver).itemSinks;
         auto request = shipCallback.sendSinkRequest ();
-        {
-            auto ship = request.initSpaceship();
-            ship.setUsername (sender.username);
-            auto pos = ship.initPosition();
-            pos.setX (sender.position[0]);
-            pos.setY (sender.position[1]);
-            auto vel = ship.initVelocity();
-            vel.setX (sender.velocity[0]);
-            vel.setY (sender.velocity[1]);
-            ship.setAngle (sender.angle);
-        }
+        sender.initialise (request.initSpaceship());
         sinks.emplace (sender.username, request.send().getSink());
     }
 
