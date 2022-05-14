@@ -26,8 +26,8 @@ interface Synchro {
     }
 
     struct Vector {
-        x @0 :Float32;
-        y @1 :Float32;
+        x @0 :Float32 = 0.0;
+        y @1 :Float32 = 0.0;
     }
 
     interface ItemSink {

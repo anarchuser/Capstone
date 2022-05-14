@@ -18,10 +18,11 @@
 #include <thread>
 
 #include "Data/Direction.h"
+#include "Data/Spaceship.h"
 
 namespace cg {
-    using SendSinkCallback       = std::function <kj::Own <cg::ItemSinkImpl> (std::string const &)>;
-    using SendSinkCallbackHandle = std::function <kj::Own <cg::ItemSinkImpl> ()>;
+    using SendSinkCallback       = std::function <kj::Own <cg::ItemSinkImpl> (Spaceship)>;
+    using SendSinkCallbackHandle = std::function <kj::Own <cg::ItemSinkImpl> (Spaceship)>;
 
     class ShipCallbackImpl final: public Synchro::ShipCallback::Server {
     private:

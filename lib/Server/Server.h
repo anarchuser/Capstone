@@ -18,6 +18,7 @@
 #include <ranges>
 
 #include "Data/Direction.h"
+#include "Data/Spaceship.h"
 #include "Callback/ItemSink.h"
 #include "Callback/ShipCallback.h"
 
@@ -25,12 +26,7 @@
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
  */
 
-#define MAX_CONNECTIONS 256
-
 namespace cg {
-//    typedef std::function <void (Direction)> SendItemCallbackHandle;
-//    typedef std::function <void ()> DoneCallbackHandle;
-
     class SynchroImpl final: public Synchro::Server {
     private:
         struct Connection {
@@ -55,14 +51,13 @@ namespace cg {
         void sendItemCallback (std::string sender, Direction direction);
         void doneCallback     (std::string username);
 
-        void distributeSpaceship (std::string const & sender, std::string const & receiver);
-        void broadcastSpaceship  (std::string const & sender);
+        void distributeSpaceship (Spaceship const & sender, std::string const & receiver);
+        void broadcastSpaceship  (Spaceship const & sender);
 
         void log (std::string const & msg);
 
     public:
         explicit SynchroImpl (std::size_t seed);
-
 
         /// RPC function calls
         ::kj::Promise <void> ping (PingContext context) override;
