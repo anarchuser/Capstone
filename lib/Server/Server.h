@@ -17,7 +17,7 @@
 
 #include <ranges>
 
-#include "Direction/Direction.h"
+#include "Data/Direction.h"
 #include "Callback/ItemSink.h"
 #include "Callback/ShipCallback.h"
 

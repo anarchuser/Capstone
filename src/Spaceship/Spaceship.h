@@ -11,7 +11,7 @@
 #include "src/World/World.h"
 #include "src/Collision/CollisionEvent.h"
 #include "src/UI/Text.h"
-#include "Direction/Direction.h"
+#include "Data/Direction.h"
 
 /// Relative spaceship size
 #define SPACESHIP_SCALE     2e-1
