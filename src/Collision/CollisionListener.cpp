@@ -8,10 +8,10 @@ namespace kt {
         auto * actorA = (Sprite *) contact->GetFixtureA()->GetBody()->GetUserData().pointer;
         auto * actorB = (Sprite *) contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 
-        if (actorB->isName ("Spaceship")) {
+        if (! actorB->isName ("Planet")) {
             actorB->dispatchEvent (new CollisionEvent (actorA, CollisionEvent::BEGIN));
         }
-        if (actorA->isName ("Spaceship")) {
+        if (! actorA->isName ("Planet")) {
             actorA->dispatchEvent (new CollisionEvent (actorB, CollisionEvent::BEGIN));
         }
     }
