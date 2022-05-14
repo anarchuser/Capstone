@@ -15,7 +15,7 @@
 #include <iostream>
 #include <memory>
 
-#include "Direction/Direction.h"
+#include "Data/Direction.h"
 
 namespace cg {
     typedef std::function <void ()> DoneCallback;

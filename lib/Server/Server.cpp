@@ -28,13 +28,32 @@ namespace cg {
 
     ::kj::Promise<void> SynchroImpl::join (JoinContext context) {
         auto params = context.getParams();
+        auto param_ship = params.getSpaceship();
         auto result = context.getResults();
+
+        Spaceship spaceship = {
+                param_ship.getUsername(), {
+                    param_ship.getPosition().getX(),
+                    param_ship.getPosition().getY()
+                }, {
+                    param_ship.getVelocity().getX(),
+                    param_ship.getVelocity().getY(),
+                },
+                param_ship.getAngle()
+        };
 
         // Check that username is unique
         // TODO: replace with UUID or ip
-        std::string username = params.getUsername();
+        std::string const & username = params.getSpaceship().getUsername();
         KJ_REQUIRE (! connections.contains (username), username, "Username already in use");
         log (std::string ("Join request received from user ") + username);
+        log (std::string ("Position: ( ")
+             + std::to_string (spaceship.position[0]) + " | "
+             + std::to_string (spaceship.position[1]) + " )");
+        log (std::string ("Velocity: ( ")
+                + std::to_string (spaceship.velocity[0]) + " | "
+                + std::to_string (spaceship.velocity[1]) + " )");
+        log (std::string ("Angle: " + std::to_string (spaceship.angle)));
 
         // Store connection details (callback handles and 'new ship' callback)
         // TODO: figure out whether to share all connections
@@ -45,7 +64,7 @@ namespace cg {
                     doneCallback (username);
                 }}, params.getShipCallback()));
         KJ_ASSERT (success);
-        broadcastSpaceship (username);
+        broadcastSpaceship (spaceship);
 
         // Configure ItemSink sent back to client
         log ("Configure ItemSink result");
@@ -62,14 +81,15 @@ namespace cg {
         if (params.getOther().isValue()) {
             log ("Establish connection back");
 
-            auto client = params.getOther().getValue();
-
             // Ensure other client uses same seed
+            auto client = params.getOther().getValue();
             client.seedRequest().send().then ([&] (capnp::Response <SeedResults> response) {
                 KJ_ASSERT (response.getSeed() != rng_seed);
 
                 auto request = client.joinRequest();
-                request.setUsername (username);
+                auto request_ship = request.initSpaceship();
+                request_ship.setUsername (username);
+                // TODO: set real spaceship position + velocity (currently defaults to 0.0)
                 request.initOther().setNothing();
                 request.send();
 
@@ -87,7 +107,8 @@ namespace cg {
             auto & sinks = pair.second.itemSinks;
 
             if (! sinks.contains (sender)) {
-                distributeSpaceship (sender, receiver);
+                // TODO: transmit position / velocity / angle...?
+                distributeSpaceship ({sender}, receiver);
             }
 
             KJ_REQUIRE (sinks.contains (sender));
@@ -118,13 +139,13 @@ namespace cg {
         });
     }
 
-    void SynchroImpl::distributeSpaceship (std::string const & sender, std::string const & receiver) {
-        log ("Relay directions from " + sender += " to " + receiver);
+    void SynchroImpl::distributeSpaceship (Spaceship const & sender, std::string const & receiver) {
+        log ("Relay directions from " + sender.username += " to " + receiver);
 
-        KJ_REQUIRE (connections.contains (sender));
+        KJ_REQUIRE (connections.contains (sender.username));
         KJ_REQUIRE (connections.contains (receiver));
 
-        if (connections.at (receiver).itemSinks.contains (sender)) {
+        if (connections.at (receiver).itemSinks.contains (sender.username)) {
             log ("Connection exists already");
             return;
         }
@@ -132,11 +153,21 @@ namespace cg {
         auto & shipCallback = connections.at (receiver).shipCallback;
         auto & sinks = connections.at (receiver).itemSinks;
         auto request = shipCallback.sendSinkRequest ();
-        request.setUsername (sender);
-        sinks.emplace (sender, request.send().getShip());
+        {
+            auto ship = request.initSpaceship();
+            ship.setUsername (sender.username);
+            auto pos = ship.initPosition();
+            pos.setX (sender.position[0]);
+            pos.setY (sender.position[1]);
+            auto vel = ship.initVelocity();
+            vel.setX (sender.velocity[0]);
+            vel.setY (sender.velocity[1]);
+            ship.setAngle (sender.angle);
+        }
+        sinks.emplace (sender.username, request.send().getShip());
     }
 
-    void SynchroImpl::broadcastSpaceship (std::string const & sender) {
+    void SynchroImpl::broadcastSpaceship (Spaceship const & sender) {
         std::for_each (connections.begin(), connections.end(),
                        [&, this] (std::pair <std::string const, Connection> & pair) {
             distributeSpaceship (sender, pair.first);

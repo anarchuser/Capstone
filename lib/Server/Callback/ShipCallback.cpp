@@ -13,12 +13,23 @@ namespace cg {
     }
 
     ::kj::Promise<void> ShipCallbackImpl::sendSink (SendSinkContext context) {
-        auto params = context.getParams();
-        auto username = params.getUsername();
+        auto spaceship = context.getParams().getSpaceship();
+        auto position = spaceship.getPosition();
+        auto velocity = spaceship.getVelocity();
+        auto username = spaceship.getUsername();
+        auto angle    = spaceship.getAngle();
         log ("New Spaceship: " + std::string (username));
 
         try {
-            context.getResults().setShip (onSendSink (username));
+            context.getResults().setShip (onSendSink ({
+                username, {
+                    position.getX(),
+                    position.getY()
+                }, {
+                    velocity.getX(),
+                    velocity.getY()
+                }, angle
+                }));
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipCallback::sendSink called without valid callback registered");
         }

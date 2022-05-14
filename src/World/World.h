@@ -11,6 +11,8 @@
 
 #include "Server/Server.h"
 
+#include "Data/Spaceship.h"
+
 /// Size of the physical world. Determines x/y ratio and size of objects contained
 #define WORLD_SIZE {10, 10}
 
@@ -33,7 +35,7 @@ namespace kt {
         b2Vec2 const world_size;
 
         /// Callback used when new spaceship direction streams are registered
-        std::function <kj::Own <cg::ItemSinkImpl> (std::string const &)> onSendSink;
+        std::function <kj::Own <cg::ItemSinkImpl> (cg::Spaceship)> onSendSink;
 
         /// Construct a new world with the given background and size
         World (ResAnim * background, b2Vec2 size);
