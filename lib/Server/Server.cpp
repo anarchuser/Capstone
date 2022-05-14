@@ -164,7 +164,7 @@ namespace cg {
             vel.setY (sender.velocity[1]);
             ship.setAngle (sender.angle);
         }
-        sinks.emplace (sender.username, request.send().getShip());
+        sinks.emplace (sender.username, request.send().getSink());
     }
 
     void SynchroImpl::broadcastSpaceship (Spaceship const & sender) {

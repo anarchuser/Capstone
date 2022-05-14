@@ -21,7 +21,7 @@ namespace cg {
         log ("New Spaceship: " + std::string (username));
 
         try {
-            context.getResults().setShip (onSendSink ({
+            context.getResults().setSink (onSendSink ({
                 username, {
                     position.getX(),
                     position.getY()
