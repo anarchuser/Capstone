@@ -45,10 +45,10 @@ namespace cg {
     }
 
     ::kj::Promise<void> ShipCallbackImpl::setSpaceship (SetSpaceshipContext context) {
-        auto ship = context.getParams().getSpaceship();
+        Spaceship ship (context.getParams().getSpaceship());
 
         try {
-            onSetSpaceship (Spaceship (ship));
+            onSetSpaceship (ship);
 
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipCallback::setSpaceship called without valid callback registered");

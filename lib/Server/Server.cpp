@@ -97,11 +97,11 @@ namespace cg {
             auto & sinks = pair.second.itemSinks;
 
             if (! sinks.contains (sender)) {
-                connections.at (sender).shipCallback.getSpaceshipRequest().send().then (
+                detach(connections.at (sender).shipCallback.getSpaceshipRequest().send().then (
                         [&] (capnp::Response<Synchro::ShipCallback::GetSpaceshipResults> response) {
                     distributeSpaceship (Spaceship (response.getSpaceship()), receiver);
                     sendItemCallback (sender, direction);
-                });
+                }));
                 return;
             }
 
