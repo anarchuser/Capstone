@@ -130,11 +130,11 @@ namespace kt {
     }
 
     b2Vec2 Spaceship::getPhysicalPosition () const {
-        return body->GetLinearVelocity();
+        return body->GetPosition();
     }
 
     b2Vec2 Spaceship::getPhysicalVelocity () const {
-        return body->GetPosition();
+        return body->GetLinearVelocity();
     }
 
     void Spaceship::setPhysicalTransform (b2Vec2 pos, float angle) {

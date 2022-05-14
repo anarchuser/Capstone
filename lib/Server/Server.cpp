@@ -47,6 +47,13 @@ namespace cg {
         std::string const & username = params.getSpaceship().getUsername();
         KJ_REQUIRE (! connections.contains (username), username, "Username already in use");
         log (std::string ("Join request received from user ") + username);
+        log (std::string ("Position: ( ")
+             + std::to_string (spaceship.position[0]) + " | "
+             + std::to_string (spaceship.position[1]) + " )");
+        log (std::string ("Velocity: ( ")
+                + std::to_string (spaceship.velocity[0]) + " | "
+                + std::to_string (spaceship.velocity[1]) + " )");
+        log (std::string ("Angle: " + std::to_string (spaceship.angle)));
 
         // Store connection details (callback handles and 'new ship' callback)
         // TODO: figure out whether to share all connections
