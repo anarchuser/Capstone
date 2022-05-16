@@ -98,6 +98,10 @@ namespace kt {
     void Spaceship::update (oxygine::UpdateState const & us) {
         updateScoreboard ();
 
+        auto centre = body->GetLocalCenter();
+        auto pos = body->GetWorldCenter();
+//        std::cout << "pos: " << pos.x << "|" << pos.y << std::endl;
+
         // Update ship velocity
         if (direction.decelerate && !direction.accelerate) {
             // Decelerate spaceship. Works as universal brake, e.g., against gravity

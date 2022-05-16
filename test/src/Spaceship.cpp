@@ -4,16 +4,16 @@
 
 #include "Spaceship/Spaceship.h"
 
-#define TIME_STEPS 61
+#define TIME_STEPS 30
 #define WINDOW_SIZE 100
 
 SCENARIO ("Time passes in a near-empty world") {
     GIVEN ("A world containing one spaceship") {
-        b2Vec2 world_size = {10, 10};
         Stage::instance = new Stage;
         getStage()->setSize (WINDOW_SIZE, WINDOW_SIZE);
 
-        kt::World world (nullptr, {10, 10});
+        b2Vec2 world_size = {10, 10};
+        kt::World world (nullptr, world_size);
         b2Vec2 ship_pos = 0.5 * world_size;
         auto & ship = * new kt::Spaceship (world, nullptr, world.convert (ship_pos), 1);
         auto ship_angle = ship.getRotation ();
@@ -21,12 +21,12 @@ SCENARIO ("Time passes in a near-empty world") {
         REQUIRE (ship.getPhysicalPosition () == ship_pos);
         REQUIRE (ship.getPhysicalVelocity () == b2Vec2_zero);
 
-        for (int i = 0; i < TIME_STEPS; i++) {
-            WHEN ("Time advances") {
-                UpdateState us;
-                ship.update (us);
+        WHEN ("Time advances") {
+            THEN ("The spaceship does not change") {
+                for (int i = 0; i < TIME_STEPS; i++) {
+                    UpdateState us;
+                    ship.update (us);
 
-                THEN ("The spaceship did not change") {
                     REQUIRE (ship.getPhysicalPosition () == ship_pos);
                     REQUIRE (ship.getPhysicalVelocity () == b2Vec2_zero);
                     REQUIRE (ship.getRotation () == ship_angle);

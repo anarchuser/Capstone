@@ -1,7 +1,7 @@
 #include "algebra.h"
 
-bool closeEnough (double one, double two) {
-    return std::abs (two - one) < EPSILON;
+bool closeEnough (double one, double two, double epsilon) {
+    return std::abs (two - one) < epsilon;
 }
 
 void makeEqual (double & one, double & two) {

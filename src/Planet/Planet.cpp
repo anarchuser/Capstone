@@ -38,10 +38,10 @@ namespace kt {
 
         while (current_actor) {
             auto * actor_body = (b2Body *) current_actor->getUserData();
-    
+
             // Apply force to existing foreign dynamic bodies only
             if (actor_body && body != actor_body && actor_body->GetType() == b2_dynamicBody) {
-                auto space = world->convert(_getStage()->getSize());
+                auto space = world->world_size;
                 auto direction = body->GetWorldCenter () - actor_body->GetWorldCenter ();
 
                 if (direction.x > 0.5 * space.x) {
@@ -56,7 +56,7 @@ namespace kt {
                 }
 
                 auto force = body->GetMass() * PLANET_GRAVITY / direction.Normalize ();
-                actor_body->ApplyLinearImpulseToCenter (force * direction, false);
+                actor_body->ApplyLinearImpulseToCenter (force * direction, PLANET_WAKES_SHIP);
             }
 
             current_actor = current_actor->getNextSibling();

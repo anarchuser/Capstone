@@ -6,7 +6,7 @@
 
 #include <cmath>
 
-bool closeEnough (double one, double two);
+bool closeEnough (double one, double two, double epsilon = EPSILON);
 
 void makeEqual (double & one, double & two);
 
