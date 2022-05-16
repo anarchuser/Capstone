@@ -6,21 +6,11 @@
 
 #include <cmath>
 
-bool closeEnough (double one, double two) {
-    return std::abs (two - one) < EPSILON;
-}
+bool closeEnough (double one, double two);
 
-void makeEqual (double & one, double & two) {
-    double mean = 0.5 * (one + two);
-    one = mean;
-    two = mean;
-}
+void makeEqual (double & one, double & two);
 
-bool tryMakeEqual (double & one, double & two) {
-    if (! closeEnough (one, two)) return false;
-    makeEqual (one, two);
-    return true;
-}
+bool tryMakeEqual (double & one, double & two);
 
 #endif //CAPSTONE_ALGEBRA_H
 
