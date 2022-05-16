@@ -18,8 +18,10 @@ jobs:
           submodules: recursive
       - name: Install SDL2
         run:  bash setup/SDL.sh
+      - name: Configure box2d
+        run:  cmake -Hbox2d -Bbox2d/build
       - name: Install box2d
-        run:  bash setup/box2d.sh
+        run:  sudo cmake --build box2d/build --target install
       - name: Install Cap'n Proto
         run:  bash setup/capnproto.sh
       - name: explicitly generate capnp files
