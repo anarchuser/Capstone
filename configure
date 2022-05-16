@@ -1,5 +1,5 @@
 #!/bin/bash
 
-# ./setup/box2d.sh
+./setup/box2d.sh
 ./setup/capnproto.sh
 ./setup/SDL.sh
