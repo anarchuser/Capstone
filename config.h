@@ -1,9 +1,10 @@
 #ifndef Capstone_CONFIG_H
 #define Capstone_CONFIG_H
 
-#include <filesystem>
-namespace fs = std::filesystem;
-fs::path const DATA_DIR = PROJECT_ROOT "/data";
+#include <string>
+
+/// Resource folder. Specifically, points to the resource XML file containing the relevant information
+#define GAME_RESOURCES  (PROJECT_ROOT "/src/data/res.xml")
 
 #define USERNAME "lucifer"
 #define SERVER_ADDRESS "*"

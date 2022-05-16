@@ -76,9 +76,11 @@ find_package(Catch2 3 CONFIG)
 if (Catch2_FOUND)
     add_subdirectory(Catch2)
     file(GLOB_RECURSE TEST_SRCS ${PROJECT_SOURCE_DIR}/test/*.c*)
-    add_executable(Test ${GEN_PROTO_FILES} ${TEST_SRCS} ${SRCS} ${LIBS})
+    add_executable(Test ${TEST_SRCS} ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
     target_include_directories(Test PRIVATE ${PROJECT_SOURCE_DIR}/lib/)
+    target_include_directories(Test PRIVATE ${PROJECT_SOURCE_DIR}/src/)
+    target_include_directories(Test PRIVATE ${PROJECT_SOURCE_DIR}/)
 
     target_link_libraries(Test PRIVATE Catch2::Catch2WithMain)
     include(Catch)
