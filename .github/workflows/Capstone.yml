@@ -48,6 +48,8 @@ jobs:
         run:  bash setup/Catch2.sh
       - name: Install SDL2
         run:  bash setup/SDL.sh
+      - name: provide sym link for SDL
+        run:  sudo ln -s /usr/local/lib/libSDL2-2.0.so.0 /usr/lib/
       - name: Install box2d
         run:  bash setup/box2d.sh
       - name: Install Cap'n Proto
