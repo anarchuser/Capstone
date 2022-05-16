@@ -13,6 +13,7 @@
 #include <atomic>
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <memory>
 
 #include "Data/Direction.h"

@@ -2,7 +2,6 @@
 #define CAPSTONE_GAMESCENE_H
 
 #include "config.h"
-#include "src/config.h"
 #include "Random/random.h"
 
 #include "oxygine-framework.h"

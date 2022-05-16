@@ -1,12 +1,15 @@
 [submodule "oxygine-framework"]
 	path = oxygine-framework
 	url = https://github.com/oxygine/oxygine-framework
+[submodule "Catch2"]
+	path = Catch2
+	url = https://github.com/catchorg/Catch2
 [submodule "SDL"]
 	path = SDL
 	url = https://github.com/oxygine/SDL
+[submodule "capnproto"]
+	path = capnproto
+	url = https://github.com/capnproto/capnproto
 [submodule "box2d"]
 	path = box2d
-	url = https://github.com/erincatto/box2d.git
-[submodule "Catch2"]
-	path = Catch2
-	url = https://github.com/catchorg/Catch2.git
+	url = https://github.com/erincatto/box2d

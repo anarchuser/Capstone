@@ -2,7 +2,6 @@
 #define CAPSTONE_DIALOG_H
 
 #include "config.h"
-#include "src/config.h"
 
 #include "Input.h"
 #include "Button.h"

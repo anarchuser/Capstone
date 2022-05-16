@@ -1,23 +1,29 @@
 # Capstone [![Capstone Workflows](https://github.com/anarchuser/Capstone/actions/workflows/Capstone.yml/badge.svg)](https://github.com/anarchuser/Capstone/actions) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/anarchuser/Capstone/blob/master/LICENSE)
 
-Control a rocket through a field of planets. On a Torus.
+Control a spaceship through a field of planets. In space. On a Torus manifold.
 
 ----
 
-![Screenshot](img/screenshot1.png)
+![Screenshot](img/screenshot2.png)
 
 ----
 
 ### Setup
 
-1. Clone this repository:
+1. Clone this repository and change working directory:
 ```shell
-git clone --recurse-submodules -j3 https://github.com/anarchuser/Capstone
+git clone --recurse-submodules -j5 https://github.com/anarchuser/Capstone;
+cd Capstone
 ```
 
-2. Go into the cloned repo and build the project:
+2. Install dependencies:
 ```shell
-cd Capstone; make
+./configure
+```
+
+3. Run the project:
+```shell
+make
 ```
 
 ### How to play

@@ -11,23 +11,19 @@ jobs:
     needs:    dependencies
     runs-on:  ubuntu-latest
     steps:
-      - name: remove g++-9
-        run:  sudo apt remove g++-9
-      - name: install g++-10
-        run:  sudo apt install g++-10
-      - name: configure g++ 10 as default
-        run:  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
-      - name: install SDL2
-        run:  sudo apt install libsdl2-dev
-      - name: install Cap'n Proto
-        run:  curl -O https://capnproto.org/capnproto-c++-0.9.1.tar.gz; tar zxf capnproto-c++-0.9.1.tar.gz; cd capnproto-c++-0.9.1; ./configure; make -j6 check; sudo make install
+      - name: Ensure gc++ v10 for stdc++20 support is used
+        run:  sudo apt remove g++-9 && sudo apt install g++-10 && sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+      - name: Install box2d dependencies
+        run:  sudo apt install xorg-dev
       - uses: actions/checkout@v2
         with:
           submodules: recursive
-      - name: configure box2d cmake
-        run:  cmake -Hbox2d -Bbox2d/build
-      - name: install box2d
-        run:  sudo cmake --build box2d/build --target install
+      - name: Install SDL2
+        run:  bash setup/SDL.sh
+      - name: Install box2d
+        run:  bash setup/box2d.sh
+      - name: Install Cap'n Proto
+        run:  bash setup/capnproto.sh
       - name: explicitly generate capnp files
         run:  cd lib/Server/; ./gen_proto
       - name: configure cmake
@@ -37,36 +33,32 @@ jobs:
 #      - name: Run the benchmarks
 #        run: ./build/Capstone
 
-#  tests:
-#    needs: dependencies
-#    runs-on:  ubuntu-latest
-#    steps:
-#      - name: remove g++-9
-#        run:  sudo apt remove g++-9
-#      - name: install g++-10
-#        run:  sudo apt install g++-10
-#      - name: configure g++ 10 as default
-#        run:  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
-#      - name: install SDL2
-#        run:  sudo apt install libsdl2-dev
-#      - name: install Cap'n Proto
-#        run:  curl -O https://capnproto.org/capnproto-c++-0.9.1.tar.gz; tar zxf capnproto-c++-0.9.1.tar.gz; cd capnproto-c++-0.9.1; ./configure; make -j6 check; sudo make install
-#      - uses: actions/checkout@v2
-#        with:
-#          submodules: recursive
-#      - name: configure catch2 cmake
-#        run:  cmake -HCatch2 -BCatch2/build -DBUILD_TESTING=OFF
-#      - name: build and install catch2
-#        run:  sudo cmake --build Catch2/build --target install
-#      - name: configure box2d cmake
-#        run:  cmake -Hbox2d -Bbox2d/build
-#      - name: build and install box2d
-#        run:  sudo cmake --build box2d/build --target install
-#      - name: explicitly generate capnp files
-#        run:  cd lib/Server/; ./gen_proto
-#      - name: configure own cmake
-#        run:  cmake -H. -Bbuild
-#      - name: Build test files
-#        run:  cmake --build build --target Test
-#      - name: Run the tests
-#        run: ./build/Test
+  tests:
+    needs: dependencies
+    runs-on:  ubuntu-latest
+    steps:
+      - name: Ensure gc++ v10 for stdc++20 support is used
+        run:  sudo apt remove g++-9 && sudo apt install g++-10 && sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+      - name: Install box2d dependencies
+        run:  sudo apt install xorg-dev
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install Catch2
+        run:  bash setup/Catch2.sh
+      - name: Install SDL2
+        run:  bash setup/SDL.sh
+      - name: provide sym link for SDL
+        run:  sudo ln -s /usr/local/lib/libSDL2-2.0.so.0 /usr/lib/
+      - name: Install box2d
+        run:  bash setup/box2d.sh
+      - name: Install Cap'n Proto
+        run:  bash setup/capnproto.sh
+      - name: explicitly generate capnp files
+        run:  cd lib/Server/; ./gen_proto
+      - name: configure own cmake
+        run:  cmake -H. -Bbuild
+      - name: Build test files
+        run:  cmake --build build --target Test
+      - name: Run the tests
+        run: ./build/Test

@@ -20,7 +20,7 @@ add_custom_command(OUTPUT ${GEN_PROTO_FILES}
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
 set(LIBS ${LIBS} ${GEN_PROTO_FILES})
-add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
+add_executable(Capstone ${PROJECT_SOURCE_DIR}/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
 # Add base directories for more intuitive includes
 target_include_directories(Capstone PUBLIC ${PROJECT_SOURCE_DIR})
@@ -76,9 +76,11 @@ find_package(Catch2 3 CONFIG)
 if (Catch2_FOUND)
     add_subdirectory(Catch2)
     file(GLOB_RECURSE TEST_SRCS ${PROJECT_SOURCE_DIR}/test/*.c*)
-    add_executable(Test ${GEN_PROTO_FILES} ${TEST_SRCS} ${SRCS} ${LIBS})
+    add_executable(Test ${TEST_SRCS} ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
     target_include_directories(Test PRIVATE ${PROJECT_SOURCE_DIR}/lib/)
+    target_include_directories(Test PRIVATE ${PROJECT_SOURCE_DIR}/src/)
+    target_include_directories(Test PRIVATE ${PROJECT_SOURCE_DIR}/)
 
     target_link_libraries(Test PRIVATE Catch2::Catch2WithMain)
     include(Catch)

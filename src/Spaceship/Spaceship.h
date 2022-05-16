@@ -2,7 +2,6 @@
 #define CAPSTONE_SPACESHIP_H
 
 #include "config.h"
-#include "src/config.h"
 #include "helper.h"
 
 #include "oxygine-framework.h"

@@ -3,15 +3,17 @@
 BUILD_DIR  ?= build
 BUILD_TYPE ?= Release
 
-.PHONY = all build clean debug default run setup test
+.PHONY = all build clean debug default FORCE run setup test
 
 default:	run
+
+FORCE:;
 
 # Clean, build, test, and run
 all:	clean	test	run
 
 # Initialise cmake build files at BUILD_DIR
-setup:	CMakeLists.txt
+setup:	FORCE	CMakeLists.txt
 	cmake -H. -B$(BUILD_DIR) -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" > /dev/zero
 
 # Build the project (lib and src)
