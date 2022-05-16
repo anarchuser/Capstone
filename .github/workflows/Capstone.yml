@@ -18,7 +18,7 @@ jobs:
       - name: configure g++ 10 as default
         run:  sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
       - name: install SDL2
-        run:  sudo apt install libsdl2-dev
+        run:  sudo apt install libsdl2-dev --fix-missing
       - name: install Cap'n Proto
         run:  curl -O https://capnproto.org/capnproto-c++-0.9.1.tar.gz; tar zxf capnproto-c++-0.9.1.tar.gz; cd capnproto-c++-0.9.1; ./configure; make -j6 check; sudo make install
       - uses: actions/checkout@v2
