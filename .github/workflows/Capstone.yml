@@ -13,15 +13,15 @@ jobs:
     steps:
       - name: Ensure gc++ v10 for stdc++20 support is used
         run:  sudo apt remove g++-9 && sudo apt install g++-10 && sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+      - name: Install box2d dependencies
+        run:  sudo apt install xorg-dev
       - uses: actions/checkout@v2
         with:
           submodules: recursive
       - name: Install SDL2
         run:  bash setup/SDL.sh
-      - name: Configure box2d
-        run:  cmake -Hbox2d -Bbox2d/build
       - name: Install box2d
-        run:  sudo cmake --build box2d/build --target install
+        run:  bash setup/box2d.sh
       - name: Install Cap'n Proto
         run:  bash setup/capnproto.sh
       - name: explicitly generate capnp files
@@ -39,6 +39,8 @@ jobs:
     steps:
       - name: Ensure gc++ v10 for stdc++20 support is used
         run:  sudo apt remove g++-9 && sudo apt install g++-10 && sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+      - name: Install box2d dependencies
+        run:  sudo apt install xorg-dev
       - uses: actions/checkout@v2
         with:
           submodules: recursive
@@ -46,8 +48,8 @@ jobs:
         run:  bash setup/Catch2.sh
       - name: Install SDL2
         run:  bash setup/SDL.sh
-#      - name: Install box2d
-#        run:  bash setup/box2d.sh
+      - name: Install box2d
+        run:  bash setup/box2d.sh
       - name: Install Cap'n Proto
         run:  bash setup/capnproto.sh
       - name: explicitly generate capnp files
