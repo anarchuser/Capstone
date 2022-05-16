@@ -10,14 +10,20 @@ Control a spaceship through a field of planets. In space. On a Torus manifold.
 
 ### Setup
 
-1. Clone this repository:
+1. Clone this repository and change working directory:
 ```shell
-git clone --recurse-submodules -j5 https://github.com/anarchuser/Capstone
+git clone --recurse-submodules -j5 https://github.com/anarchuser/Capstone;
+cd Capstone
 ```
 
-2. Go into the cloned repo and build the project:
+2. Install dependencies:
 ```shell
-cd Capstone; make
+./configure
+```
+
+3. Run the project:
+```shell
+make
 ```
 
 ### How to play
