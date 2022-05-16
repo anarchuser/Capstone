@@ -1,10 +1,10 @@
 # Capstone [![Capstone Workflows](https://github.com/anarchuser/Capstone/actions/workflows/Capstone.yml/badge.svg)](https://github.com/anarchuser/Capstone/actions) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://github.com/anarchuser/Capstone/blob/master/LICENSE)
 
-Control a rocket through a field of planets. On a Torus.
+Control a spaceship through a field of planets. In space. On a Torus manifold.
 
 ----
 
-![Screenshot](img/screenshot1.png)
+![Screenshot](img/screenshot2.png)
 
 ----
 
