@@ -6,10 +6,17 @@
 struct Bounds {
     double const lower, upper;
 
-    Bounds (double lower, double upper): lower {lower}, upper {upper} {}
+    Bounds (double lower, double upper)
+            : lower {lower < upper ? lower : upper}
+            , upper {lower < upper ? upper : lower} {}
 
-    bool operator == (Bounds other) const {
+    [[nodiscard]] bool operator == (Bounds other) const {
         return lower == other.lower && upper == other.upper;
+    }
+
+    [[nodiscard]] bool contains (double val) const {
+        if (val == lower) return true;
+        return val >= lower && val < upper;
     }
 };
 
