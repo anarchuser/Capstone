@@ -20,7 +20,7 @@ add_custom_command(OUTPUT ${GEN_PROTO_FILES}
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
 set(LIBS ${LIBS} ${GEN_PROTO_FILES})
-add_executable(Capstone ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
+add_executable(Capstone ${PROJECT_SOURCE_DIR}/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
 # Add base directories for more intuitive includes
 target_include_directories(Capstone PUBLIC ${PROJECT_SOURCE_DIR})
