@@ -1,11 +1,15 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include "Algebra/algebra.h"
+
 #include "World/World.h"
 #include "Planet/Planet.h"
 #include "Random/random.h"
 
 #define WINDOW_SIZE 100
 #define PHYS_SCALE  0.1
+
+#define TIME_STEPS 61
 
 #define TEST_RANDOM_SEED 1
 
@@ -116,6 +120,66 @@ SCENARIO ("World handles objects as expected") {
                 REQUIRE (body->GetPosition () != phys_pos);
                 REQUIRE (world.convert (body->GetPosition ()) != pos);
                 REQUIRE (body->GetPosition () == world.wrap (phys_pos));
+            }
+        }
+    }
+}
+
+SCENARIO ("Time passes in a near-empty world") {
+    GIVEN ("A world containing one spaceship") {
+        b2Vec2 world_size {10, 10};
+        auto world = kt::World (nullptr, world_size);
+
+        auto ship_pos = 0.5 * world_size;
+        auto & ship = * new kt::Spaceship (world, nullptr, world.convert (ship_pos), 1);
+        auto ship_ref = safeSpCast <kt::Spaceship> (world.getFirstChild());
+        auto ship_angle = ship.getRotation();
+
+        REQUIRE (& ship == ship_ref);
+        REQUIRE (ship.getPhysicalPosition() == ship_pos);
+        REQUIRE (ship.getPhysicalVelocity() == b2Vec2_zero);
+
+        for (int i = 0; i < TIME_STEPS; i++) {
+            WHEN ("Time advances") {
+                UpdateState us;
+                world.update (us);
+
+                THEN ("The spaceship did not change") {
+                    REQUIRE (ship.getPhysicalPosition () == ship_pos);
+                    REQUIRE (ship.getPhysicalVelocity () == b2Vec2_zero);
+                    REQUIRE (ship.getRotation () == ship_angle);
+                }
+            }
+        }
+        b2Body & body = * (b2Body *) ship.getUserData();
+        auto mass = body.GetMass();
+
+        WHEN ("A force is applied to the spaceship") {
+            b2Vec2 linear_impulse {0.1, 0};
+            body.ApplyLinearImpulseToCenter (linear_impulse, true);
+
+            THEN ("The spaceship moves predictably linear") {
+                for (int i = 1; i < TIME_STEPS; i++) {
+                    UpdateState us;
+                    world.update (us);
+
+                    auto vel_estimate = (1 / mass) * linear_impulse;
+                    auto velocity = body.GetLinearVelocity ();
+                    REQUIRE (vel_estimate.y == velocity.y);
+                    REQUIRE (vel_estimate.x == velocity.x);
+
+                    b2Vec2 delta = (1.0 / FPS * i) * velocity;
+                    REQUIRE (delta.y == 0);
+                    REQUIRE (delta.x > 0);
+
+                    auto pos_estimate = ship_pos + delta;
+                    REQUIRE (pos_estimate.y == ship_pos.y);
+                    REQUIRE (body.GetPosition ().y == ship_pos.y);
+                    REQUIRE (closeEnough (body.GetPosition ().x, pos_estimate.x));
+
+                    // Keep movement synchronised with ideal values
+                    body.SetTransform (pos_estimate, body.GetAngle());
+                }
             }
         }
     }
