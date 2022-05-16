@@ -4,6 +4,7 @@
 
 #include <array>
 #include <vector>
+#include <exception>
 
 #include <iostream>
 
@@ -100,6 +101,17 @@ SCENARIO ("RNGs with different seeds provide different values") {
             }
         }
     }
+}
+
+TEST_CASE ("Bounds initialised with one or more NaN values") {
+    REQUIRE_THROWS_AS (Bounds (0, INFINITY), std::logic_error);
+    REQUIRE_THROWS_AS (Bounds (0, NAN), std::logic_error);
+    REQUIRE_THROWS_AS (Bounds (INFINITY, 0), std::logic_error);
+    REQUIRE_THROWS_AS (Bounds (NAN, 0), std::logic_error);
+    REQUIRE_THROWS_AS (Bounds (INFINITY, INFINITY), std::logic_error);
+    REQUIRE_THROWS_AS (Bounds (INFINITY, NAN), std::logic_error);
+    REQUIRE_THROWS_AS (Bounds (NAN, INFINITY), std::logic_error);
+    REQUIRE_THROWS_AS (Bounds (NAN, NAN), std::logic_error);
 }
 
 /* Copyright © 2022 Aaron Alef */
