@@ -26,7 +26,7 @@
 #define SPACESHIP_TORQUE    3e-5
 
 /// Number of collisions allowed before destroying spaceship
-#define SPACESHIP_HEALTH    1e2
+#define SPACESHIP_HEALTH    2e1
 
 namespace kt {
     using namespace oxygine;

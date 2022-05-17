@@ -31,10 +31,13 @@ namespace cg {
         auto result = context.getResults();
         Spaceship spaceship (params.getSpaceship());
 
-        // Check that username is unique
-        // TODO: replace with UUID or ip
+        // If username exists already, replace:
         std::string const & username = params.getSpaceship().getUsername();
+        if (connections.contains (username)) {
+            doneCallback (username);
+        }
         KJ_REQUIRE (! connections.contains (username), username, "Username already in use");
+
         log (std::string ("Join request received from user ") + username);
         log (std::string ("Position: ( ")
              + std::to_string (spaceship.position[0]) + " | "
@@ -73,8 +76,9 @@ namespace cg {
 
             // Ensure other client uses same seed
             auto client = params.getOther().getValue();
-            client.seedRequest().send().then ([&] (capnp::Response <SeedResults> response) {
-                KJ_ASSERT (response.getSeed() != rng_seed);
+            detach(client.seedRequest().send().then ([&] (capnp::Response <SeedResults> response) {
+                KJ_ASSERT (response.getSeed() == rng_seed);
+                log ("Other seed: " + std::to_string (response.getSeed()));
 
                 auto request = client.joinRequest();
                 // TODO: figure out the KeyboardSpaceship of the local client's game
@@ -85,7 +89,7 @@ namespace cg {
                 request.send();
 
                 // TODO: handle join request properly
-            });
+            }));
         }
 
         return kj::READY_NOW;
@@ -126,10 +130,8 @@ namespace cg {
                        [&] (std::pair <std::string const, Connection> & pair) {
             auto & sinks = pair.second.itemSinks;
             if (sinks.contains (username)) {
-                sinks.at (username).doneRequest ().send ()
-                .then ([&] (...) {
-                    sinks.erase (username);
-                });
+                sinks.at (username).doneRequest ().send ().then ([](...){});
+                sinks.erase (username);
             }
         });
     }

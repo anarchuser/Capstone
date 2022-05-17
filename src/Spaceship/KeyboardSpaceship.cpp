@@ -14,7 +14,6 @@ namespace kt {
                 setName (USERNAME);
 
                 auto request = client.getMain <Synchro> ().joinRequest ();
-                request.initOther().setValue (kj::heap <cg::SynchroImpl> (1));
                 getData().initialise (request.initSpaceship());
 
                 auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
@@ -73,9 +72,14 @@ namespace kt {
         auto request = sink.sendItemRequest ();
         queried.initialise (request.initItem().initDirection());
 
-        auto promise = request.send();
-        Spaceship::update (us);
-        promise.wait (client.getWaitScope());
+        try {
+            auto promise = request.send ();
+            Spaceship::update (us);
+            promise.wait (client.getWaitScope ());
+        } catch (std::exception & e) {
+            Spaceship::destroy();
+            instance = nullptr;
+        }
     }
 
     void KeyboardSpaceship::destroy () {
