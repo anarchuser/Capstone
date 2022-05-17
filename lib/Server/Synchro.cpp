@@ -34,7 +34,7 @@ namespace cg {
         // If username exists already, replace:
         std::string const & username = params.getSpaceship().getUsername();
         if (connections.contains (username)) {
-            connections.erase (username);
+            doneCallback (username);
         }
         KJ_REQUIRE (! connections.contains (username), username, "Username already in use");
 
