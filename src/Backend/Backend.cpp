@@ -4,10 +4,10 @@ namespace kt {
     Backend::Backend (std::size_t seed, std::string address)
             : seed {seed}
             , address {std::move (address)}
-            , server_thread {& Backend::serve, this} {
-        getPort();
-        logs::messageln ("Set up backend at '%s'", this->address.c_str());
-    }
+            , server_thread {& Backend::serve, this}
+            {
+                getPort();
+            }
     
     Backend::~Backend () noexcept {
         if (auto & ship = KeyboardSpaceship::instance) {
