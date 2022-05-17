@@ -57,15 +57,12 @@ SCENARIO ("The Synchro implementation handles requests properly") {
             callback->setOnSendSink ([] (cg::Spaceship ship) {
                 auto sink = kj::heap <cg::ItemSinkImpl>();
                 sink->setOnSendItem ([] (cg::Direction const & dir) {
-                    logs::messageln ("SendItem");
                     REQUIRE (dir.accelerate  == -1);
                     REQUIRE (dir.decelerate  ==  1);
                     REQUIRE (dir.rotateLeft  == -1);
                     REQUIRE (dir.rotateRight == -1);
                 });
-                sink->setOnDone ([] () {
-                    logs::messageln ("Done");
-                });
+                sink->setOnDone ([](){});
                 return kj::mv (sink);
             });
             request.setShipCallback (kj::mv (callback));
@@ -76,16 +73,18 @@ SCENARIO ("The Synchro implementation handles requests properly") {
                 WHEN ("I send a sendSink request back to the received ItemSink") {
                     auto request = sink.sendItemRequest();
                     request.initItem().initDirection().setDecelerate (1);
+                    auto promise = request.send();
 
                     THEN ("It resolves without fail") {
-                        REQUIRE_NOTHROW (request.send().wait (waitScope));
+                        REQUIRE_NOTHROW (promise.wait (waitScope));
                     }
                 }
                 WHEN ("I send a done request back") {
-                    auto request = sink.doneRequest ();
+                    auto request = sink.doneRequest();
+                    auto promise = request.send();
 
                     THEN ("It resolves without fail") {
-                        REQUIRE_NOTHROW (request.send().wait (waitScope));
+                        REQUIRE_NOTHROW (promise.wait (waitScope));
                     }
                 }
             }
