@@ -1,4 +1,4 @@
-#include "Server.h"
+#include "Synchro.h"
 
 namespace cg {
     SynchroImpl::SynchroImpl (std::size_t seed): rng_seed {seed} {}

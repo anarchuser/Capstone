@@ -10,7 +10,7 @@
 #include "src/World/World.h"
 #include "Spaceship.h"
 
-#include "Server/Server.h"
+#include "Server/Synchro.h"
 #include "Data/Spaceship.h"
 
 #define KEYBOARD_SPACESHIP_COLOR {0, 0, 255}
@@ -30,7 +30,7 @@ namespace kt {
 
     public:
         /// Creates a new human-controllable spaceship. Only one such ship may exist in a game
-        KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale, std::string address);
+        KeyboardSpaceship (World & world, Resources * res, Vector2 const & pos, float scale, std::string address);
         ~KeyboardSpaceship() noexcept override;
 
         /// When issuing commands, update Spaceship-specific flags

@@ -41,7 +41,7 @@ namespace kt {
             spActor child = world->getChild (username, oxygine::ep_ignore_error);
             OX_ASSERT (! child);
 
-            spRemoteSpaceship ship = new RemoteSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE);
+            spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, getSize() * 0.5, SPACESHIP_SCALE);
             ship->setName (username);
             ship->setPhysicalTransform ({spaceship.position[0], spaceship.position[1]}, spaceship.angle);
             ship->setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
@@ -61,7 +61,7 @@ namespace kt {
 
         Spaceship::ship_counter = 0;
         if (!join)
-            new KeyboardSpaceship (* world, gameResources, getSize() * 0.5, SPACESHIP_SCALE, SERVER_FULL_ADDRESS);
+            new KeyboardSpaceship (* world, & gameResources, getSize() * 0.5, SPACESHIP_SCALE, SERVER_FULL_ADDRESS);
 
         getStage ()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
@@ -158,7 +158,7 @@ namespace kt {
 
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
         if (!KeyboardSpaceship::instance) {
-            new KeyboardSpaceship (* safeSpCast <World> (getFirstChild()), gameResources, getSize() * 0.5, SPACESHIP_SCALE, ip + ":" + std::to_string (port));
+            new KeyboardSpaceship (* safeSpCast <World> (getFirstChild()), & gameResources, getSize() * 0.5, SPACESHIP_SCALE, ip + ":" + std::to_string (port));
         } else {
             logs::warning ("Joining Game whilst Spaceship already present");
         }

@@ -19,6 +19,9 @@
 /// Scales down gravitational pull to an acceptable value
 #define PLANET_GRAVITY      2e-7
 
+/// Flag determining whether gravity wakes up spaceships
+#define PLANET_WAKES_SHIP   false
+
 namespace kt {
     using namespace oxygine;
 
