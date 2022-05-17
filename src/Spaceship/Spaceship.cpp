@@ -155,13 +155,16 @@ namespace kt {
                 getPhysicalVelocity().x,
                 getPhysicalVelocity().y
             },
-            getRotation()
+            getRotation(),
+            health
         );
     }
     void Spaceship::setData (cg::Spaceship const & spaceship) {
         setName (spaceship.username);
         setPhysicalTransform ({spaceship.position[0], spaceship.position[1]}, spaceship.angle);
         setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
+        health = spaceship.health;
+        updateScoreboard ();
     }
 }
 

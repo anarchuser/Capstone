@@ -24,6 +24,7 @@ interface Synchro {
         position @1 :Vector;
         velocity @2 :Vector;
         angle    @3 :Float32;
+        health   @4 :Int8;
     }
 
     struct Vector {

@@ -43,6 +43,7 @@ namespace cg {
                 + std::to_string (spaceship.velocity[0]) + " | "
                 + std::to_string (spaceship.velocity[1]) + " )");
         log (std::string ("Angle: " + std::to_string (spaceship.angle)));
+        log (std::string ("Health: " + std::to_string (spaceship.health)));
 
         // Store connection details (callback handles and 'new ship' callback)
         // TODO: figure out whether to share all connections

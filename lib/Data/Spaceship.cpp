@@ -8,14 +8,16 @@ namespace cg {
             , velocity {reader.getVelocity().getX(),
                         reader.getVelocity().getY()}
             , angle {reader.getAngle()}
+            , health {reader.getHealth()}
             {
             }
 
-    Spaceship::Spaceship (std::string username, vector2 position, vector2 velocity, float angle)
+    Spaceship::Spaceship (std::string username, vector2 position, vector2 velocity, float angle, int health)
             : username {std::move (username)}
             , position {position}
             , velocity {velocity}
             , angle {angle}
+            , health {health}
             {
             }
 
@@ -31,6 +33,7 @@ namespace cg {
         vel.setY (velocity[1]);
 
         builder.setAngle (angle);
+        builder.setHealth (health);
     }
 }
 

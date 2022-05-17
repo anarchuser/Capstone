@@ -27,9 +27,7 @@ namespace kt {
             {
                 auto ship = KeyboardSpaceship::instance;
                 if (ship && ship->getName () == username) {
-                    ship->setPhysicalTransform ({spaceship.position[0], spaceship.position[1]},
-                                                spaceship.angle);
-                    ship->setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
+                    ship->setData (spaceship);
                     return kj::heap<cg::ItemSinkImpl> (
                             CLOSURE (ship, & KeyboardSpaceship::destroy),
                             CLOSURE (ship, & KeyboardSpaceship::updateDirection));
@@ -42,9 +40,7 @@ namespace kt {
             OX_ASSERT (! child);
 
             spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, getSize() * 0.5, SPACESHIP_SCALE);
-            ship->setName (username);
-            ship->setPhysicalTransform ({spaceship.position[0], spaceship.position[1]}, spaceship.angle);
-            ship->setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
+            ship->setData (spaceship);
             return kj::heap <cg::ItemSinkImpl> (
                     CLOSURE (ship.get(), & RemoteSpaceship::destroy),
                     CLOSURE (ship.get(), & RemoteSpaceship::updateDirection));
