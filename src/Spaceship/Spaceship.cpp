@@ -151,7 +151,7 @@ namespace kt {
     }
 
     cg::Spaceship Spaceship::getData () const {
-        return {
+        return cg::Spaceship (
             getName(), {
                 getPhysicalPosition().x,
                 getPhysicalPosition().y
@@ -160,7 +160,7 @@ namespace kt {
                 getPhysicalVelocity().y
             },
             getRotation()
-        };
+        );
     }
     void Spaceship::setData (cg::Spaceship const & spaceship) {
         setName (spaceship.username);

@@ -13,10 +13,10 @@ namespace cg {
         std::string username;
         vector2 position = {0};
         vector2 velocity = {0};
-        float angle;
+        float angle = 0;
 
         explicit Spaceship (Synchro::Spaceship::Reader reader);
-        Spaceship (std::string username, vector2 position, vector2 velocity, float angle);
+        explicit Spaceship (std::string username, vector2 position = {0}, vector2 velocity = {0}, float angle = 0);
 
         void initialise (Synchro::Spaceship::Builder builder) const;
     };

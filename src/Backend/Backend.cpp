@@ -10,10 +10,7 @@ namespace kt {
             }
     
     Backend::~Backend () noexcept {
-        if (auto & ship = KeyboardSpaceship::instance) {
-            ship->destroy();
-            ship = nullptr;
-        }
+        if (auto & ship = KeyboardSpaceship::instance) ship->destroy();
         stop = true;
         server_thread.join();
     }
