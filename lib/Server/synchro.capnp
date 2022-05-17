@@ -45,5 +45,4 @@ interface Synchro {
     ping @0 ();
     seed @1 () -> (seed :UInt64);
     join @2 (spaceship :Spaceship, other :Maybe(Synchro), shipCallback :ShipCallback) -> (itemSink :ItemSink);
-    waitScope @3 (scope :UInt64);
 }
