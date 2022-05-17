@@ -31,10 +31,13 @@ namespace cg {
         auto result = context.getResults();
         Spaceship spaceship (params.getSpaceship());
 
-        // Check that username is unique
-        // TODO: replace with UUID or ip
+        // If username exists already, replace:
         std::string const & username = params.getSpaceship().getUsername();
+        if (connections.contains (username)) {
+            connections.erase (username);
+        }
         KJ_REQUIRE (! connections.contains (username), username, "Username already in use");
+
         log (std::string ("Join request received from user ") + username);
         log (std::string ("Position: ( ")
              + std::to_string (spaceship.position[0]) + " | "

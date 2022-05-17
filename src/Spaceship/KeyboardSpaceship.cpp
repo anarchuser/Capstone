@@ -77,7 +77,8 @@ namespace kt {
             Spaceship::update (us);
             promise.wait (client.getWaitScope ());
         } catch (std::exception & e) {
-            logs::warning (e.what());
+            Spaceship::destroy();
+            instance = nullptr;
         }
     }
 
