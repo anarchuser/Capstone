@@ -20,8 +20,8 @@
 
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
-#include "Callback/ItemSink.h"
-#include "Callback/ShipCallback.h"
+#include "ItemSink.h"
+#include "ShipCallback.h"
 
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
