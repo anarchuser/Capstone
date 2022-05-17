@@ -11,12 +11,18 @@ namespace cg {
 
     struct Spaceship {
         std::string username;
-        vector2 position = {0};
-        vector2 velocity = {0};
-        float angle = 0;
+        vector2 position;
+        vector2 velocity;
+        float angle;
+        int health;
 
         explicit Spaceship (Synchro::Spaceship::Reader reader);
-        explicit Spaceship (std::string username, vector2 position = {0}, vector2 velocity = {0}, float angle = 0);
+        explicit Spaceship (
+                std::string username,
+                vector2 position = {0},
+                vector2 velocity = {0},
+                float angle = 0,
+                int health = 100);
 
         void initialise (Synchro::Spaceship::Builder builder) const;
     };
