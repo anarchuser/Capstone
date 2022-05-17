@@ -1,5 +1,5 @@
-#ifndef CAPSTONE_SERVER_H
-#define CAPSTONE_SERVER_H
+#ifndef CAPSTONE_SYNCHRO_H
+#define CAPSTONE_SYNCHRO_H
 
 #include "config.h"
 
@@ -67,6 +67,6 @@ namespace cg {
     };
 } // cg
 
-#endif //CAPSTONE_SERVER_H
+#endif //CAPSTONE_SYNCHRO_H
 
 /* Copyright © 2022 Aaron Alef */

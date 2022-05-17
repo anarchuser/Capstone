@@ -9,7 +9,7 @@
 
 #include "Spaceship.h"
 
-#include "Server/Server.h"
+#include "Server/Synchro.h"
 #include "Server/Callback/ItemSink.h"
 
 #include <functional>
