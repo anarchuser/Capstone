@@ -9,8 +9,8 @@
 
 #include "Spaceship.h"
 
-#include "Server/Server.h"
-#include "Server/Callback/ItemSink.h"
+#include "Server/Synchro.h"
+#include "lib/Server/ItemSink.h"
 
 #include <functional>
 
@@ -21,7 +21,7 @@ namespace kt {
 
     class RemoteSpaceship: public Spaceship {
     public:
-        RemoteSpaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
+        RemoteSpaceship (World & world, Resources * res, Vector2 const & pos, float scale = 1);
 
         void destroy () override;
     };

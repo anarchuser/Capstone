@@ -3,13 +3,14 @@
 namespace kt {
     std::size_t Spaceship::ship_counter = 0;
 
-    Spaceship::Spaceship (World & world, Resources & res, Vector2 const & pos, float scale) {
+    Spaceship::Spaceship (World & world, Resources * res, Vector2 const & pos, float scale) {
         attachTo (& world);
         setPosition (pos);
         setRotation (1.5 * b2_pi);
-        setResAnim (res.getResAnim ("spaceship"));
         setAnchor (0.5, 0.5);
         setTouchChildrenEnabled (false);
+        if (res)
+            setResAnim (res->getResAnim ("spaceship"));
 
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
@@ -50,7 +51,7 @@ namespace kt {
         rearFixture.isSensor = true;
         body->CreateFixture (& rearFixture);
 
-        scoreboard = new Text (res.getResFont ("kt-liberation"));
+        scoreboard = new Text (res ? res->getResFont ("kt-liberation") : nullptr);
         scoreboard->setPosition (0.80 * getParent()->getSize().x, 10 + id * 40);
         getParent()->addChild (scoreboard);
         updateScoreboard();
@@ -96,6 +97,10 @@ namespace kt {
 
     void Spaceship::update (oxygine::UpdateState const & us) {
         updateScoreboard ();
+
+        auto centre = body->GetLocalCenter();
+        auto pos = body->GetWorldCenter();
+//        std::cout << "pos: " << pos.x << "|" << pos.y << std::endl;
 
         // Update ship velocity
         if (direction.decelerate && !direction.accelerate) {
@@ -146,7 +151,7 @@ namespace kt {
     }
 
     cg::Spaceship Spaceship::getData () const {
-        return {
+        return cg::Spaceship (
             getName(), {
                 getPhysicalPosition().x,
                 getPhysicalPosition().y
@@ -155,7 +160,7 @@ namespace kt {
                 getPhysicalVelocity().y
             },
             getRotation()
-        };
+        );
     }
     void Spaceship::setData (cg::Spaceship const & spaceship) {
         setName (spaceship.username);

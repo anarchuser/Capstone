@@ -9,7 +9,7 @@
 #include "src/debug/Box2DDebugDraw.h"
 #include "src/Collision/CollisionListener.h"
 
-#include "Server/Server.h"
+#include "Server/Synchro.h"
 
 #include "Data/Spaceship.h"
 

@@ -1,15 +1,29 @@
 #ifndef CAPSTONE_BOUNDS_H
 #define CAPSTONE_BOUNDS_H
 
+#include <stdexcept>
 #include <functional>
 
 struct Bounds {
     double const lower, upper;
 
-    Bounds (double lower, double upper): lower {lower}, upper {upper} {}
+    Bounds (double lower, double upper)
+            : lower {lower < upper ? lower : upper}
+            , upper {lower < upper ? upper : lower}
+            {
+                if (!std::isnormal (lower) && lower != 0.0)
+                    throw std::logic_error ("Real boundary expected; got " + std::to_string (lower));
+                if (!std::isnormal (upper) && upper != 0.0)
+                    throw std::logic_error ("Real boundary expected; got " + std::to_string (upper));
+            }
 
-    bool operator == (Bounds other) const {
+    [[nodiscard]] bool operator == (Bounds other) const {
         return lower == other.lower && upper == other.upper;
+    }
+
+    [[nodiscard]] bool contains (double val) const {
+        if (val == lower) return true;
+        return val >= lower && val < upper;
     }
 };
 

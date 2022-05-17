@@ -4,7 +4,7 @@ namespace kt {
 
     KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
 
-    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources & res, Vector2 const & pos, float scale, std::string address)
+    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, Vector2 const & pos, float scale, std::string address)
             : Spaceship (world, res, pos, scale)
             , client {address}
             , sink {[&, this, address] () {

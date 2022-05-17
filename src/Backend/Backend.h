@@ -9,7 +9,7 @@
 #include "Spaceship/KeyboardSpaceship.h"
 
 #include "Server/generated/synchro.capnp.h"
-#include "Server/Server.h"
+#include "Server/Synchro.h"
 #include <capnp/ez-rpc.h>
 #include <thread>
 #include <atomic>
@@ -44,8 +44,6 @@ namespace kt {
 
         [[nodiscard]] unsigned short getPort() const;
         [[nodiscard]] std::string const & getAddress() const;
-
-        void connect (std::string remote, short port);
 
         static bool ping (std::string const & ip, short port);
     };

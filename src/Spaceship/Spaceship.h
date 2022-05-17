@@ -56,7 +56,7 @@ namespace kt {
         cg::Direction direction;
 
         /// Construct a new ship in the current world, at given position (usually centred)
-        Spaceship (World & world, Resources & res, Vector2 const & pos, float scale = 1);
+        Spaceship (World & world, Resources * res, Vector2 const & pos, float scale = 1);
         ~Spaceship() noexcept override = default;
 
         /// Apply linear or angular impulses based on command flags

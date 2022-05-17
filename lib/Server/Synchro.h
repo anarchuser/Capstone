@@ -1,5 +1,5 @@
-#ifndef CAPSTONE_SERVER_H
-#define CAPSTONE_SERVER_H
+#ifndef CAPSTONE_SYNCHRO_H
+#define CAPSTONE_SYNCHRO_H
 
 #include "config.h"
 
@@ -20,8 +20,8 @@
 
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
-#include "Callback/ItemSink.h"
-#include "Callback/ShipCallback.h"
+#include "ItemSink.h"
+#include "ShipCallback.h"
 
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
@@ -67,6 +67,6 @@ namespace cg {
     };
 } // cg
 
-#endif //CAPSTONE_SERVER_H
+#endif //CAPSTONE_SYNCHRO_H
 
 /* Copyright © 2022 Aaron Alef */
