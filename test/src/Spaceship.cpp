@@ -1,11 +1,12 @@
 #include <catch2/catch_test_macros.hpp>
-
-#include "Algebra/algebra.h"
+#include <catch2/catch_approx.hpp>
 
 #include "Spaceship/Spaceship.h"
 
 #define TIME_STEPS 30
 #define WINDOW_SIZE 100
+
+using namespace Catch;
 
 SCENARIO ("Time passes in a near-empty world") {
     GIVEN ("A world containing one spaceship") {
@@ -57,7 +58,7 @@ SCENARIO ("Time passes in a near-empty world") {
                     auto pos_estimate = ship_pos + delta;
                     REQUIRE (pos_estimate.y == ship_pos.y);
                     REQUIRE (body.GetPosition ().y == ship_pos.y);
-//                    REQUIRE (closeEnough (body.GetPosition ().x, pos_estimate.x));
+                    REQUIRE (body.GetPosition ().x == Approx (pos_estimate.x).epsilon (5e-4));
 
                     // Keep movement synchronised with ideal values
                     body.SetTransform (pos_estimate, body.GetAngle ());

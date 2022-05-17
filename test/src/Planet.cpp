@@ -39,7 +39,6 @@ SCENARIO ("Planets exert gravitational pull on Spaceships") {
                     // TODO: check more things, maybe?
                     auto new_speed = p_ship.GetLinearVelocity().Length();
                     static int j = 0;
-                    logs::messageln ("%d| speed: %f", j++, speed);
                     REQUIRE (new_speed > speed);
                     speed = new_speed;
                 }
