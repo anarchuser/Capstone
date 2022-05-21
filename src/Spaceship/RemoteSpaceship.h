@@ -9,8 +9,8 @@
 
 #include "Spaceship.h"
 
-#include "Server/Synchro.h"
-#include "lib/Server/ItemSink.h"
+#include "Network/Backend.h"
+#include "Network/ItemSink/ItemSink.h"
 
 #include <functional>
 

@@ -2,7 +2,7 @@
 #define CAPSTONE_GAMESCENE_H
 
 #include "config.h"
-#include "Random/random.h"
+#include "Network/config.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
@@ -13,14 +13,10 @@
 #include "src/World/World.h"
 #include "Scene.h"
 #include "MenuScene.h"
-
-#include "Server/generated/synchro.capnp.h"
-#include "Server/Synchro.h"
 #include "Backend/Backend.h"
-#include <capnp/ez-rpc.h>
-#include <kj/debug.h>
-#include <thread>
-#include <string>
+
+#include "Random/random.h"
+#include "Network/Backend.h"
 
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
 #define RANDOM_SEED

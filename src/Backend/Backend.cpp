@@ -19,7 +19,7 @@ namespace kt {
     void Backend::serve () {
         while (! stop) {
             try {
-                auto server = capnp::EzRpcServer (kj::heap <cg::SynchroImpl> (seed), address);
+                auto server = capnp::EzRpcServer (kj::heap <cg::BackendImpl> (seed), address);
                 port = server.getPort().wait (server.getWaitScope());
 
                 auto & exec = kj::getCurrentThreadExecutor();
@@ -47,7 +47,7 @@ namespace kt {
 
     bool Backend::ping (std::string const & ip, short port) {
         auto client = capnp::EzRpcClient (ip, port);
-        auto request = client.getMain <Synchro>().pingRequest();
+        auto request = client.getMain <::Backend>().pingRequest();
         try {
             request.send().wait (client.getWaitScope());
             return true;

@@ -1,14 +1,7 @@
 #ifndef CAPSTONE_ITEMSINK_H
 #define CAPSTONE_ITEMSINK_H
 
-#include "config.h"
-
-#include "Server/generated/synchro.capnp.h"
-
-#include <kj/debug.h>
-#include <kj/memory.h>
-#include <capnp/ez-rpc.h>
-#include <capnp/message.h>
+#include "Network/config.h"
 
 #include <atomic>
 #include <functional>
@@ -22,7 +15,7 @@ namespace cg {
     typedef std::function <void ()> DoneCallback;
     typedef std::function <void (Direction)> SendItemCallback;
 
-    class ItemSinkImpl final: public Synchro::ItemSink::Server {
+    class ItemSinkImpl final: public Backend::ItemSink::Server {
     private:
         struct Callbacks {
             DoneCallback     onDone;
@@ -46,7 +39,6 @@ namespace cg {
         /// RPC function calls
         ::kj::Promise <void> done     (DoneContext     context) override;
         ::kj::Promise <void> sendItem (SendItemContext context) override;
-
     };
 
 } // cg

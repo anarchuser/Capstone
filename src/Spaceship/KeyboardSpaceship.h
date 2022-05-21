@@ -10,7 +10,7 @@
 #include "src/World/World.h"
 #include "Spaceship.h"
 
-#include "Server/Synchro.h"
+#include "Network/Backend.h"
 #include "Data/Spaceship.h"
 
 #define KEYBOARD_SPACESHIP_COLOR {0, 0, 255}
@@ -24,7 +24,7 @@ namespace kt {
     class KeyboardSpaceship: public Spaceship {
     private:
         capnp::EzRpcClient client;
-        Synchro::ItemSink::Client sink;
+//        Backend::ItemSink::Client sink;
 
         cg::Direction queried;
 

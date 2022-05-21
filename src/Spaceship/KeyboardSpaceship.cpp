@@ -7,23 +7,23 @@ namespace kt {
     KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, Vector2 const & pos, float scale, std::string address)
             : Spaceship (world, res, pos, scale)
             , client {address}
-            , sink {[&, this, address] () {
-                instance = this;
-
-                logs::messageln ("Connect to '%s'", address.c_str());
-                setName (USERNAME);
-
-                auto request = client.getMain <Synchro> ().joinRequest ();
-                getData().initialise (request.initSpaceship());
-
-                auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
-                shipCB->setOnSendSink (world.onSendSink);
-                shipCB->setOnGetSpaceship (CLOSURE (this, & Spaceship::getData));
-                shipCB->setOnSetSpaceship (CLOSURE (this, & Spaceship::setData));
-                request.setShipCallback (kj::mv (shipCB));
-
-                return request.send().wait (client.getWaitScope()).getItemSink();
-            }()}
+//            , sink {[&, this, address] () {
+//                instance = this;
+//
+//                logs::messageln ("Connect to '%s'", address.c_str());
+//                setName (USERNAME);
+//
+//                auto request = client.getMain <::Backend> ().joinRequest ();
+//                getData().initialise (request.initSpaceship());
+//
+//                auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
+//                shipCB->setOnSendSink (world.onSendSink);
+//                shipCB->setOnGetSpaceship (CLOSURE (this, & Spaceship::getData));
+//                shipCB->setOnSetSpaceship (CLOSURE (this, & Spaceship::setData));
+//                request.setShipCallback (kj::mv (shipCB));
+//
+//                return request.send().wait (client.getWaitScope()).getItemSink();
+//            }()}
             {
         setAddColor (KEYBOARD_SPACESHIP_COLOR);
 
@@ -39,7 +39,7 @@ namespace kt {
     }
 
     KeyboardSpaceship::~KeyboardSpaceship () noexcept {
-        sink.doneRequest().send().wait (client.getWaitScope());
+//        sink.doneRequest().send().wait (client.getWaitScope());
     }
 
     void KeyboardSpaceship::onSteeringEvent (ox::KeyEvent * event) {
@@ -69,13 +69,13 @@ namespace kt {
     }
 
     void KeyboardSpaceship::update (UpdateState const & us) {
-        auto request = sink.sendItemRequest ();
-        queried.initialise (request.initItem().initDirection());
+//        auto request = sink.sendItemRequest ();
+//        queried.initialise (request.initItem().initDirection());
 
         try {
-            auto promise = request.send ();
+//            auto promise = request.send ();
             Spaceship::update (us);
-            promise.wait (client.getWaitScope ());
+//            promise.wait (client.getWaitScope ());
         } catch (std::exception & e) {
             Spaceship::destroy();
             instance = nullptr;
@@ -83,7 +83,7 @@ namespace kt {
     }
 
     void KeyboardSpaceship::destroy () {
-        sink.doneRequest().send().wait (client.getWaitScope());
+//        sink.doneRequest().send().wait (client.getWaitScope());
         Spaceship::destroy();
         instance = nullptr;
     }

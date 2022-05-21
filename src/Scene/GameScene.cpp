@@ -148,7 +148,7 @@ namespace kt {
 
     std::size_t GameScene::requestSeed (std::string const & ip, unsigned short port) {
         auto client = capnp::EzRpcClient (ip, port);
-        auto promise = client.getMain <Synchro> ().seedRequest ().send();
+        auto promise = client.getMain <::Backend> ().seedRequest ().send();
         return promise.wait (client.getWaitScope()).getSeed();
     }
 

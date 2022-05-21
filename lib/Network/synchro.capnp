@@ -59,7 +59,7 @@ interface Backend {
     interface ShipRegistrar {
     # A registrar to tell the game client that a new spaceship has been registered
 
-        register @0 (spaceship :Spaceship, handle :ShipHandle) -> (sink :ItemSink);
+        registerShip @0 (spaceship :Spaceship, handle :ShipHandle) -> (sink :ItemSink);
         # Tell the game client of the new spaceship
     }
 
@@ -77,8 +77,8 @@ interface Backend {
     seed @1 () -> (seed :UInt64);
     # Request RNG seed server is running for
 
-    newShip @2 (registrar :ShipRegistrar);
-    # Register Spaceship to be managed by this server
+    registerClient @2 () -> (registrar :ShipRegistrar);
+    # Register game client. Returned registrar can be used to sync individual spaceships
 
     connect @3 (address :Address, this :Synchro) -> (their :Synchro);
     # Connect to a remote server
