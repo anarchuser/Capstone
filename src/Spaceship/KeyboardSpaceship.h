@@ -23,8 +23,8 @@ namespace kt {
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     private:
-        capnp::EzRpcClient client;
         Backend::ShipHandle::Client handle;
+        kj::WaitScope & waitscope;
 
         cg::Direction queried;
 

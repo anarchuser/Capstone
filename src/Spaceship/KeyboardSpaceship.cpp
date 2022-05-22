@@ -6,32 +6,18 @@ namespace kt {
 
     KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, Vector2 const & pos, float scale, std::string address)
             : Spaceship (world, res, pos, scale)
-            , client {address}
+            , waitscope {world.client.getWaitScope()}
             , handle {[&] () -> Backend::ShipHandle::Client {
                 instance = this;
 
                 logs::messageln ("Connect instance '%p' to backend", this);
                 setName (USERNAME);
 
-//                auto request = client.getMain <::Backend>().registerClientRequest ()
+                auto request = world.registrar.registerShipRequest();
+                getData().initialise (request.initSpaceship());
+                request.setHandle (getHandle());
+                return request.send().wait (world.client.getWaitScope()).getRemote();
             }()}
-//            , sink {[&, this, address] () {
-//                instance = this;
-//
-//                logs::messageln ("Connect to '%s'", address.c_str());
-//                setName (USERNAME);
-//
-//                auto request = client.getMain <::Backend> ().joinRequest ();
-//                getData().initialise (request.initSpaceship());
-//
-//                auto shipCB = kj::heap <cg::ShipCallbackImpl> ();
-//                shipCB->setOnSendSink (world.onSendSink);
-//                shipCB->setOnGetSpaceship (CLOSURE (this, & Spaceship::getData));
-//                shipCB->setOnSetSpaceship (CLOSURE (this, & Spaceship::setData));
-//                request.setShipCallback (kj::mv (shipCB));
-//
-//                return request.send().wait (client.getWaitScope()).getItemSink();
-//            }()}
             {
         setAddColor (KEYBOARD_SPACESHIP_COLOR);
 
@@ -76,11 +62,12 @@ namespace kt {
         try {
             auto promise = request.send ();
             Spaceship::update (us);
-            promise.detach ([] (kj::Exception && e) {
-                if (auto ship = KeyboardSpaceship::instance) {
-                    ship->destroy();
-                }
-            });
+            promise.wait (waitscope);
+//            promise.detach ([] (kj::Exception && e) {
+//                if (auto ship = KeyboardSpaceship::instance) {
+//                    ship->destroy();
+//                }
+//            });
         } catch (std::exception & e) {
             destroy();
         }
@@ -88,9 +75,10 @@ namespace kt {
 
     void KeyboardSpaceship::destroy () {
         try {
-            handle.doneRequest().send().wait (client.getWaitScope());
+            handle.doneRequest().send().wait (waitscope);
         } catch (...) {}
         Spaceship::destroy();
+        instance = nullptr;
     }
 
     kj::Own <cg::ShipHandleImpl> KeyboardSpaceship::getHandle () {

@@ -17,23 +17,22 @@ namespace kt {
     }
     
     void Backend::serve () {
-        while (! stop) {
-            try {
-                auto server = capnp::EzRpcServer (kj::heap <cg::BackendImpl> (seed), address);
-                port = server.getPort().wait (server.getWaitScope());
+        try {
+            auto server = capnp::EzRpcServer (kj::heap <cg::BackendImpl> (seed), address);
+            port = server.getPort().wait (server.getWaitScope());
 
-                auto & exec = kj::getCurrentThreadExecutor();
+            auto & exec = kj::getCurrentThreadExecutor();
 
-                while (! stop) {
-                    exec.executeAsync ([this] () {
-                        std::this_thread::yield ();
-                    }).wait (server.getWaitScope ());
-                }
-                return;
-            } catch (...) {
-                logs::warning ("Failed to bind address to '%s'. Retrying...", address.c_str());
-                std::this_thread::yield();
+            logs::messageln ("Backend starts serving now");
+
+            while (! stop) {
+                exec.executeAsync ([this] () {
+                    std::this_thread::yield ();
+                }).wait (server.getWaitScope ());
             }
+            return;
+        } catch (...) {
+            logs::warning ("Failed to bind address to '%s'. Retrying...", address.c_str());
         }
     }
     

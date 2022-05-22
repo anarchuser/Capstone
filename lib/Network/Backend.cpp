@@ -37,7 +37,6 @@ namespace cg {
         log (std::string ("Velocity: ( ")
                 + std::to_string (spaceship.velocity[0]) + " | "
                 + std::to_string (spaceship.velocity[1]) + " )");
-        log (std::string ("Angle: " + std::to_string (spaceship.angle)));
         log (std::string ("Health: " + std::to_string (spaceship.health)));
 
         // Store connection details (callback handles and 'new ship' callback)
@@ -46,7 +45,7 @@ namespace cg {
 
         broadcastSpaceship (spaceship);
 
-        log ("Configure ShipHandle sent back to the client");
+        log ("Send ShipHandle back to " + username);
         auto sink = kj::heap <ShipHandleImpl> ();
         sink->setOnSendItem ([this, username] (Direction direction) {
             sendItemCallback (username, direction);
@@ -70,15 +69,14 @@ namespace cg {
     }
 
     void BackendImpl::doneCallback (std::string username) {
-        log ("Closing sinks from " + username);
-
         if (shipHandles.contains (username)) {
-            auto & handle = shipHandles.at (username);
+            log ("Closing sinks from " + username);
+
+            auto handle = std::move (shipHandles.at (username));
+            shipHandles.erase (username);
             // TODO: look for a better way
             // TODO: does this need detachment?
             handle.doneRequest().send().then ([](...){});
-        } else {
-            KJ_DLOG (WARNING, "No spaceship with username " + username + "found");
         }
     }
 
