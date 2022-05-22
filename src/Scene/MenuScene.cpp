@@ -23,6 +23,7 @@ namespace kt {
     void MenuScene::onNewGame (Event * event) {
         detach();
         getStage()->removeAllEventListeners();
+        this->~MenuScene();
         while (get_pointer(getStage()->getLastChild()) == this);
         new GameScene (RANDOM_SEED);
     }
@@ -49,6 +50,7 @@ namespace kt {
     void MenuScene::joinGame (std::string address) {
         detach();
         getStage()->removeAllEventListeners();
+        this->~MenuScene();
         while (get_pointer (getStage()->getLastChild()) == this);
         new GameScene (std::move (address), SERVER_PORT);
     }

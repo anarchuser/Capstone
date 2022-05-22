@@ -117,6 +117,7 @@ namespace kt {
     void GameScene::onRestart (Event * event) {
         detach ();
         getStage ()->removeAllEventListeners ();
+        this->~GameScene();
         while (get_pointer (getStage ()->getLastChild ()) == this);
         new GameScene (rng.seed);
     }
@@ -124,6 +125,7 @@ namespace kt {
     void GameScene::onNewGame (Event * event) {
         detach ();
         getStage ()->removeAllEventListeners ();
+        this->~GameScene();
         while (get_pointer (getStage ()->getLastChild ()) == this);
         new GameScene (RANDOM_SEED);
     }
@@ -131,6 +133,7 @@ namespace kt {
     void GameScene::onDisconnect (Event * event) {
         detach ();
         getStage ()->removeAllEventListeners ();
+        this->~GameScene();
         while (get_pointer (getStage ()->getLastChild ()) == this);
         new MenuScene ();
     }

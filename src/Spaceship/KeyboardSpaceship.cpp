@@ -68,22 +68,19 @@ namespace kt {
         }
     }
 
-    KeyboardSpaceship::~KeyboardSpaceship () noexcept {
-        logs::messageln ("~KeyboardSpaceship: instance = %p", instance);
-    }
-
     void KeyboardSpaceship::destroy () {
-        ONCE ({
-            logs::messageln ("KeyboardSpaceship::destroy");
-            try {
-                handle.doneRequest ().send().wait (waitscope);
-            } catch (...) {}
-            Spaceship::destroy ();
-            instance = nullptr;
-        });
+        logs::messageln ("KeyboardSpaceship::destroy");
+        try {
+            handle.doneRequest ().send().wait (waitscope);
+        } catch (...) {}
+        Spaceship::destroy ();
+        this->~KeyboardSpaceship();
+        instance = nullptr;
     }
 
     kj::Own <cg::ShipHandleImpl> KeyboardSpaceship::getHandle () {
+        setAwake (true);
+
         auto handle = kj::heap <cg::ShipHandleImpl> ();
         handle->setOnDone         (CLOSURE (this, & KeyboardSpaceship::destroy));
         handle->setOnSendItem     (CLOSURE (this, & KeyboardSpaceship::updateDirection));

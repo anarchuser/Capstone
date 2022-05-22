@@ -77,16 +77,15 @@ namespace kt {
     };
 
     void Spaceship::destroy () {
-        ONCE ({
-            logs::messageln ("Spaceship::destroy");
-            for (auto listener: listeners)
-                getStage ()->removeEventListener (listener);
-            updateScoreboard ("dead");
-            setAwake (false);
-            if (body) body->GetUserData ().pointer = 0;
-            body = nullptr;
-            detach ();
-        });
+        logs::messageln ("Spaceship::destroy");
+        for (auto listener: listeners)
+            getStage ()->removeEventListener (listener);
+        updateScoreboard ("dead");
+        setAwake (false);
+        if (body) body->GetUserData ().pointer = 0;
+        body = nullptr;
+        this->~Spaceship();
+        detach ();
     }
 
     void Spaceship::updateScoreboard (std::string msg) {
@@ -176,6 +175,8 @@ namespace kt {
     }
 
     kj::Own <cg::ShipHandleImpl> Spaceship::getHandle () {
+        setAwake (true);
+
         auto handle = kj::heap <cg::ShipHandleImpl> ();
         handle->setOnDone         (CLOSURE (this, & Spaceship::destroy));
         handle->setOnSendItem     (CLOSURE (this, & Spaceship::updateDirection));
