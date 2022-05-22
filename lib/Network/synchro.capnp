@@ -43,32 +43,23 @@ interface Backend {
     # The thing exchanged between servers as communication basis
 
         disconnect @0 ();
-        sendSink @1 (sink :ItemSink);
-    }
-
-    interface ItemSink {
-    # An item stream used to update entities in the game
-
-        done @0 ();
-        # Stop stream -> delete related object
-
-        sendItem @1 (item :Item) -> ();
-        # Send the next item for the related object to process
+        sendShip @1 (ship :ShipHandle);
     }
 
     interface ShipRegistrar {
     # A registrar to tell the game client that a new spaceship has been registered
 
-        registerShip @0 (spaceship :Spaceship, handle :ShipHandle) -> (sink :ItemSink);
+        registerShip @0 (spaceship :Spaceship, handle :ShipHandle) -> (remote :ShipHandle);
         # Tell the game client of the new spaceship
     }
 
     interface ShipHandle {
     # A handle for a connected spaceship giving the backend control over it
 
-        getSpaceship @0 () -> (spaceship :Spaceship);
-        setSpaceship @1 (spaceship :Spaceship) -> ();
-        destroy @2 ();
+        done @0 ();
+        sendItem @1 (item :Item);
+        getSpaceship @2 () -> (spaceship :Spaceship);
+        setSpaceship @3 (spaceship :Spaceship) -> ();
     }
 
     ping @0 ();
@@ -77,7 +68,7 @@ interface Backend {
     seed @1 () -> (seed :UInt64);
     # Request RNG seed server is running for
 
-    registerClient @2 () -> (registrar :ShipRegistrar);
+    registerClient @2 (s2c_registrar :ShipRegistrar) -> (c2s_registrar :ShipRegistrar);
     # Register game client. Returned registrar can be used to sync individual spaceships
 
     connect @3 (address :Address, this :Synchro) -> (their :Synchro);

@@ -17,16 +17,19 @@
 
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
-#include "Network/ItemSink/ItemSink.h"
 
 namespace cg {
-    using GetSpaceshipHandle       = std::function <Spaceship ()>;
-    using SetSpaceshipHandle       = std::function <void (Spaceship)>;
+    using DoneCallback         = std::function <void ()>;
+    using SendItemCallback     = std::function <void (Direction)>;
+    using GetSpaceshipCallback = std::function <Spaceship ()>;
+    using SetSpaceshipCallback = std::function <void (Spaceship)>;
 
     class ShipHandleImpl final: public Backend::ShipHandle::Server {
     private:
-        GetSpaceshipHandle onGetSpaceship;
-        SetSpaceshipHandle onSetSpaceship;
+        DoneCallback         onDone;
+        SendItemCallback     onSendItem;
+        GetSpaceshipCallback onGetSpaceship;
+        SetSpaceshipCallback onSetSpaceship;
 
         void log (std::string const & msg);
 
@@ -34,12 +37,15 @@ namespace cg {
         ShipHandleImpl() = default;
         ~ShipHandleImpl() = default;
 
-        void setOnGetSpaceship (GetSpaceshipHandle && onGetSpaceship);
-        void setOnSetSpaceship (SetSpaceshipHandle && onSetSpaceship);
+        void setOnDone (DoneCallback && onDone);
+        void setOnSendItem (SendItemCallback && onSendItem);
+        void setOnGetSpaceship (GetSpaceshipCallback && onGetSpaceship);
+        void setOnSetSpaceship (SetSpaceshipCallback && onSetSpaceship);
 
+        ::kj::Promise <void> done (DoneContext context) override;
+        ::kj::Promise <void> sendItem (SendItemContext context) override;
         ::kj::Promise <void> getSpaceship (GetSpaceshipContext context) override;
         ::kj::Promise <void> setSpaceship (SetSpaceshipContext context) override;
-        ::kj::Promise <void> destroy (DestroyContext context) override;
     };
 } // cg
 

@@ -3,22 +3,21 @@
 
 #include "Network/config.h"
 
-#include "Network/ItemSink/ItemSink.h"
 #include "Network/ShipHandle/ShipHandle.h"
 
 namespace cg {
-    using registerShipCallback = std::function <kj::Own <ItemSinkImpl> (Spaceship const &, Backend::ShipHandle::Client)>;
+    using RegisterShipCallback = std::function <kj::Own <ShipHandleImpl> (Spaceship const &, Backend::ShipHandle::Client)>;
 
     class ShipRegistrarImpl final: public Backend::ShipRegistrar::Server {
     private:
-        registerShipCallback onRegisterShip;
+        RegisterShipCallback onRegisterShip;
 
         void log (std::string const & msg);
 
     public:
         ShipRegistrarImpl() = default;
 
-        void setOnRegisterShip (registerShipCallback && callback);
+        void setOnRegisterShip (RegisterShipCallback && callback);
 
         ::kj::Promise <void> registerShip (RegisterShipContext context) override;
     };

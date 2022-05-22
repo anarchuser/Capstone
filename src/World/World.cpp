@@ -1,10 +1,20 @@
 #include "World.h"
 
 namespace kt {
-    World * World::instance = nullptr;
+    World::World (ResAnim * background, b2Vec2 size, cg::RegisterShipCallback && onRegisterShip)
+            : world (b2Vec2_zero)
+            , world_size {size}
+            , client {SERVER_FULL_ADDRESS}
+            , registrar {[this] (cg::RegisterShipCallback && onRegisterShip) {
 
-    World::World (ResAnim * background, b2Vec2 size): world (b2Vec2_zero), world_size {size} {
-        instance = this;
+                auto request = client.getMain <::Backend> ().registerClientRequest();
+                auto registrar = kj::heap <cg::ShipRegistrarImpl> ();
+                registrar->setOnRegisterShip (std::move (onRegisterShip));
+                request.setS2c_registrar (kj::mv (registrar));
+
+                return request.send().wait (client.getWaitScope()).getC2s_registrar();
+            } (std::forward <cg::RegisterShipCallback> (onRegisterShip))}
+            {
         setName ("World");
         setResAnim (background);
     
@@ -26,6 +36,9 @@ namespace kt {
                     break;
             }
         });
+    }
+    World::~World () noexcept {
+        Sprite::~Sprite();
     }
 
     void World::update (UpdateState const & updateState) {

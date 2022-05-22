@@ -18,9 +18,8 @@ namespace kt {
         // Load all required game assets
         gameResources.loadXML (GAME_RESOURCES);
 
-        spWorld world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
-        addChild (world);
-        world->onSendSink = [&] (cg::Spaceship const & spaceship) -> kj::Own <cg::ItemSinkImpl> {
+        spWorld world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE,
+                                   [&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
             auto & username = spaceship.username;
             logs::messageln ("Received sink for spaceship '%s'", username.c_str());
 
@@ -28,23 +27,17 @@ namespace kt {
                 auto ship = KeyboardSpaceship::instance;
                 if (ship && ship->getName () == username) {
                     ship->setData (spaceship);
-                    return kj::heap<cg::ItemSinkImpl> (
-                            CLOSURE (ship, & KeyboardSpaceship::destroy),
-                            CLOSURE (ship, & KeyboardSpaceship::updateDirection));
+                    return ship->getHandle();
                 }
             }
 
-            spWorld world = World::instance;
-            OX_ASSERT (world);
-            spActor child = world->getChild (username, oxygine::ep_ignore_error);
-            OX_ASSERT (! child);
+            world->removeChild (world->getChild (username, oxygine::ep_ignore_error));
 
             spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, getSize() * 0.5, SPACESHIP_SCALE);
             ship->setData (spaceship);
-            return kj::heap <cg::ItemSinkImpl> (
-                    CLOSURE (ship.get(), & RemoteSpaceship::destroy),
-                    CLOSURE (ship.get(), & RemoteSpaceship::updateDirection));
-        };
+            return ship->getHandle();
+        });
+        addChild (world);
 
         // Generate a couple of planets, number based on world size
         auto planetAnimation = gameResources.getResAnim ("venus");
@@ -55,7 +48,7 @@ namespace kt {
             }, float (rng.random ({0.3, 0.7})));
         }
 
-        Spaceship::ship_counter = 0;
+        Spaceship::resetCounter();
         if (!join)
             new KeyboardSpaceship (* world, & gameResources, getSize() * 0.5, SPACESHIP_SCALE, SERVER_FULL_ADDRESS);
 

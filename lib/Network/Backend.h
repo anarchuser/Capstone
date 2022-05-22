@@ -5,7 +5,6 @@
 
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
-#include "ItemSink/ItemSink.h"
 #include "ShipHandle/ShipHandle.h"
 #include "ShipRegistrar/ShipRegistrar.h"
 
@@ -25,16 +24,10 @@
 namespace cg {
     class BackendImpl final: public Backend::Server {
     private:
-        struct ShipHandle {
-            Backend::ShipHandle::Client shipHandle;
-            std::unordered_map <std::string, Backend::ItemSink::Client> itemSinks;
 
-            explicit ShipHandle (Backend::ShipHandle::Client && handle): shipHandle {handle} {}
-        };
-
-        /// List of open connections per username
+        /// Handles to all spaceships registered to the server
         //TODO: replace username with proper UUID
-        std::unordered_map <std::string, ShipHandle> shipHandles;
+        std::unordered_map <std::string, Backend::ShipHandle::Client> shipHandles;
 
         /// List of connected game clients
         std::vector <Backend::ShipRegistrar::Client> registrars;
@@ -51,7 +44,7 @@ namespace cg {
         void distributeSpaceship (Spaceship const & sender, std::string const & receiver);
         void broadcastSpaceship  (Spaceship const & sender);
 
-        kj::Own <ItemSinkImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
+        kj::Own <ShipHandleImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
 
         void log (std::string const & msg);
 

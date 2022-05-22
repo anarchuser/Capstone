@@ -11,7 +11,7 @@ namespace cg {
 
     public:
         kj::Promise <void> disconnect (DisconnectContext context) override;
-        kj::Promise <void> sendSink (SendSinkContext context) override;
+        kj::Promise <void> sendShip (SendShipContext context) override;
     };
 
 } // cg

@@ -6,13 +6,22 @@ namespace kt {
             : Spaceship (world, res, pos, scale)
     {
         setAddColor (REMOTE_SPACESHIP_COLOR);
-
-        setAwake (true);
     }
 
     void RemoteSpaceship::destroy () {
         Spaceship::destroy();
         updateScoreboard ("ghost");
+    }
+
+    kj::Own <cg::ShipHandleImpl> RemoteSpaceship::getHandle () {
+        setAwake (true);
+
+        auto handle = kj::heap <cg::ShipHandleImpl> ();
+        handle->setOnDone         (CLOSURE (this, & RemoteSpaceship::destroy));
+        handle->setOnSendItem     (CLOSURE (this, & RemoteSpaceship::updateDirection));
+        handle->setOnGetSpaceship (CLOSURE (this, & RemoteSpaceship::getData));
+        handle->setOnSetSpaceship (CLOSURE (this, & RemoteSpaceship::setData));
+        return handle;
     }
 }
 

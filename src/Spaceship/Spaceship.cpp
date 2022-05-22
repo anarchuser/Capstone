@@ -3,6 +3,10 @@
 namespace kt {
     std::size_t Spaceship::ship_counter = 0;
 
+    void Spaceship::resetCounter () {
+        ship_counter = 0;
+    }
+
     Spaceship::Spaceship (World & world, Resources * res, Vector2 const & pos, float scale) {
         attachTo (& world);
         setPosition (pos);
@@ -165,6 +169,15 @@ namespace kt {
         setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
         health = spaceship.health;
         updateScoreboard ();
+    }
+
+    kj::Own <cg::ShipHandleImpl> Spaceship::getHandle () {
+        auto handle = kj::heap <cg::ShipHandleImpl> ();
+        handle->setOnDone         (CLOSURE (this, & Spaceship::destroy));
+        handle->setOnSendItem     (CLOSURE (this, & Spaceship::updateDirection));
+        handle->setOnGetSpaceship (CLOSURE (this, & Spaceship::getData));
+        handle->setOnSetSpaceship (CLOSURE (this, & Spaceship::setData));
+        return handle;
     }
 }
 

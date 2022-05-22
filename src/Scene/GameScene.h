@@ -17,6 +17,7 @@
 
 #include "Random/random.h"
 #include "Network/Backend.h"
+#include "Network/ShipRegistrar/ShipRegistrar.h"
 
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
 #define RANDOM_SEED

@@ -24,14 +24,14 @@ namespace kt {
     class KeyboardSpaceship: public Spaceship {
     private:
         capnp::EzRpcClient client;
-//        Backend::ItemSink::Client sink;
+        Backend::ShipHandle::Client handle;
 
         cg::Direction queried;
 
     public:
         /// Creates a new human-controllable spaceship. Only one such ship may exist in a game
         KeyboardSpaceship (World & world, Resources * res, Vector2 const & pos, float scale, std::string address);
-        ~KeyboardSpaceship() noexcept override;
+        ~KeyboardSpaceship() noexcept override = default;
 
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
@@ -39,6 +39,8 @@ namespace kt {
         void update (UpdateState const & us) override;
 
         void destroy () override;
+
+        kj::Own <cg::ShipHandleImpl> getHandle () override;
 
         /// Current keyboard controlled spaceship instance
         static KeyboardSpaceship * instance;

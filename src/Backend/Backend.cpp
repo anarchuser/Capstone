@@ -52,8 +52,9 @@ namespace kt {
             request.send().wait (client.getWaitScope());
             return true;
         } catch (std::exception & e) {
-            logs::warning ("Backend::ping(): Connection refused:\n'%s'", e.what());
+            logs::warning ("Backend::ping(): Connection refused'");
         }
+        return false;
     }
 }
 

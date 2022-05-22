@@ -8,7 +8,7 @@ namespace cg {
         std::cout << ss.str() << std::endl;
     }
 
-    void ShipRegistrarImpl::setOnRegisterShip (registerShipCallback && callback) {
+    void ShipRegistrarImpl::setOnRegisterShip (RegisterShipCallback && callback) {
         onRegisterShip = callback;
     }
 
@@ -17,7 +17,7 @@ namespace cg {
         auto results = context.initResults();
 
         try {
-            results.setSink (onRegisterShip (Spaceship (params.getSpaceship()), params.getHandle()));
+            results.setRemote (onRegisterShip (Spaceship (params.getSpaceship()), params.getHandle()));
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipRegistrar::registerShip called without valid callback registered");
         }

@@ -12,7 +12,7 @@ namespace cg {
         return kj::READY_NOW;
     }
 
-    kj::Promise <void> SynchroImpl::sendSink (SendSinkContext context) {
+    kj::Promise <void> SynchroImpl::sendShip (SendShipContext context) {
         return kj::READY_NOW;
     }
 

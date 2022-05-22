@@ -33,6 +33,9 @@ namespace kt {
 
     /// Spaceship intended to be controlled by (human) players. No control mechanism included; subclass to do so
     class Spaceship: public Sprite {
+        /// Counter incrementing IDs. Reset on creating a new GameScene instance
+        static std::size_t ship_counter;
+
         /// ID of this spaceship. IDs increment with each ship, starting from 0 each game
         std::size_t const id = ship_counter++;
 
@@ -79,8 +82,10 @@ namespace kt {
         cg::Spaceship getData () const;
         void setData (cg::Spaceship const & spaceship);
 
+        virtual kj::Own <cg::ShipHandleImpl> getHandle ();
+
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
-        static std::size_t ship_counter;
+        static void resetCounter();
     };
 
     DECLARE_SMART(Spaceship, spSpaceship);
