@@ -63,22 +63,24 @@ namespace kt {
             auto promise = request.send ();
             Spaceship::update (us);
             promise.wait (waitscope);
-//            promise.detach ([] (kj::Exception && e) {
-//                if (auto ship = KeyboardSpaceship::instance) {
-//                    ship->destroy();
-//                }
-//            });
         } catch (std::exception & e) {
             destroy();
         }
     }
 
+    KeyboardSpaceship::~KeyboardSpaceship () noexcept {
+        logs::messageln ("~KeyboardSpaceship: instance = %p", instance);
+    }
+
     void KeyboardSpaceship::destroy () {
-        try {
-            handle.doneRequest().send().wait (waitscope);
-        } catch (...) {}
-        Spaceship::destroy();
-        instance = nullptr;
+        ONCE ({
+            logs::messageln ("KeyboardSpaceship::destroy");
+            try {
+                handle.doneRequest ().send().wait (waitscope);
+            } catch (...) {}
+            Spaceship::destroy ();
+            instance = nullptr;
+        });
     }
 
     kj::Own <cg::ShipHandleImpl> KeyboardSpaceship::getHandle () {

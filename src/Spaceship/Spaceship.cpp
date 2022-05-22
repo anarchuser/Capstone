@@ -64,8 +64,9 @@ namespace kt {
             if (!body->IsAwake()) return;
 //            spSprite other = safeCast <CollisionEvent *> (event)->other;
             --health;
-            updateScoreboard("");
+            updateScoreboard();
             if (health <= 0) {
+                logs::messageln ("Spaceship of '%s' crashed...", getName().c_str());
                 destroy();
             }
         }));
@@ -76,13 +77,16 @@ namespace kt {
     };
 
     void Spaceship::destroy () {
-        for (auto listener : listeners)
-            getStage ()->removeEventListener (listener);
-        updateScoreboard ("dead");
-        setAwake (false);
-        if (body) body->GetUserData().pointer = 0;
-        body = nullptr;
-        detach();
+        ONCE ({
+            logs::messageln ("Spaceship::destroy");
+            for (auto listener: listeners)
+                getStage ()->removeEventListener (listener);
+            updateScoreboard ("dead");
+            setAwake (false);
+            if (body) body->GetUserData ().pointer = 0;
+            body = nullptr;
+            detach ();
+        });
     }
 
     void Spaceship::updateScoreboard (std::string msg) {

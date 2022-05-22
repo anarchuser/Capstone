@@ -74,9 +74,6 @@ namespace cg {
 
             auto handle = std::move (shipHandles.at (username));
             shipHandles.erase (username);
-            // TODO: look for a better way
-            // TODO: does this need detachment?
-            handle.doneRequest().send().then ([](...){});
         }
     }
 
@@ -85,8 +82,7 @@ namespace cg {
             auto request = registrar->registerShipRequest();
             sender.initialise (request.initSpaceship());
             request.send().detach ([&] (kj::Exception && e) {
-                        KJ_DLOG (WARNING, e.getDescription());
-                        KJ_DLOG (WARNING, "Removing registrar");
+                        KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription());
                 registrars.erase (registrar);
             });
         }
