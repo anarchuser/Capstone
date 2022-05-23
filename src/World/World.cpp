@@ -17,7 +17,7 @@ namespace kt {
 
         world.SetContactListener (new CollisionListener);
 
-        getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
+        getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [this](Event * event) {
             auto key = safeCast<KeyEvent *> (event)->data->keysym.scancode;
             switch (key) {
                 case SDL_SCANCODE_GRAVE:

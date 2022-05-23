@@ -23,11 +23,11 @@ namespace kt {
 
         registrar.whenResolved().then ([this] () { destroy(); });
 
-        listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
-            instance->onSteeringEvent ((KeyEvent *) event);
+        listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [this](Event * event) {
+            onSteeringEvent ((KeyEvent *) event);
         }));
-        listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_DOWN, [](Event * event) {
-            instance->onSteeringEvent ((KeyEvent *) event);
+        listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
+            onSteeringEvent ((KeyEvent *) event);
         }));
     }
 
@@ -76,7 +76,6 @@ namespace kt {
             handle.doneRequest ().send().wait (waitscope);
         } catch (...) {}
         Spaceship::destroy ();
-        this->~KeyboardSpaceship();
         instance = nullptr;
     }
 

@@ -10,7 +10,6 @@ namespace kt {
             }
     
     Backend::~Backend () noexcept {
-        if (auto & ship = KeyboardSpaceship::instance) ship->destroy();
         logs::messageln ("Shutting down backend");
         stop = true;
         server_thread.join();

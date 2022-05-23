@@ -85,7 +85,6 @@ namespace kt {
         setAwake (false);
         if (body) body->GetUserData ().pointer = 0;
         body = nullptr;
-        this->~Spaceship();
         detach ();
     }
 

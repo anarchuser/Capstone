@@ -1,4 +1,3 @@
-#include <spqr.hpp>
 #include "Backend.h"
 
 namespace cg {

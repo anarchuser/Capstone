@@ -83,6 +83,7 @@ namespace kt {
     GameScene::~GameScene () noexcept {
         // Free all game assets
         gameResources.free ();
+        if (auto * ship = KeyboardSpaceship::instance) ship->destroy();
     }
 
     void GameScene::update (UpdateState const & us) {
@@ -110,12 +111,13 @@ namespace kt {
             return dialog;
         } ();
 
-        // TODO: check if *any* child is dialog
-        if (getLastChild () != dialog) {
-            addChild (dialog);
-        } else {
-            removeChild (dialog);
+        for (auto child = getFirstChild(); child != getLastChild(); child = child->getNextSibling()) {
+            if (child == dialog) {
+                removeChild (child);
+                return;
+            }
         }
+        addChild (dialog);
     }
 
     void GameScene::onRestart (Event * event) {
