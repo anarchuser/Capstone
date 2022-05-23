@@ -174,11 +174,12 @@ namespace kt {
     }
 
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
+        auto synchroRequest = client.getMain <::Backend>().requestSynchroRequest();
+
         auto request = client.getMain <::Backend> ().requestConnectRequest ();
-        auto address = request.initAddress();
-        address.setIp (ip.c_str());
-        address.setPort (port);
-        request.send();
+        cg::Address (std::string (ip), port).initialise (request.initAddress());
+        request.setTheir (synchroRequest.send().getTheir());
+        request.send().wait (waitscope);
     }
 }
 

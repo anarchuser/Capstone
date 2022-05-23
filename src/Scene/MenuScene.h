@@ -27,7 +27,7 @@ namespace kt {
         /// Callback for when quitting the application is requested
         void onRequestExit (Event * event);
 
-        void joinGame (std::string address);
+        void joinGame (std::string const & address);
     };
     DECLARE_SMART (MenuScene, spMenuScene);
 

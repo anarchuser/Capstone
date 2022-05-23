@@ -74,6 +74,8 @@ interface Backend {
     connect @3 (address :Address, this :Synchro) -> (their :Synchro);
     # Connect to a remote server
 
-    requestConnect @4 (address :Address);
+    requestConnect @4 (address :Address, their :Synchro);
     # Request connection to given address
+
+    requestSynchro @5 () -> (their :Synchro);
 }

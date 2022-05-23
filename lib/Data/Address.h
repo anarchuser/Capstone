@@ -14,7 +14,7 @@ namespace cg {
 
         void initialise (Backend::Address::Builder builder) const;
 
-        explicit operator std::string () const;
+        operator std::string () const;
     };
 }
 

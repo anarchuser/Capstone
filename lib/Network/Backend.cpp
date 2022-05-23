@@ -91,6 +91,9 @@ namespace cg {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasS2c_registrar());
         KJ_REQUIRE (!gameClient);
+
+        log ("Registering game client");
+
         gameClient = std::make_unique <Backend::ShipRegistrar::Client> (params.getS2c_registrar());
 
         auto results = context.initResults();
@@ -115,6 +118,8 @@ namespace cg {
         KJ_REQUIRE (params.hasThis());
         connections.insert ({address, params.getThis()});
 
+        log ("Connecting to " + address);
+
         auto results = context.initResults();
 //        results.setTheir (kj::heap <SynchroImpl> ());
 
@@ -126,15 +131,25 @@ namespace cg {
         KJ_REQUIRE (params.hasAddress());
 
         Address address (params.getAddress());
-        KJ_REQUIRE (!connections.contains ((std::string) address));
+        KJ_REQUIRE (!connections.contains (address));
 
+        // ======== //
 
-        capnp::EzRpcClient client ((std::string) address);
-        auto request = client.getMain <Backend>().connectRequest();
-        address.initialise (request.initAddress());
+//        params.getTheir().
 
-        auto result = request.send();
-        connections.insert ({(std::string) address, result.getTheir()});
+        // ======== //
+
+        log ("Finished connection request");
+
+        return kj::READY_NOW;
+    }
+
+    ::kj::Promise <void> BackendImpl::requestSynchro (RequestSynchroContext context) {
+        log ("Synchro requested");
+
+        auto synchro = kj::heap <cg::SynchroImpl> ();
+
+        context.initResults ().setTheir (kj ::mv (synchro));
 
         return kj::READY_NOW;
     }

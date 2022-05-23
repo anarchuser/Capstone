@@ -56,6 +56,7 @@ namespace cg {
         ::kj::Promise <void> registerClient (RegisterClientContext context) override;
         ::kj::Promise <void> connect (ConnectContext context) override;
         ::kj::Promise <void> requestConnect (RequestConnectContext context) override;
+        ::kj::Promise <void> requestSynchro (RequestSynchroContext context) override;
     };
 } // cg
 
