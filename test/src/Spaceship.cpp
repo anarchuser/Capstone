@@ -16,7 +16,7 @@ SCENARIO ("Time passes in a near-empty world") {
         b2Vec2 world_size = {10, 10};
         kt::World world (nullptr, world_size);
         b2Vec2 ship_pos = 0.5 * world_size;
-        auto & ship = * new kt::Spaceship (world, nullptr);
+        auto & ship = * new kt::Spaceship (world, nullptr, "");
         auto ship_angle = ship.getRotation ();
 
         REQUIRE (ship.getPhysicalPosition () == ship_pos);
