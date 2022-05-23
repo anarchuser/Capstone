@@ -7,9 +7,9 @@ namespace kt {
         ship_counter = 0;
     }
 
-    Spaceship::Spaceship (World & world, Resources * res, Vector2 const & pos, float scale) {
+    Spaceship::Spaceship (World & world, Resources * res) {
         attachTo (& world);
-        setPosition (pos);
+        setPosition (world.getSize() * 0.5);
         setRotation (1.5 * b2_pi);
         setAnchor (0.5, 0.5);
         setTouchChildrenEnabled (false);
@@ -18,7 +18,7 @@ namespace kt {
 
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
-        bodyDef.position = world.convert (pos);
+        bodyDef.position = 0.5 * world.world_size;
         bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
         bodyDef.angle = 1.5 * b2_pi;
 
@@ -26,6 +26,7 @@ namespace kt {
         setUserData (body);
         body->SetAwake (false);
 
+        float scale = SPACESHIP_SCALE;
         setScale (scale);
 
         b2PolygonShape cone;

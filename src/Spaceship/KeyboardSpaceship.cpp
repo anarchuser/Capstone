@@ -4,22 +4,24 @@ namespace kt {
 
     KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
 
-    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, Vector2 const & pos, float scale, std::string address)
-            : Spaceship (world, res, pos, scale)
-            , waitscope {world.client.getWaitScope()}
+    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, ::Backend::ShipRegistrar::Client & registrar, kj::WaitScope & waitscope)
+            : Spaceship (world, res)
+            , waitscope {waitscope}
             , handle {[&] () -> Backend::ShipHandle::Client {
                 instance = this;
 
                 logs::messageln ("Connect instance '%p' to backend", this);
                 setName (USERNAME);
 
-                auto request = world.registrar.registerShipRequest();
+                auto request = registrar.registerShipRequest();
                 getData().initialise (request.initSpaceship());
                 request.setHandle (getHandle());
-                return request.send().wait (world.client.getWaitScope()).getRemote();
+                return request.send().wait (waitscope).getRemote();
             }()}
             {
         setAddColor (KEYBOARD_SPACESHIP_COLOR);
+
+        registrar.whenResolved().then ([this] () { destroy(); });
 
         listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [](Event * event) {
             instance->onSteeringEvent ((KeyEvent *) event);

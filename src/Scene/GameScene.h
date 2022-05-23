@@ -39,6 +39,8 @@ namespace kt {
 
         Backend backend;
 
+        capnp::EzRpcClient client;
+
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         void joinGame (std::string const & ip, unsigned short port);
         
@@ -48,7 +50,7 @@ namespace kt {
         /// Directly ping to an existing Game remotely
         GameScene (std::string const & ip, unsigned short port);
         /// Inject a new Game instance with given seed into the stage
-        explicit GameScene (std::size_t seed, bool join = false);
+        explicit GameScene (std::size_t seed);
         ~GameScene() noexcept override;
 
         /// Updates its children, given that the game is not paused (i.e., hard and soft pause set to false)

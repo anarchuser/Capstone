@@ -9,33 +9,31 @@
 
 #define HEALTH_VALUE 42
 
-SCENARIO ("...") {
-    GIVEN ("a Synchro instance on a different thread") {
+SCENARIO ("A backend returns the seed it was initialised with") {
+    GIVEN ("A backend running on a local port") {
         auto const seed = RANDOM_SEED;
         kt::Backend backend (seed, "*");
-        auto port = backend.getPort();
+        auto port = backend.getPort ();
 
-        capnp::EzRpcClient client ("localhost", port);
-        auto main = client.getMain <::Backend>();
-        auto & waitScope = client.getWaitScope();
+        capnp::EzRpcClient client ("*", port);
+        auto main = client.getMain<::Backend> ();
+        auto & waitScope = client.getWaitScope ();
 
         WHEN ("I send a ping") {
-            auto request = main.pingRequest();
+            auto request = main.pingRequest ();
 
             THEN ("It resolves without fail") {
-                REQUIRE_NOTHROW (request.send().wait (waitScope));
+                REQUIRE_NOTHROW (request.send ().wait (waitScope));
             }
         }
         WHEN ("I request the RNG seed") {
-            auto request = main.seedRequest();
+            auto request = main.seedRequest ();
 
             THEN ("I get back the expected seed without fail") {
-                REQUIRE (request.send().wait (waitScope).getSeed() == seed);
+                REQUIRE (request.send ().wait (waitScope).getSeed () == seed);
             }
         }
-
-        WHEN ("I send a join request") {
-            static int i = 0;
+        WHEN ("I register as client") {
             auto registerClientRequest = main.registerClientRequest();
 
             auto registrar = kj::heap <cg::ShipRegistrarImpl> ();
@@ -94,13 +92,13 @@ SCENARIO ("...") {
 
 TEST_CASE ("Ping checks whether the backend is running on a local port ") {
     SECTION ("Ping without active server") {
-        REQUIRE_FALSE (kt::Backend::ping (SERVER_ADDRESS, SERVER_PORT));
+        REQUIRE_FALSE (kt::Backend::ping ("*", SERVER_PORT));
     }
 
     SECTION ("Ping with active server") {
         kt::Backend backend (RANDOM_SEED, SERVER_FULL_ADDRESS);
 
-        REQUIRE (kt::Backend::ping (SERVER_ADDRESS, SERVER_PORT));
+        REQUIRE (kt::Backend::ping ("*", backend.getPort()));
     }
 }
 

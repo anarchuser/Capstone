@@ -36,7 +36,7 @@ interface Backend {
 
     struct Address {
         ip   @0 :Text;
-        port @1:Int16;
+        port @1 :UInt16;
     }
 
     interface Synchro {

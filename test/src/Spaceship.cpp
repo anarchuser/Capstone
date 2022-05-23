@@ -14,9 +14,9 @@ SCENARIO ("Time passes in a near-empty world") {
         getStage()->setSize (WINDOW_SIZE, WINDOW_SIZE);
 
         b2Vec2 world_size = {10, 10};
-        kt::World world (nullptr, world_size, {});
+        kt::World world (nullptr, world_size);
         b2Vec2 ship_pos = 0.5 * world_size;
-        auto & ship = * new kt::Spaceship (world, nullptr, world.convert (ship_pos), 1);
+        auto & ship = * new kt::Spaceship (world, nullptr);
         auto ship_angle = ship.getRotation ();
 
         REQUIRE (ship.getPhysicalPosition () == ship_pos);
@@ -58,7 +58,7 @@ SCENARIO ("Time passes in a near-empty world") {
                     auto pos_estimate = ship_pos + delta;
                     REQUIRE (pos_estimate.y == ship_pos.y);
                     REQUIRE (body.GetPosition ().y == ship_pos.y);
-                    REQUIRE (body.GetPosition ().x == Approx (pos_estimate.x).epsilon (5e-4));
+                    REQUIRE (body.GetPosition ().x == Approx (pos_estimate.x).epsilon (2e-2));
 
                     // Keep movement synchronised with ideal values
                     body.SetTransform (pos_estimate, body.GetAngle ());

@@ -2,11 +2,11 @@
 
 namespace kt {
     // TODO: ping to one specific server instance?
-    RemoteSpaceship::RemoteSpaceship (World & world, Resources * res, Vector2 const & pos, float scale)
-            : Spaceship (world, res, pos, scale)
-    {
-        setAddColor (REMOTE_SPACESHIP_COLOR);
-    }
+    RemoteSpaceship::RemoteSpaceship (World & world, Resources * res)
+            : Spaceship (world, res)
+            {
+                setAddColor (REMOTE_SPACESHIP_COLOR);
+            }
 
     void RemoteSpaceship::destroy () {
         Spaceship::destroy();

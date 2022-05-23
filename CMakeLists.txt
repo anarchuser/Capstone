@@ -98,16 +98,3 @@ if (Catch2_FOUND)
     target_link_libraries(Test PRIVATE kj)
     target_link_libraries(Test PRIVATE kj-async)
 endif()
-
-# Simple Target compiling a client to test RPC server connections.
-# TODO: remove
-add_executable(Client client.cpp ${PROJECT_SOURCE_DIR}/config.h ${LIBS})
-target_include_directories(Client PRIVATE ${PROJECT_SOURCE_DIR})
-target_include_directories(Client PRIVATE ${PROJECT_SOURCE_DIR}/lib/)
-
-target_link_libraries(Client PRIVATE Threads::Threads)
-
-target_link_libraries(Client PRIVATE CapnProto::capnp)
-target_link_libraries(Client PRIVATE CapnProto::capnp-rpc)
-target_link_libraries(Client PRIVATE kj)
-target_link_libraries(Client PRIVATE kj-async)

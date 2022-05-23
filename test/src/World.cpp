@@ -18,7 +18,7 @@ SCENARIO ("World handles objects as expected") {
         Stage::instance = new Stage;
         getStage()->setSize (WINDOW_SIZE, WINDOW_SIZE);
 
-        auto world = kt::World (nullptr, {WINDOW_SIZE * PHYS_SCALE, WINDOW_SIZE * PHYS_SCALE}, {});
+        auto world = kt::World (nullptr, {WINDOW_SIZE * PHYS_SCALE, WINDOW_SIZE * PHYS_SCALE});
 
         THEN ("The physical world starts as default") {
             auto & physical_world = world.world;

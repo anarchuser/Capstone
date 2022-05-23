@@ -35,12 +35,9 @@ namespace kt {
         /// Size of physical world
         b2Vec2 const world_size;
 
-        capnp::EzRpcClient client;
-        ::Backend::ShipRegistrar::Client registrar;
-
         /// Construct a new world with the given background and size
-        World (ResAnim * background, b2Vec2 size, cg::RegisterShipCallback && onRegisterShip);
-        ~World () noexcept override;
+        World (ResAnim * background, b2Vec2 size);
+        ~World () noexcept override = default;
 
         /// Iteratively called for each descendent of the root actor. Calculates the next physics iteration
         void update (UpdateState const & updateState) override;
