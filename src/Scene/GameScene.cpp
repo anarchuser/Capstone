@@ -12,6 +12,7 @@ namespace kt {
             , rng (seed)
             , backend {seed, SERVER_FULL_ADDRESS}
             , client {SERVER_FULL_ADDRESS}
+            , waitscope {client.getWaitScope()}
             {
 
         logs::messageln ("Seed: %lu", rng.seed);
@@ -33,7 +34,7 @@ namespace kt {
             }, float (rng.random ({0.3, 0.7})));
         }
 
-        auto request = client.getMain <::Backend>().registerClientRequest();
+        auto registerClient = client.getMain <::Backend>().registerClientRequest();
         auto s2c = kj::heap <cg::ShipRegistrarImpl> ();
         s2c->setOnRegisterShip ([&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
             auto & username = spaceship.username;
@@ -51,12 +52,30 @@ namespace kt {
             ship->setData (spaceship);
             return ship->getHandle();
         });
-        request.setS2c_registrar (kj::mv (s2c));
-        auto c2s = request.send().wait(client.getWaitScope()).getC2s_registrar();
+        registerClient.setS2c_registrar (kj::mv (s2c));
+        auto c2s = registerClient.send().wait(waitscope).getC2s_registrar();
         registrar = std::make_unique <::Backend::ShipRegistrar::Client> (c2s);
 
         Spaceship::resetCounter();
-        spKeyboardSpaceship kb_ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);
+        spKeyboardSpaceship ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);
+
+        auto registerShip = registrar->registerShipRequest ();
+        ship->getData().initialise (registerShip.initSpaceship());
+        registerShip.setHandle (ship->getHandle());
+        auto result = registerShip.send().wait (waitscope);
+        handle = std::make_unique <::Backend::ShipHandle::Client> (result.getRemote());
+        ship->setOnDone ([&] () {
+            handle->doneRequest().send().wait (waitscope);
+        });
+        ship->setOnUpdate ([&] (cg::Direction direction) {
+            auto request = handle->sendItemRequest();
+            direction.initialise (request.initItem().initDirection());
+            try {
+                request.send().wait (waitscope);
+            } catch (...) {
+                ship->destroy();
+            }
+        });
 
         getStage ()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
@@ -113,13 +132,11 @@ namespace kt {
             return dialog;
         } ();
 
-        for (auto child = getFirstChild(); child != getLastChild(); child = child->getNextSibling()) {
-            if (child == dialog) {
-                removeChild (child);
-                return;
-            }
+        if (getLastChild() == dialog) {
+            removeChild (dialog);
+        } else {
+            addChild (dialog);
         }
-        addChild (dialog);
     }
 
     void GameScene::onRestart (Event * event) {

@@ -39,7 +39,9 @@ namespace kt {
 
         Backend backend;
         capnp::EzRpcClient client;
+        kj::WaitScope & waitscope;
         std::unique_ptr <::Backend::ShipRegistrar::Client> registrar;
+        std::unique_ptr <::Backend::ShipHandle::Client> handle;
 
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         void joinGame (std::string const & ip, unsigned short port);

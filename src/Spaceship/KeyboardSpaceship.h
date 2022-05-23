@@ -23,9 +23,8 @@ namespace kt {
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     private:
-        capnp::EzRpcClient client;
-        kj::WaitScope & waitscope;
-        Backend::ShipHandle::Client handle;
+        std::function <void (cg::Direction)> onUpdate;
+        std::function <void ()> onDone;
 
         cg::Direction queried;
 
@@ -37,8 +36,10 @@ namespace kt {
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
 
+        void setOnUpdate (std::function <void (cg::Direction)> && onUpdate);
         void update (UpdateState const & us) override;
 
+        void setOnDone (std::function <void ()> && onDone);
         void destroy () override;
 
         kj::Own <cg::ShipHandleImpl> getHandle () override;
