@@ -15,7 +15,7 @@ SCENARIO ("Planets exert gravitational pull on Spaceships") {
         getStage()->setSize (WINDOW_SIZE, WINDOW_SIZE);
 
         b2Vec2 world_size = {10, 10};
-        kt::World world (nullptr, world_size);
+        kt::World world (nullptr, world_size, {});
 
         b2Vec2 ship_pos = 0.5 * world_size;
         auto & ship = * new kt::Spaceship (world, nullptr, world.convert (ship_pos), SPACESHIP_SCALE);

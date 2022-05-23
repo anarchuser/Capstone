@@ -54,7 +54,10 @@ namespace kt {
             request.send().wait (client.getWaitScope());
             return true;
         } catch (std::exception & e) {
-            logs::warning ("Backend::ping(): Connection refused'");
+            std::string exception (e.what());
+            if (exception.find ("disconnected: connect(): Connection refused") < 0) {
+                throw e;
+            }
         }
         return false;
     }
