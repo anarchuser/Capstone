@@ -174,14 +174,21 @@ namespace kt {
     }
 
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
+        // TODO: catch connection refused errors
+
         capnp::EzRpcClient remote (ip, port);
         auto remoteRequest = remote.getMain <::Backend>().synchroRequest();
         auto synchro = remoteRequest.send().wait (remote.getWaitScope()).getTheir();
 
-        auto request = client.getMain <::Backend> ().connectRequest();
-        cg::Address (std::string (ip), port).initialise (request.initAddress());
-        request.setRemote (synchro);
-        request.send().wait (waitscope);
+        auto test = synchro.connectRequest ();
+        auto own = client.getMain<::Backend>().synchroRequest ();
+        test.setOther (own.send().getTheir());
+        test.send().wait (remote.getWaitScope());
+
+//        auto request = client.getMain <::Backend> ().connectRequest();
+//        cg::Address (std::string (ip), port).initialise (request.initAddress());
+//        request.setRemote (synchro);
+//        request.send().wait (waitscope);
     }
 }
 
