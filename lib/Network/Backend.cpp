@@ -77,14 +77,12 @@ namespace cg {
     }
 
     void BackendImpl::broadcastSpaceship (Spaceship const & sender) {
-        for (auto registrar = registrars.begin(); registrar != registrars.end(); registrar++) {
-            auto request = registrar->registerShipRequest();
-            sender.initialise (request.initSpaceship());
-            request.send().detach ([&] (kj::Exception && e) {
-                        KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription());
-                registrars.erase (registrar);
-            });
-        }
+        auto request = gameClient->registerShipRequest();
+        sender.initialise (request.initSpaceship());
+        request.send().detach ([&] (kj::Exception && e) {
+                    KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription());
+                    gameClient.reset();
+        });
 
         // TODO: distribute new ship to each connection
     }
@@ -92,7 +90,8 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::registerClient (RegisterClientContext context) {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasS2c_registrar());
-        registrars.push_back (params.getS2c_registrar());
+        KJ_REQUIRE (!gameClient);
+        gameClient = std::make_unique <Backend::ShipRegistrar::Client> (params.getS2c_registrar());
 
         auto results = context.initResults();
         auto registrar = kj::heap <ShipRegistrarImpl> ();
@@ -105,10 +104,38 @@ namespace cg {
     }
 
     ::kj::Promise<void> BackendImpl::connect (Backend::Server::ConnectContext context) {
+        if (!context.getParams().hasThis()) return kj::READY_NOW;
+
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasAddress());
+
+        auto address = (std::string) Address (params.getAddress());
+        KJ_REQUIRE (!connections.contains (address));
+
+        KJ_REQUIRE (params.hasThis());
+        connections.insert ({address, params.getThis()});
+
+        auto results = context.initResults();
+//        results.setTheir (kj::heap <SynchroImpl> ());
+
         return kj::READY_NOW;
     }
 
     ::kj::Promise<void> BackendImpl::requestConnect (Backend::Server::RequestConnectContext context) {
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasAddress());
+
+        Address address (params.getAddress());
+        KJ_REQUIRE (!connections.contains ((std::string) address));
+
+
+        capnp::EzRpcClient client ((std::string) address);
+        auto request = client.getMain <Backend>().connectRequest();
+        address.initialise (request.initAddress());
+
+        auto result = request.send();
+        connections.insert ({(std::string) address, result.getTheir()});
+
         return kj::READY_NOW;
     }
 }

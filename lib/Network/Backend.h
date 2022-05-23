@@ -5,8 +5,10 @@
 
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
+#include "Data/Address.h"
 #include "ShipHandle/ShipHandle.h"
 #include "ShipRegistrar/ShipRegistrar.h"
+#include "Synchro/Synchro.h"
 
 #include <atomic>
 #include <functional>
@@ -24,13 +26,11 @@
 namespace cg {
     class BackendImpl final: public Backend::Server {
     private:
+        /// List of connected game clients
+        std::unique_ptr <Backend::ShipRegistrar::Client> gameClient;
 
         /// Handles to all spaceships registered to the server
-        //TODO: replace username with proper UUID
         std::unordered_map <std::string, Backend::ShipHandle::Client> shipHandles;
-
-        /// List of connected game clients
-        std::vector <Backend::ShipRegistrar::Client> registrars;
 
         /// Map address -> remote server connection
         std::unordered_map <std::string, Backend::Synchro::Client> connections;
