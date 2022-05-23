@@ -23,14 +23,15 @@ namespace kt {
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     private:
-        Backend::ShipHandle::Client handle;
+        capnp::EzRpcClient client;
         kj::WaitScope & waitscope;
+        Backend::ShipHandle::Client handle;
 
         cg::Direction queried;
 
     public:
         /// Creates a new human-controllable spaceship. Only one such ship may exist in a game
-        KeyboardSpaceship (World & world, Resources * res, ::Backend::ShipRegistrar::Client & registrar, kj::WaitScope & waitScope);
+        KeyboardSpaceship (World & world, Resources * res, cg::RegisterShipCallback && callback);
         ~KeyboardSpaceship() noexcept override = default;
 
         /// When issuing commands, update Spaceship-specific flags

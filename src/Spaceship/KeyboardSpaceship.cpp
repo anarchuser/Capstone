@@ -4,24 +4,28 @@ namespace kt {
 
     KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
 
-    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, ::Backend::ShipRegistrar::Client & registrar, kj::WaitScope & waitscope)
+    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, cg::RegisterShipCallback && callback)
             : Spaceship (world, res)
-            , waitscope {waitscope}
+            , client {SERVER_FULL_ADDRESS}
+            , waitscope {client.getWaitScope()}
             , handle {[&] () -> Backend::ShipHandle::Client {
                 instance = this;
 
                 logs::messageln ("Connect instance '%p' to backend", this);
                 setName (USERNAME);
 
-                auto request = registrar.registerShipRequest();
-                getData().initialise (request.initSpaceship());
-                request.setHandle (getHandle());
-                return request.send().wait (waitscope).getRemote();
+                auto registerClient = client.getMain <::Backend>().registerClientRequest();
+                auto s2c = kj::heap <cg::ShipRegistrarImpl> ();
+                s2c->setOnRegisterShip (std::move (callback));
+                registerClient.setS2c_registrar (kj::mv (s2c));
+                auto c2s = registerClient.send();
+                auto registerShip = c2s.getC2s_registrar().registerShipRequest();
+                getData().initialise (registerShip.initSpaceship());
+                registerShip.setHandle (getHandle());
+                return registerShip.send().wait (waitscope).getRemote();
             }()}
             {
         setAddColor (KEYBOARD_SPACESHIP_COLOR);
-
-        registrar.whenResolved().then ([this] () { destroy(); });
 
         listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [this](Event * event) {
             onSteeringEvent ((KeyEvent *) event);

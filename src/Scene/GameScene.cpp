@@ -22,9 +22,20 @@ namespace kt {
         spWorld world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
         addChild (world);
 
-        auto request = client.getMain <::Backend> ().registerClientRequest();
-        auto s2c_registrar = kj::heap <cg::ShipRegistrarImpl> ();
-        s2c_registrar->setOnRegisterShip ([&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
+
+
+        // Generate a couple of planets, number based on world size
+        auto planetAnimation = gameResources.getResAnim ("venus");
+        for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
+            new Planet (* world, planetAnimation, {
+                    float (rng.random ({100, world->getSize ().x - 100})),
+                    float (rng.random ({100, world->getSize ().y - 100}))
+            }, float (rng.random ({0.3, 0.7})));
+        }
+
+        Spaceship::resetCounter();
+        new KeyboardSpaceship (* world, & gameResources,
+                               [&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
             auto & username = spaceship.username;
             logs::messageln ("Received sink for spaceship '%s'", username.c_str());
 
@@ -40,21 +51,6 @@ namespace kt {
             ship->setData (spaceship);
             return ship->getHandle();
         });
-        request.setS2c_registrar (kj::mv (s2c_registrar));
-        auto promise = request.send();
-
-        // Generate a couple of planets, number based on world size
-        auto planetAnimation = gameResources.getResAnim ("venus");
-        for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
-            new Planet (* world, planetAnimation, {
-                    float (rng.random ({100, world->getSize ().x - 100})),
-                    float (rng.random ({100, world->getSize ().y - 100}))
-            }, float (rng.random ({0.3, 0.7})));
-        }
-
-        auto c2s_registrar = promise.wait (client.getWaitScope()).getC2s_registrar();
-        Spaceship::resetCounter();
-        new KeyboardSpaceship (* world, & gameResources, c2s_registrar, client.getWaitScope());
 
         getStage ()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
