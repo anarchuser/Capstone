@@ -21,7 +21,7 @@ namespace kt {
 
     class RemoteSpaceship: public Spaceship {
     public:
-        RemoteSpaceship (World & world, Resources * res);
+        RemoteSpaceship (World & world, Resources * res, std::string const & username);
 
         void destroy () override;
 

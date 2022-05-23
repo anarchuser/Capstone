@@ -7,7 +7,9 @@ namespace kt {
         ship_counter = 0;
     }
 
-    Spaceship::Spaceship (World & world, Resources * res) {
+    Spaceship::Spaceship (World & world, Resources * res, std::string const & username) {
+        setName (username);
+
         attachTo (& world);
         setPosition (world.getSize() * 0.5);
         setRotation (1.5 * b2_pi);
@@ -78,7 +80,6 @@ namespace kt {
     };
 
     void Spaceship::destroy () {
-        logs::messageln ("Spaceship::destroy");
         for (auto listener: listeners)
             getStage ()->removeEventListener (listener);
         updateScoreboard ("dead");

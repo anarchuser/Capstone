@@ -38,8 +38,8 @@ namespace kt {
         bool softPause = true;
 
         Backend backend;
-
         capnp::EzRpcClient client;
+        std::unique_ptr <::Backend::ShipRegistrar::Client> registrar;
 
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         void joinGame (std::string const & ip, unsigned short port);

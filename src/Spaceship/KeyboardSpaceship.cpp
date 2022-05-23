@@ -4,25 +4,20 @@ namespace kt {
 
     KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
 
-    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, cg::RegisterShipCallback && callback)
-            : Spaceship (world, res)
+    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, std::string const & username)
+            : Spaceship (world, res, username)
             , client {SERVER_FULL_ADDRESS}
             , waitscope {client.getWaitScope()}
             , handle {[&] () -> Backend::ShipHandle::Client {
                 instance = this;
 
                 logs::messageln ("Connect instance '%p' to backend", this);
-                setName (USERNAME);
+                setName (username);
 
-                auto registerClient = client.getMain <::Backend>().registerClientRequest();
-                auto s2c = kj::heap <cg::ShipRegistrarImpl> ();
-                s2c->setOnRegisterShip (std::move (callback));
-                registerClient.setS2c_registrar (kj::mv (s2c));
-                auto c2s = registerClient.send();
-                auto registerShip = c2s.getC2s_registrar().registerShipRequest();
+                auto registerShip = client.getMain <::Backend>().registerShipRequest();
                 getData().initialise (registerShip.initSpaceship());
-                registerShip.setHandle (getHandle());
-                return registerShip.send().wait (waitscope).getRemote();
+                registerShip.setRemote (getHandle());
+                return registerShip.send().wait (waitscope).getHandle();
             }()}
             {
         setAddColor (KEYBOARD_SPACESHIP_COLOR);
@@ -75,7 +70,6 @@ namespace kt {
     }
 
     void KeyboardSpaceship::destroy () {
-        logs::messageln ("KeyboardSpaceship::destroy");
         try {
             handle.doneRequest ().send().wait (waitscope);
         } catch (...) {}

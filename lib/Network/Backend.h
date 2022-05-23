@@ -41,7 +41,6 @@ namespace cg {
         void sendItemCallback (std::string const & sender, Direction direction);
         void doneCallback     (std::string username);
 
-        void distributeSpaceship (Spaceship const & sender, std::string const & receiver);
         void broadcastSpaceship  (Spaceship const & sender);
 
         kj::Own <ShipHandleImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
@@ -55,6 +54,7 @@ namespace cg {
         ::kj::Promise <void> ping (PingContext context) override;
         ::kj::Promise <void> seed (SeedContext context) override;
         ::kj::Promise <void> registerClient (RegisterClientContext context) override;
+        ::kj::Promise <void> registerShip (RegisterShipContext context) override;
         ::kj::Promise <void> connect (ConnectContext context) override;
         ::kj::Promise <void> requestConnect (RequestConnectContext context) override;
     };

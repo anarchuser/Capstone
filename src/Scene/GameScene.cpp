@@ -33,9 +33,9 @@ namespace kt {
             }, float (rng.random ({0.3, 0.7})));
         }
 
-        Spaceship::resetCounter();
-        new KeyboardSpaceship (* world, & gameResources,
-                               [&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
+        auto request = client.getMain <::Backend>().registerClientRequest();
+        auto s2c = kj::heap <cg::ShipRegistrarImpl> ();
+        s2c->setOnRegisterShip ([&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
             auto & username = spaceship.username;
             logs::messageln ("Received sink for spaceship '%s'", username.c_str());
 
@@ -47,10 +47,16 @@ namespace kt {
             }
             world->removeChild (world->getChild (username, oxygine::ep_ignore_error));
 
-            spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources);
+            spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, username);
             ship->setData (spaceship);
             return ship->getHandle();
         });
+        request.setS2c_registrar (kj::mv (s2c));
+        auto c2s = request.send().wait(client.getWaitScope()).getC2s_registrar();
+        registrar = std::make_unique <::Backend::ShipRegistrar::Client> (c2s);
+
+        Spaceship::resetCounter();
+        spKeyboardSpaceship kb_ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);
 
         getStage ()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
