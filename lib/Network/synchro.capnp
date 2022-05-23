@@ -71,12 +71,9 @@ interface Backend {
     registerClient @2 (s2c_registrar :ShipRegistrar) -> (c2s_registrar :ShipRegistrar);
     # Register game client. Returned registrar can be used to sync individual spaceships
 
-    registerShip @3 (spaceship :Spaceship, remote :ShipHandle) -> (handle :ShipHandle);
-    # Tell the game client of the new spaceship
-
-    connect @4 (address :Address, this :Synchro) -> (their :Synchro);
+    connect @3 (address :Address, this :Synchro) -> (their :Synchro);
     # Connect to a remote server
 
-    requestConnect @5 (address :Address);
+    requestConnect @4 (address :Address);
     # Request connection to given address
 }

@@ -104,12 +104,6 @@ namespace cg {
         return kj::READY_NOW;
     }
 
-    ::kj::Promise <void> BackendImpl::registerShip (RegisterShipContext context) {
-        auto params = context.getParams();
-        context.initResults().setHandle (registerShipCallback (Spaceship (params.getSpaceship()), params.getRemote()));
-        return kj::READY_NOW;
-    }
-
     ::kj::Promise<void> BackendImpl::connect (Backend::Server::ConnectContext context) {
         return kj::READY_NOW;
     }
