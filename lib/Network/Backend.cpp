@@ -135,7 +135,9 @@ namespace cg {
 
         // ======== //
 
-//        params.getTheir().
+        params.getTheir().disconnectRequest ().send().then ([this] (...) {
+            log ("Disconnected!");
+        }).detach ([](kj::Exception && e) {});
 
         // ======== //
 

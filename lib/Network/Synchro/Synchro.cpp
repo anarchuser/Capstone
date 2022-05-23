@@ -9,10 +9,14 @@ namespace cg {
     }
 
     kj::Promise <void> SynchroImpl::disconnect (DisconnectContext context) {
+        KJ_DLOG (WARNING, "disconnect: not yet implemented");
+
         return kj::READY_NOW;
     }
 
     kj::Promise <void> SynchroImpl::sendShip (SendShipContext context) {
+        KJ_DLOG (WARNING, "sendShip: not yet implemented");
+
         return kj::READY_NOW;
     }
 
