@@ -10,7 +10,7 @@
 #include "src/World/World.h"
 #include "Spaceship.h"
 
-#include "Server/Synchro.h"
+#include "Network/Backend.h"
 #include "Data/Spaceship.h"
 
 #define KEYBOARD_SPACESHIP_COLOR {0, 0, 255}
@@ -23,22 +23,26 @@ namespace kt {
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     private:
-        capnp::EzRpcClient client;
-        Synchro::ItemSink::Client sink;
+        std::function <void (cg::Direction)> onUpdate;
+        std::function <void ()> onDone;
 
         cg::Direction queried;
 
     public:
         /// Creates a new human-controllable spaceship. Only one such ship may exist in a game
-        KeyboardSpaceship (World & world, Resources * res, Vector2 const & pos, float scale, std::string address);
-        ~KeyboardSpaceship() noexcept override;
+        KeyboardSpaceship (World & world, Resources * res, std::string const & username);
+        ~KeyboardSpaceship() noexcept override = default;
 
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
 
+        void setOnUpdate (std::function <void (cg::Direction)> && onUpdate);
         void update (UpdateState const & us) override;
 
+        void setOnDone (std::function <void ()> && onDone);
         void destroy () override;
+
+        kj::Own <cg::ShipHandleImpl> getHandle () override;
 
         /// Current keyboard controlled spaceship instance
         static KeyboardSpaceship * instance;

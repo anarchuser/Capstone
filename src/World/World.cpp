@@ -1,10 +1,10 @@
 #include "World.h"
 
 namespace kt {
-    World * World::instance = nullptr;
-
-    World::World (ResAnim * background, b2Vec2 size): world (b2Vec2_zero), world_size {size} {
-        instance = this;
+    World::World (ResAnim * background, b2Vec2 size)
+            : world (b2Vec2_zero)
+            , world_size {size}
+            {
         setName ("World");
         setResAnim (background);
     
@@ -17,7 +17,7 @@ namespace kt {
 
         world.SetContactListener (new CollisionListener);
 
-        getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [=](Event * event) {
+        getStage()->addEventListener (ox::KeyEvent::KEY_DOWN, [this](Event * event) {
             auto key = safeCast<KeyEvent *> (event)->data->keysym.scancode;
             switch (key) {
                 case SDL_SCANCODE_GRAVE:

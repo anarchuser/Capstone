@@ -9,17 +9,18 @@ set(CMAKE_CXX_STANDARD 20)
 set(CAPNP_LIBS "-lcapnp -lcapnp-rpc -lkj -lkj-async")
 set(CMAKE_CXX_FLAGS "${CAPNP_LIBS} -pthread --std=c++20")
 
-set(GEN_PROTO_FILES lib/Server/generated/synchro.capnp.*)
-add_custom_command(OUTPUT ${GEN_PROTO_FILES}
+set(CAPNP_DIR "${PROJECT_SOURCE_DIR}/lib/Network")
+set(CAPNP_GEN "${CAPNP_DIR}/generated/synchro.capnp.*")
+add_custom_command(OUTPUT ${CAPNP_GEN}
         COMMAND bash -c "./gen_proto"
-        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/lib/Server/"
-        MAIN_DEPENDENCY lib/Server/synchro.capnp
+        WORKING_DIRECTORY "${CAPNP_DIR}"
+        MAIN_DEPENDENCY "${CAPNP_DIR}/synchro.capnp"
         VERBATIM)
 
 # List source files and define target
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
-set(LIBS ${LIBS} ${GEN_PROTO_FILES})
+set(LIBS ${LIBS} ${CAPNP_GEN})
 add_executable(Capstone ${PROJECT_SOURCE_DIR}/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
 # Add base directories for more intuitive includes
@@ -97,16 +98,3 @@ if (Catch2_FOUND)
     target_link_libraries(Test PRIVATE kj)
     target_link_libraries(Test PRIVATE kj-async)
 endif()
-
-# Simple Target compiling a client to test RPC server connections.
-# TODO: remove
-add_executable(Client client.cpp ${PROJECT_SOURCE_DIR}/config.h ${LIBS})
-target_include_directories(Client PRIVATE ${PROJECT_SOURCE_DIR})
-target_include_directories(Client PRIVATE ${PROJECT_SOURCE_DIR}/lib/)
-
-target_link_libraries(Client PRIVATE Threads::Threads)
-
-target_link_libraries(Client PRIVATE CapnProto::capnp)
-target_link_libraries(Client PRIVATE CapnProto::capnp-rpc)
-target_link_libraries(Client PRIVATE kj)
-target_link_libraries(Client PRIVATE kj-async)

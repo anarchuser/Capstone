@@ -7,88 +7,98 @@
 
 #define RANDOM_SEED generateSeed()
 
-SCENARIO ("The Synchro implementation handles requests properly") {
-    GIVEN ("No running server") {
-        capnp::EzRpcClient client ("localhost:44444");
-        auto & waitScope = client.getWaitScope();
+#define HEALTH_VALUE 42
 
-        WHEN ("I connect to a non-existent address") {
-            auto main = client.getMain <Synchro>();
-            auto request = main.pingRequest();
-
-            THEN ("It throws an error") {
-                REQUIRE_THROWS_AS (request.send().wait (waitScope), std::exception);
-            }
-        }
-    }
-
-    GIVEN ("a Synchro instance on a different thread") {
+SCENARIO ("A backend returns the seed it was initialised with") {
+    GIVEN ("A backend running on a local port") {
         auto const seed = RANDOM_SEED;
         kt::Backend backend (seed, "*");
-        auto port = backend.getPort();
+        auto port = backend.getPort ();
 
-        capnp::EzRpcClient client ("localhost", port);
-        auto main = client.getMain <Synchro>();
-        auto & waitScope = client.getWaitScope();
+        capnp::EzRpcClient client ("*", port);
+        auto main = client.getMain<::Backend> ();
+        auto & waitScope = client.getWaitScope ();
 
         WHEN ("I send a ping") {
-            auto request = main.pingRequest();
+            auto request = main.pingRequest ();
 
             THEN ("It resolves without fail") {
-                REQUIRE_NOTHROW (request.send().wait (waitScope));
+                REQUIRE_NOTHROW (request.send ().wait (waitScope));
             }
         }
         WHEN ("I request the RNG seed") {
-            auto request = main.seedRequest();
+            auto request = main.seedRequest ();
 
             THEN ("I get back the expected seed without fail") {
-                REQUIRE (request.send().wait (waitScope).getSeed() == seed);
+                REQUIRE (request.send ().wait (waitScope).getSeed () == seed);
             }
         }
+        WHEN ("I register as client") {
+            auto registerClientRequest = main.registerClientRequest();
 
-        WHEN ("I send a join request") {
-            static int i = 0;
-            auto request = main.joinRequest();
-            request.initOther().setNothing();
-            cg::Spaceship ship (std::to_string (i++));
-            ship.initialise (request.initSpaceship());
+            auto registrar = kj::heap <cg::ShipRegistrarImpl> ();
+            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, Backend::ShipHandle::Client sink) {
+                CHECK (ship.health == HEALTH_VALUE);
 
-            auto callback = kj::heap <cg::ShipCallbackImpl> ();
-            callback->setOnSendSink ([] (cg::Spaceship ship) {
-                auto sink = kj::heap <cg::ItemSinkImpl>();
-                sink->setOnSendItem ([] (cg::Direction const & dir) {
+                auto drain = kj::heap <cg::ShipHandleImpl> ();
+                drain->setOnDone ([](){});
+                drain->setOnSendItem ([] (cg::Direction const & dir) {
                     REQUIRE (dir.accelerate  == -1);
                     REQUIRE (dir.decelerate  ==  1);
                     REQUIRE (dir.rotateLeft  == -1);
                     REQUIRE (dir.rotateRight == -1);
                 });
-                sink->setOnDone ([](){});
-                return kj::mv (sink);
+                return kj::mv (drain);
             });
-            request.setShipCallback (kj::mv (callback));
+            registerClientRequest.setS2c_registrar (kj::mv (registrar));
 
             THEN ("I get back a proper result without fail") {
-                auto sink = request.send().wait (waitScope).getItemSink();
+                auto registerClientResult = registerClientRequest.send().wait (waitScope);
+                REQUIRE (registerClientResult.hasC2s_registrar());
 
-                WHEN ("I send a sendSink request back to the received ItemSink") {
-                    auto request = sink.sendItemRequest();
-                    request.initItem().initDirection().setDecelerate (1);
-                    auto promise = request.send();
+                auto c2s = registerClientResult.getC2s_registrar();
 
-                    THEN ("It resolves without fail") {
-                        REQUIRE_NOTHROW (promise.wait (waitScope));
-                    }
-                }
-                WHEN ("I send a done request back") {
-                    auto request = sink.doneRequest();
-                    auto promise = request.send();
+                WHEN ("I send a registerShip request back to the received registrar") {
+                    auto registerShipRequest = c2s.registerShipRequest();
+                    registerShipRequest.initSpaceship().setHealth (HEALTH_VALUE);
 
-                    THEN ("It resolves without fail") {
-                        REQUIRE_NOTHROW (promise.wait (waitScope));
+                    THEN ("It returns a valid ShipHandle") {
+                        auto registerShipResult = registerShipRequest.send().wait (waitScope);
+                        REQUIRE (registerShipResult.hasRemote());
+
+                        auto sink = registerShipResult.getRemote();
+
+                        WHEN ("I send a sendItem request") {
+                            auto sendItemRequest = sink.sendItemRequest ();
+                            sendItemRequest.initItem().initDirection().setDecelerate (1);
+
+                            THEN ("It solves without fail") {
+                                REQUIRE_NOTHROW (sendItemRequest.send().wait (waitScope));
+                            }
+                        }
+                        WHEN ("I send a done request back") {
+                            auto doneRequest = sink.doneRequest();
+
+                            THEN ("It resolves without fail") {
+                                REQUIRE_NOTHROW (doneRequest.send().wait (waitScope));
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+TEST_CASE ("Ping checks whether the backend is running on a local port ") {
+    SECTION ("Ping without active server") {
+        REQUIRE_FALSE (kt::Backend::ping ("*", SERVER_PORT));
+    }
+
+    SECTION ("Ping with active server") {
+        kt::Backend backend (RANDOM_SEED, SERVER_FULL_ADDRESS);
+
+        REQUIRE (kt::Backend::ping ("*", backend.getPort()));
     }
 }
 

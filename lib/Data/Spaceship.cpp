@@ -1,7 +1,7 @@
 #include "Spaceship.h"
 
 namespace cg {
-    Spaceship::Spaceship (Synchro::Spaceship::Reader reader)
+    Spaceship::Spaceship (Backend::Spaceship::Reader reader)
             : username {reader.getUsername()}
             , position {reader.getPosition().getX(),
                         reader.getPosition().getY()}
@@ -21,7 +21,7 @@ namespace cg {
             {
             }
 
-    void Spaceship::initialise (Synchro::Spaceship::Builder builder) const {
+    void Spaceship::initialise (Backend::Spaceship::Builder builder) const {
         builder.setUsername (username);
 
         auto pos = builder.initPosition();

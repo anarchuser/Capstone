@@ -1,7 +1,7 @@
-#ifndef CAPSTONE_DIRECTION_H
-#define CAPSTONE_DIRECTION_H
+#ifndef CAPSTONE_NETWORK_DIRECTION_H
+#define CAPSTONE_NETWORK_DIRECTION_H
 
-#include "Server/generated/synchro.capnp.h"
+#include "Network/config.h"
 
 namespace cg {
     struct Direction {
@@ -11,12 +11,12 @@ namespace cg {
         char rotateRight: 2 = false;
 
         Direction() = default;
-        explicit Direction (Synchro::Direction::Reader reader);
+        explicit Direction (Backend::Direction::Reader reader);
 
-        void initialise (Synchro::Direction::Builder builder) const;
+        void initialise (Backend::Direction::Builder builder) const;
     };
 };
 
-#endif //CAPSTONE_DIRECTION_H
+#endif //CAPSTONE_NETWORK_DIRECTION_H
 
 /* Copyright © 2022 Aaron Alef */

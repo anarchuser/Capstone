@@ -25,7 +25,7 @@ jobs:
       - name: Install Cap'n Proto
         run:  bash setup/capnproto.sh
       - name: explicitly generate capnp files
-        run:  cd lib/Server/; ./gen_proto
+        run:  cd lib/Network/; ./gen_proto
       - name: configure cmake
         run:  cmake -H. -Bbuild
       - name: compile the project
@@ -55,7 +55,7 @@ jobs:
       - name: Install Cap'n Proto
         run:  bash setup/capnproto.sh
       - name: explicitly generate capnp files
-        run:  cd lib/Server/; ./gen_proto
+        run:  cd lib/Network/; ./gen_proto
       - name: configure own cmake
         run:  cmake -H. -Bbuild
       - name: Build test files

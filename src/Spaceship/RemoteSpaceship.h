@@ -9,8 +9,8 @@
 
 #include "Spaceship.h"
 
-#include "Server/Synchro.h"
-#include "lib/Server/ItemSink.h"
+#include "Network/Backend.h"
+#include "Network/ShipHandle/ShipHandle.h"
 
 #include <functional>
 
@@ -21,9 +21,11 @@ namespace kt {
 
     class RemoteSpaceship: public Spaceship {
     public:
-        RemoteSpaceship (World & world, Resources * res, Vector2 const & pos, float scale = 1);
+        RemoteSpaceship (World & world, Resources * res, std::string const & username);
 
         void destroy () override;
+
+        kj::Own <cg::ShipHandleImpl> getHandle () override;
     };
     DECLARE_SMART (RemoteSpaceship, spRemoteSpaceship);
 

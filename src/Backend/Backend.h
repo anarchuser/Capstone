@@ -2,18 +2,12 @@
 #define _CAPSTONE_BACKEND_H
 
 #include "config.h"
+#include "Network/config.h"
 
 #include "oxygine-framework.h"
 
 #include "helper.h"
 #include "Spaceship/KeyboardSpaceship.h"
-
-#include "Server/generated/synchro.capnp.h"
-#include "Server/Synchro.h"
-#include <capnp/ez-rpc.h>
-#include <thread>
-#include <atomic>
-#include <memory>
 
 #include <unordered_map>
 #include <string>

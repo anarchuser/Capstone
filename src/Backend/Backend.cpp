@@ -10,31 +10,32 @@ namespace kt {
             }
     
     Backend::~Backend () noexcept {
-        if (auto & ship = KeyboardSpaceship::instance) ship->destroy();
         logs::messageln ("Shutting down backend");
         stop = true;
         server_thread.join();
     }
     
     void Backend::serve () {
-        while (! stop) {
+        for (int i = 0; i < 100; i++) {
             try {
-                auto server = capnp::EzRpcServer (kj::heap <cg::SynchroImpl> (seed), address);
-                port = server.getPort().wait (server.getWaitScope());
+                auto server = capnp::EzRpcServer (kj::heap<cg::BackendImpl> (seed), address);
+                port = server.getPort ().wait (server.getWaitScope ());
 
-                auto & exec = kj::getCurrentThreadExecutor();
+                auto & exec = kj::getCurrentThreadExecutor ();
 
-                while (! stop) {
+                logs::messageln ("Backend starts serving now");
+
+                while (!stop) {
                     exec.executeAsync ([this] () {
                         std::this_thread::yield ();
                     }).wait (server.getWaitScope ());
                 }
                 return;
             } catch (...) {
-                logs::warning ("Failed to bind address to '%s'. Retrying...", address.c_str());
-                std::this_thread::yield();
+                std::this_thread::sleep_for (std::chrono::milliseconds (500));
             }
         }
+        logs::error ("Failed to set up server");
     }
     
     unsigned short Backend::getPort () const {
@@ -47,13 +48,17 @@ namespace kt {
 
     bool Backend::ping (std::string const & ip, short port) {
         auto client = capnp::EzRpcClient (ip, port);
-        auto request = client.getMain <Synchro>().pingRequest();
+        auto request = client.getMain <::Backend>().pingRequest();
         try {
             request.send().wait (client.getWaitScope());
             return true;
         } catch (std::exception & e) {
-            logs::warning ("Backend::ping(): Connection refused:\n'%s'", e.what());
+            std::string exception (e.what());
+            if (exception.find ("disconnected: connect(): Connection refused") < 0) {
+                throw e;
+            }
         }
+        return false;
     }
 }
 

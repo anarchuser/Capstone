@@ -9,7 +9,8 @@
 #include "src/debug/Box2DDebugDraw.h"
 #include "src/Collision/CollisionListener.h"
 
-#include "Server/Synchro.h"
+#include "Network/Backend.h"
+#include "Network/ShipRegistrar/ShipRegistrar.h"
 
 #include "Data/Spaceship.h"
 
@@ -34,11 +35,9 @@ namespace kt {
         /// Size of physical world
         b2Vec2 const world_size;
 
-        /// Callback used when new spaceship direction streams are registered
-        std::function <kj::Own <cg::ItemSinkImpl> (cg::Spaceship)> onSendSink;
-
         /// Construct a new world with the given background and size
         World (ResAnim * background, b2Vec2 size);
+        ~World () noexcept override = default;
 
         /// Iteratively called for each descendent of the root actor. Calculates the next physics iteration
         void update (UpdateState const & updateState) override;
@@ -57,8 +56,6 @@ namespace kt {
         void toggleDebugDraw ();
 
         void addChild (spActor child);
-
-        static World * instance;
     };
 
     DECLARE_SMART (World, spWorld);

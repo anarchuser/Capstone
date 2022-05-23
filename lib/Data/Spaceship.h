@@ -1,10 +1,10 @@
-#ifndef CAPSTONE_STRUCT_SPACESHIP_H
-#define CAPSTONE_STRUCT_SPACESHIP_H
+#ifndef CAPSTONE_NETWORK_SPACESHIP_H
+#define CAPSTONE_NETWORK_SPACESHIP_H
+
+#include "Network/config.h"
 
 #include <string>
 #include <array>
-
-#include "Server/generated/synchro.capnp.h"
 
 namespace cg {
     using vector2 = std::array <float, 2>;
@@ -16,7 +16,7 @@ namespace cg {
         float angle;
         int health;
 
-        explicit Spaceship (Synchro::Spaceship::Reader reader);
+        explicit Spaceship (Backend::Spaceship::Reader reader);
         explicit Spaceship (
                 std::string username,
                 vector2 position = {0},
@@ -24,10 +24,10 @@ namespace cg {
                 float angle = 0,
                 int health = 100);
 
-        void initialise (Synchro::Spaceship::Builder builder) const;
+        void initialise (Backend::Spaceship::Builder builder) const;
     };
 }
 
-#endif //CAPSTONE_STRUCT_SPACESHIP_H
+#endif //CAPSTONE_NETWORK_SPACESHIP_H
 
 /* Copyright © 2022 Aaron Alef */

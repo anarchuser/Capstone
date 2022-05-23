@@ -2,7 +2,7 @@
 #define CAPSTONE_GAMESCENE_H
 
 #include "config.h"
-#include "Random/random.h"
+#include "Network/config.h"
 
 #include "oxygine-framework.h"
 #include "box2d.h"
@@ -13,14 +13,11 @@
 #include "src/World/World.h"
 #include "Scene.h"
 #include "MenuScene.h"
-
-#include "Server/generated/synchro.capnp.h"
-#include "Server/Synchro.h"
 #include "Backend/Backend.h"
-#include <capnp/ez-rpc.h>
-#include <kj/debug.h>
-#include <thread>
-#include <string>
+
+#include "Random/random.h"
+#include "Network/Backend.h"
+#include "Network/ShipRegistrar/ShipRegistrar.h"
 
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
 #define RANDOM_SEED
@@ -41,6 +38,10 @@ namespace kt {
         bool softPause = true;
 
         Backend backend;
+        capnp::EzRpcClient client;
+        kj::WaitScope & waitscope;
+        std::unique_ptr <::Backend::ShipRegistrar::Client> registrar;
+        std::unique_ptr <::Backend::ShipHandle::Client> handle;
 
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         void joinGame (std::string const & ip, unsigned short port);
@@ -51,7 +52,7 @@ namespace kt {
         /// Directly ping to an existing Game remotely
         GameScene (std::string const & ip, unsigned short port);
         /// Inject a new Game instance with given seed into the stage
-        explicit GameScene (std::size_t seed, bool join = false);
+        explicit GameScene (std::size_t seed);
         ~GameScene() noexcept override;
 
         /// Updates its children, given that the game is not paused (i.e., hard and soft pause set to false)

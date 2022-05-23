@@ -18,7 +18,7 @@ SCENARIO ("Planets exert gravitational pull on Spaceships") {
         kt::World world (nullptr, world_size);
 
         b2Vec2 ship_pos = 0.5 * world_size;
-        auto & ship = * new kt::Spaceship (world, nullptr, world.convert (ship_pos), SPACESHIP_SCALE);
+        auto & ship = * new kt::Spaceship (world, nullptr, "");
         auto & p_ship = * (b2Body *) ship.getUserData();
 
         b2Vec2 planet_pos = 0.1 * ship_pos;

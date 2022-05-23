@@ -3,9 +3,15 @@
 namespace kt {
     std::size_t Spaceship::ship_counter = 0;
 
-    Spaceship::Spaceship (World & world, Resources * res, Vector2 const & pos, float scale) {
+    void Spaceship::resetCounter () {
+        ship_counter = 0;
+    }
+
+    Spaceship::Spaceship (World & world, Resources * res, std::string const & username) {
+        setName (username);
+
         attachTo (& world);
-        setPosition (pos);
+        setPosition (world.getSize() * 0.5);
         setRotation (1.5 * b2_pi);
         setAnchor (0.5, 0.5);
         setTouchChildrenEnabled (false);
@@ -14,7 +20,7 @@ namespace kt {
 
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
-        bodyDef.position = world.convert (pos);
+        bodyDef.position = 0.5 * world.world_size;
         bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
         bodyDef.angle = 1.5 * b2_pi;
 
@@ -22,6 +28,7 @@ namespace kt {
         setUserData (body);
         body->SetAwake (false);
 
+        float scale = SPACESHIP_SCALE;
         setScale (scale);
 
         b2PolygonShape cone;
@@ -60,8 +67,9 @@ namespace kt {
             if (!body->IsAwake()) return;
 //            spSprite other = safeCast <CollisionEvent *> (event)->other;
             --health;
-            updateScoreboard("");
+            updateScoreboard();
             if (health <= 0) {
+                logs::messageln ("Spaceship of '%s' crashed...", getName().c_str());
                 destroy();
             }
         }));
@@ -72,13 +80,13 @@ namespace kt {
     };
 
     void Spaceship::destroy () {
-        for (auto listener : listeners)
+        for (auto listener: listeners)
             getStage ()->removeEventListener (listener);
         updateScoreboard ("dead");
         setAwake (false);
-        if (body) body->GetUserData().pointer = 0;
+        if (body) body->GetUserData ().pointer = 0;
         body = nullptr;
-        detach();
+        detach ();
     }
 
     void Spaceship::updateScoreboard (std::string msg) {
@@ -165,6 +173,17 @@ namespace kt {
         setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
         health = spaceship.health;
         updateScoreboard ();
+    }
+
+    kj::Own <cg::ShipHandleImpl> Spaceship::getHandle () {
+        setAwake (true);
+
+        auto handle = kj::heap <cg::ShipHandleImpl> ();
+        handle->setOnDone         (CLOSURE (this, & Spaceship::destroy));
+        handle->setOnSendItem     (CLOSURE (this, & Spaceship::updateDirection));
+        handle->setOnGetSpaceship (CLOSURE (this, & Spaceship::getData));
+        handle->setOnSetSpaceship (CLOSURE (this, & Spaceship::setData));
+        return handle;
     }
 }
 
