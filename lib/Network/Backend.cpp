@@ -107,50 +107,31 @@ namespace cg {
     }
 
     ::kj::Promise<void> BackendImpl::connect (Backend::Server::ConnectContext context) {
-        if (!context.getParams().hasThis()) return kj::READY_NOW;
-
         auto params = context.getParams();
+        if (!params.hasRemote()) return kj::READY_NOW;
+
         KJ_REQUIRE (params.hasAddress());
 
         auto address = (std::string) Address (params.getAddress());
         KJ_REQUIRE (!connections.contains (address));
-
-        KJ_REQUIRE (params.hasThis());
-        connections.insert ({address, params.getThis()});
+        connections.insert ({address, params.getRemote()});
 
         log ("Connecting to " + address);
 
-        auto results = context.initResults();
-//        results.setTheir (kj::heap <SynchroImpl> ());
+        auto synchro = kj::heap <cg::SynchroImpl> ();
+        auto request = params.getRemote().connectRequest();
+        request.setOther (kj::mv (synchro));
+        request.send().detach ([this] (kj::Exception && e) {
+            log (e.getDescription());
+        });
 
         return kj::READY_NOW;
     }
 
-    ::kj::Promise<void> BackendImpl::requestConnect (Backend::Server::RequestConnectContext context) {
-        auto params = context.getParams();
-        KJ_REQUIRE (params.hasAddress());
-
-        Address address (params.getAddress());
-        KJ_REQUIRE (!connections.contains (address));
-
-        // ======== //
-
-        params.getTheir().disconnectRequest ().send().then ([this] (...) {
-            log ("Disconnected!");
-        }).detach ([](kj::Exception && e) {});
-
-        // ======== //
-
-        log ("Finished connection request");
-
-        return kj::READY_NOW;
-    }
-
-    ::kj::Promise <void> BackendImpl::requestSynchro (RequestSynchroContext context) {
+    ::kj::Promise <void> BackendImpl::synchro (SynchroContext context) {
         log ("Synchro requested");
 
         auto synchro = kj::heap <cg::SynchroImpl> ();
-
         context.initResults ().setTheir (kj ::mv (synchro));
 
         return kj::READY_NOW;

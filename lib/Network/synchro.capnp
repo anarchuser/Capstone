@@ -42,8 +42,14 @@ interface Backend {
     interface Synchro {
     # The thing exchanged between servers as communication basis
 
-        disconnect @0 ();
-        sendShip @1 (ship :ShipHandle);
+        connect @0 (other :Synchro);
+        # Connect to this synchro, passing along a back-reference
+
+        disconnect @1 ();
+        # TODO
+
+        sendShip @2 (ship :ShipHandle);
+        # Convey ship properties to this Synchro
     }
 
     interface ShipRegistrar {
@@ -71,11 +77,9 @@ interface Backend {
     registerClient @2 (s2c_registrar :ShipRegistrar) -> (c2s_registrar :ShipRegistrar);
     # Register game client. Returned registrar can be used to sync individual spaceships
 
-    connect @3 (address :Address, this :Synchro) -> (their :Synchro);
-    # Connect to a remote server
-
-    requestConnect @4 (address :Address, their :Synchro);
+    connect @3 (address :Address, remote :Synchro);
     # Request connection to given address
 
-    requestSynchro @5 () -> (their :Synchro);
+    synchro @4 () -> (their :Synchro);
+    # Returns a Synchro instance of this backend
 }
