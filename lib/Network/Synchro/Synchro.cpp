@@ -11,18 +11,34 @@ namespace cg {
     void SynchroImpl::setOnConnect (ConnectCallback && onConnect) {
         this->onConnect = onConnect;
     }
+    void SynchroImpl::setOnSync (SyncCallback && onSync) {
+        this->onSync = onSync;
+    }
 
     kj::Promise <void> SynchroImpl::connect (ConnectContext context) {
         log ("Connection request received");
 
         auto params = context.getParams();
-        auto results = context.initResults ();
+        KJ_REQUIRE (params.hasOther());
         try {
-            if (params.hasOther()) {
-                results.setRegistrar (onConnect (params.getName(), params.getOther().connectRequest().send().getRegistrar()));
-            }
+            onConnect (params.getName(), params.getOther());
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "Synchro::connect called without valid callback registered");
+        }
+
+        return kj::READY_NOW;
+    }
+
+    ::kj::Promise <void> SynchroImpl::sync (SyncContext context) {
+        log ("Synchronisation request received");
+
+        auto params = context.getParams();
+        auto results = context.getResults();
+        KJ_REQUIRE (params.hasLocal());
+        try {
+            results.setRemote (onSync (params.getName(), params.getLocal()));
+        } catch (std::bad_function_call & e) {
+            KJ_DLOG (WARNING, "Synchro::sync called without valid callback registered");
         }
 
         return kj::READY_NOW;

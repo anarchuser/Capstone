@@ -42,8 +42,10 @@ interface Backend {
     interface Synchro {
     # The thing exchanged between servers as communication basis
 
-        connect @0 (name :Text, other :Synchro) -> (registrar :ShipRegistrar);
-        # Connect to this synchro, passing along a back-reference ("hand shake")
+        connect @0 (name :Text, other :Synchro);
+        # Connect to this synchro, passing along a back-reference
+
+        sync @1 (name :Text, local :ShipRegistrar) -> (remote :ShipRegistrar);
     }
 
     interface ShipRegistrar {
