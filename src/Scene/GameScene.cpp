@@ -173,7 +173,8 @@ namespace kt {
     }
 
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
-        capnp::EzRpcClient remote (ip, port);
+        remoteClients.push_back (std::make_unique <capnp::EzRpcClient> (ip, port));
+        auto & remote = * remoteClients.back();
         auto remoteSynchro = remote.getMain<::Backend>().synchroRequest().send().getRemote();
 
         static auto localSynchro = [this]() {

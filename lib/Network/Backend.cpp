@@ -85,8 +85,9 @@ namespace cg {
                         [&] (capnp::Response <Backend::ShipHandle::GetSpaceshipResults> response) {
                             distributeSpaceship (Spaceship (response.getSpaceship()), connection.first);
                             sendItemCallback (sender, direction);
-                        }).detach ([] (kj::Exception && e) {
+                        }).detach ([&] (kj::Exception && e) {
                             KJ_DLOG (WARNING, "Exception on establishing missing connection: ", e.getDescription ());
+                            connections.erase (connection.first);
                         });
                 return;
             }
