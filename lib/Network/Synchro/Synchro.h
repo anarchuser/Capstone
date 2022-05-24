@@ -10,6 +10,7 @@ namespace cg {
         void log (std::string const & msg);
 
     public:
+        kj::Promise <void> connect (ConnectContext context) override;
         kj::Promise <void> disconnect (DisconnectContext context) override;
         kj::Promise <void> sendShip (SendShipContext context) override;
     };

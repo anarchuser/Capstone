@@ -1,14 +1,14 @@
 #include "GameScene.h"
 
 namespace kt {
-    GameScene::GameScene () : GameScene (generateSeed ()) {}
+    GameScene::GameScene() : GameScene (generateSeed()) {}
 
     GameScene::GameScene (std::string const & ip, unsigned short port): GameScene (requestSeed (ip, port)) {
         joinGame (ip, port);
     }
 
     GameScene::GameScene (std::size_t seed)
-            : Scene ()
+            : Scene()
             , rng (seed)
             , backend {seed, SERVER_FULL_ADDRESS}
             , client {SERVER_FULL_ADDRESS}
@@ -29,13 +29,13 @@ namespace kt {
         auto planetAnimation = gameResources.getResAnim ("venus");
         for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
             new Planet (* world, planetAnimation, {
-                    float (rng.random ({100, world->getSize ().x - 100})),
-                    float (rng.random ({100, world->getSize ().y - 100}))
+                    float (rng.random ({100, world->getSize().x - 100})),
+                    float (rng.random ({100, world->getSize().y - 100}))
             }, float (rng.random ({0.3, 0.7})));
         }
 
         auto registerClient = client.getMain <::Backend>().registerClientRequest();
-        auto s2c = kj::heap <cg::ShipRegistrarImpl> ();
+        auto s2c = kj::heap <cg::ShipRegistrarImpl>();
         s2c->setOnRegisterShip ([&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
             auto & username = spaceship.username;
             logs::messageln ("Received sink for spaceship '%s'", username.c_str());
@@ -43,7 +43,7 @@ namespace kt {
             if (auto ship = KeyboardSpaceship::instance) {
                 if (ship->getName() == username) {
                     ship->setData (spaceship);
-                    return ship->getHandle ();
+                    return ship->getHandle();
                 }
             }
             world->removeChild (world->getChild (username, oxygine::ep_ignore_error));
@@ -59,12 +59,12 @@ namespace kt {
         Spaceship::resetCounter();
         spKeyboardSpaceship ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);
 
-        auto registerShip = registrar->registerShipRequest ();
+        auto registerShip = registrar->registerShipRequest();
         ship->getData().initialise (registerShip.initSpaceship());
         registerShip.setHandle (ship->getHandle());
         auto result = registerShip.send().wait (waitscope);
         handle = std::make_unique <::Backend::ShipHandle::Client> (result.getRemote());
-        ship->setOnDone ([&] () {
+        ship->setOnDone ([&]() {
             handle->doneRequest().send().wait (waitscope);
         });
         ship->setOnUpdate ([&] (cg::Direction direction) {
@@ -77,7 +77,7 @@ namespace kt {
             }
         });
 
-        getStage ()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
+        getStage()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;
             switch (keysym.scancode) {
@@ -101,9 +101,9 @@ namespace kt {
         });
     }
 
-    GameScene::~GameScene () noexcept {
+    GameScene::~GameScene() noexcept {
         // Free all game assets
-        gameResources.free ();
+        gameResources.free();
         if (auto * ship = KeyboardSpaceship::instance) ship->destroy();
     }
 
@@ -121,8 +121,8 @@ namespace kt {
 
     void GameScene::onMenu (Event * event) {
         hardPause = !hardPause;
-        static auto size = getSize ();
-        static spDialog dialog = [this] () {
+        static auto size = getSize();
+        static spDialog dialog = [this]() {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
             dialog->addButton ("Restart", CLOSURE (this, & GameScene::onRestart));
             dialog->addButton ("New game", CLOSURE (this, & GameScene::onNewGame));
@@ -130,7 +130,7 @@ namespace kt {
             dialog->addButton ("Quit", CLOSURE (this, & GameScene::onQuit));
             dialog->addButton ("Cancel", CLOSURE (this, & GameScene::onMenu));
             return dialog;
-        } ();
+        }();
 
         if (getLastChild() == dialog) {
             removeChild (dialog);
@@ -140,55 +140,58 @@ namespace kt {
     }
 
     void GameScene::onRestart (Event * event) {
-        detach ();
-        getStage ()->removeAllEventListeners ();
+        detach();
+        getStage()->removeAllEventListeners();
         this->~GameScene();
-        while (get_pointer (getStage ()->getLastChild ()) == this);
+        while (get_pointer (getStage()->getLastChild()) == this);
         new GameScene (rng.seed);
     }
 
     void GameScene::onNewGame (Event * event) {
-        detach ();
-        getStage ()->removeAllEventListeners ();
+        detach();
+        getStage()->removeAllEventListeners();
         this->~GameScene();
-        while (get_pointer (getStage ()->getLastChild ()) == this);
+        while (get_pointer (getStage()->getLastChild()) == this);
         new GameScene (RANDOM_SEED);
     }
 
     void GameScene::onDisconnect (Event * event) {
-        detach ();
-        getStage ()->removeAllEventListeners ();
+        detach();
+        getStage()->removeAllEventListeners();
         this->~GameScene();
-        while (get_pointer (getStage ()->getLastChild ()) == this);
-        new MenuScene ();
+        while (get_pointer (getStage()->getLastChild()) == this);
+        new MenuScene();
     }
 
     void GameScene::onQuit (Event * event) {
-        core::requestQuit ();
+        core::requestQuit();
     }
 
     std::size_t GameScene::requestSeed (std::string const & ip, unsigned short port) {
         auto client = capnp::EzRpcClient (ip, port);
-        auto promise = client.getMain <::Backend> ().seedRequest ().send();
+        auto promise = client.getMain <::Backend>().seedRequest().send();
         return promise.wait (client.getWaitScope()).getSeed();
     }
 
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
-        // TODO: catch connection refused errors
-
         capnp::EzRpcClient remote (ip, port);
-        auto remoteRequest = remote.getMain <::Backend>().synchroRequest();
-        auto synchro = remoteRequest.send().wait (remote.getWaitScope()).getTheir();
+        auto remoteSynchro = remote.getMain<::Backend>().synchroRequest().send().getTheir();
 
-        auto test = synchro.connectRequest ();
-        auto own = client.getMain<::Backend>().synchroRequest ();
-        test.setOther (own.send().getTheir());
-        test.send().wait (remote.getWaitScope());
+        static auto localSynchro = [this]() {
+            for (int i = 0; i < 120; i++) {
+                try {
+                    return client.getMain<::Backend>().synchroRequest().send().getTheir();
+                } catch (std::exception & e) {
+                    logs::messageln ("Failed to connect to local client! Retrying...");
+                    std::this_thread::sleep_for (std::chrono::milliseconds (500));
+                }
+            }
+            logs::error ("Connection timed out - could not establish connection to local backend!");
+        }();
 
-//        auto request = client.getMain <::Backend> ().connectRequest();
-//        cg::Address (std::string (ip), port).initialise (request.initAddress());
-//        request.setRemote (synchro);
-//        request.send().wait (waitscope);
+        auto connectRequest = localSynchro.connectRequest();
+        connectRequest.setOther (remoteSynchro);
+        connectRequest.send().wait (waitscope);
     }
 }
 

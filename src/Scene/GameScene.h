@@ -7,6 +7,8 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
+#include <thread>
+
 #include "src/UI/Dialog.h"
 #include "src/Planet/Planet.h"
 #include "src/Spaceship/RemoteSpaceship.h"

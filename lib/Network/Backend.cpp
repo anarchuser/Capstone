@@ -106,28 +106,6 @@ namespace cg {
         return kj::READY_NOW;
     }
 
-    ::kj::Promise<void> BackendImpl::connect (Backend::Server::ConnectContext context) {
-        auto params = context.getParams();
-        if (!params.hasRemote()) return kj::READY_NOW;
-
-        KJ_REQUIRE (params.hasAddress());
-
-        auto address = (std::string) Address (params.getAddress());
-        KJ_REQUIRE (!connections.contains (address));
-        connections.insert ({address, params.getRemote()});
-
-        log ("Connecting to " + address);
-
-        auto synchro = kj::heap <cg::SynchroImpl> ();
-        auto request = params.getRemote().connectRequest();
-        request.setOther (kj::mv (synchro));
-        request.send().detach ([this] (kj::Exception && e) {
-            log (e.getDescription());
-        });
-
-        return kj::READY_NOW;
-    }
-
     ::kj::Promise <void> BackendImpl::synchro (SynchroContext context) {
         log ("Synchro requested");
 
@@ -135,6 +113,25 @@ namespace cg {
         context.initResults ().setTheir (kj ::mv (synchro));
 
         return kj::READY_NOW;
+    }
+
+    BackendImpl::~BackendImpl () {
+        std::vector <kj::Promise <void>> promises;
+        std::transform (connections.begin(), connections.end(), promises.begin(),
+                        [this] (std::pair <std::string const, Backend::Synchro::Client> & pair) {
+            return pair.second.disconnectRequest().send().ignoreResult();
+        });
+
+        auto promise_fold = [] (kj::Promise <void> & a, kj::Promise <void> & b) {
+            return a.then ([& b] () {
+                return b.eagerlyEvaluate ([] (kj::Exception && e) {
+                    KJ_DLOG (WARNING, e.getDescription());
+                });
+            });
+        };
+
+        kj::Promise <void> promise = kj::READY_NOW;
+        std::reduce (promises.begin(), promises.end(), std::move (promise), promise_fold).eagerlyEvaluate ([](...){});
     }
 }
 

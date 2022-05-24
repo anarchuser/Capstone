@@ -16,6 +16,8 @@
 #include <sstream>
 #include <memory>
 #include <unordered_map>
+#include <vector>
+#include <numeric>
 
 #include <ranges>
 
@@ -49,12 +51,12 @@ namespace cg {
 
     public:
         explicit BackendImpl (std::size_t seed);
+        ~BackendImpl();
 
         /// RPC function calls
         ::kj::Promise <void> ping (PingContext context) override;
         ::kj::Promise <void> seed (SeedContext context) override;
         ::kj::Promise <void> registerClient (RegisterClientContext context) override;
-        ::kj::Promise <void> connect (ConnectContext context) override;
         ::kj::Promise <void> synchro (SynchroContext context) override;
     };
 } // cg
