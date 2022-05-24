@@ -177,7 +177,7 @@ namespace cg {
             });
             request.setLocal (kj::mv (local));
             auto result = request.send();
-            KJ_REQUIRE (connections.contains (name));
+            KJ_REQUIRE (!connections.contains (name), name, "Duplicate client identifier");
             result.then ([&] (capnp::Response <Backend::Synchro::SyncResults> results) {
                 connections.emplace (name, Connection {results.getRemote()});
             }).detach ([] (kj::Exception && e) {
