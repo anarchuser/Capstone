@@ -65,15 +65,16 @@ namespace cg {
 
     kj::Own <ShipHandleImpl> BackendImpl::registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
         std::string const & username = spaceship.username;
-//        KJ_REQUIRE (connections.contains (username), username, "Tried to register a ship without being registered");
+        KJ_REQUIRE (connections.contains (username), username, "Tried to register a ship without being registered");
 
         auto & shipHandles = connections.at (username).shipHandles;
 
         // If username exists already, replace:
-//        if (shipHandles.contains (username)) {
+        if (shipHandles.contains (username)) {
+            return kj::heap<ShipHandleImpl>();
 //            KJ_DLOG (WARNING, "Duplicate username detected");
 //            doneCallback (username);
-//        }
+        }
         KJ_REQUIRE (! shipHandles.contains (username), username, "Username already in use");
 
         log (std::string ("Ship registration received from ") + username);
