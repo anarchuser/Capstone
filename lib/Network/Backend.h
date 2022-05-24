@@ -51,7 +51,6 @@ namespace cg {
 
     public:
         explicit BackendImpl (std::size_t seed);
-        ~BackendImpl();
 
         /// RPC function calls
         ::kj::Promise <void> ping (PingContext context) override;

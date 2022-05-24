@@ -3,16 +3,21 @@
 
 #include "Network/config.h"
 
+#include <functional>
+
 namespace cg {
+    using ConnectCallback = std::function <void ()>;
 
     class SynchroImpl final: public Backend::Synchro::Server {
     private:
+        ConnectCallback onConnect;
+
         void log (std::string const & msg);
 
     public:
+        void setOnConnect (ConnectCallback && onConnect);
+
         kj::Promise <void> connect (ConnectContext context) override;
-        kj::Promise <void> disconnect (DisconnectContext context) override;
-        kj::Promise <void> sendShip (SendShipContext context) override;
     };
 
 } // cg

@@ -110,28 +110,12 @@ namespace cg {
         log ("Synchro requested");
 
         auto synchro = kj::heap <cg::SynchroImpl> ();
+        synchro->setOnConnect ([this]() {
+            log ("Someone connected to my synchro impl!");
+        });
         context.initResults ().setTheir (kj ::mv (synchro));
 
         return kj::READY_NOW;
-    }
-
-    BackendImpl::~BackendImpl () {
-        std::vector <kj::Promise <void>> promises;
-        std::transform (connections.begin(), connections.end(), promises.begin(),
-                        [this] (std::pair <std::string const, Backend::Synchro::Client> & pair) {
-            return pair.second.disconnectRequest().send().ignoreResult();
-        });
-
-        auto promise_fold = [] (kj::Promise <void> & a, kj::Promise <void> & b) {
-            return a.then ([& b] () {
-                return b.eagerlyEvaluate ([] (kj::Exception && e) {
-                    KJ_DLOG (WARNING, e.getDescription());
-                });
-            });
-        };
-
-        kj::Promise <void> promise = kj::READY_NOW;
-        std::reduce (promises.begin(), promises.end(), std::move (promise), promise_fold).eagerlyEvaluate ([](...){});
     }
 }
 

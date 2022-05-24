@@ -44,12 +44,6 @@ interface Backend {
 
         connect @0 (other :Synchro);
         # Connect to this synchro, passing along a back-reference
-
-        disconnect @1 ();
-        # TODO
-
-        sendShip @2 (ship :ShipHandle);
-        # Convey ship properties to this Synchro
     }
 
     interface ShipRegistrar {
