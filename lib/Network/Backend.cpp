@@ -24,11 +24,10 @@ namespace cg {
     }
 
     ::kj::Promise <void> BackendImpl::connect (ConnectContext context) {
-        log ("Connect request received");
-
         auto params = context.getParams();
         KJ_REQUIRE (params.hasName());
         KJ_REQUIRE (params.hasS2c_registrar());
+        log ("Connect request received from " + std::string (params.getName()));
         auto [iterator, success] = connections.emplace (params.getName(), params.getS2c_registrar());
         KJ_ASSERT (success);
 
@@ -91,7 +90,7 @@ namespace cg {
         auto [iterator, success] = shipHandles.emplace (username, handle);
         KJ_ASSERT (success);
 
-        broadcastSpaceship (spaceship);
+//        broadcastSpaceship (spaceship);
 
         log ("Send ShipHandle back to " + username);
         auto sink = kj::heap <ShipHandleImpl> ();
