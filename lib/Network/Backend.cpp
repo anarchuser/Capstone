@@ -65,7 +65,7 @@ namespace cg {
 
     kj::Own <ShipHandleImpl> BackendImpl::registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
         std::string const & username = spaceship.username;
-        KJ_REQUIRE (connections.contains (username), username, "Tried to register a ship without being registered");
+//        KJ_REQUIRE (connections.contains (username), username, "Tried to register a ship without being registered");
 
         auto & shipHandles = connections.at (username).shipHandles;
 

@@ -53,7 +53,7 @@ namespace kt {
             return ship->getHandle();
         });
         registerClient.setS2c_registrar (kj::mv (s2c));
-        registerClient.setName (USERNAME);
+        registerClient.setName (USERNAME"_B");
         auto c2s = registerClient.send().wait(waitscope).getC2s_registrar();
         registrar = std::make_unique <::Backend::ShipRegistrar::Client> (c2s);
 
