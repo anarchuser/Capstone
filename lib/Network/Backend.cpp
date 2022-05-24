@@ -86,12 +86,12 @@ namespace cg {
                             distributeSpaceship (Spaceship (response.getSpaceship()), connection.first);
                             sendItemCallback (sender, direction);
                         }).detach ([&] (kj::Exception && e) {
-                            KJ_DLOG (WARNING, "Exception on establishing missing connection: ", this, e.getDescription ());
-                            doneCallback (connection.first);
+                            KJ_DLOG (WARNING, "Exception on establishing missing connection: ", e.getDescription ());
+//                            doneCallback (connection.first);
                         });
                 return;
             }
-            KJ_REQUIRE (shipHandles.contains (sender), this, sender, "Cannot forward directions; ship handle not found");
+            KJ_REQUIRE (shipHandles.contains (sender), sender, "Cannot forward directions; ship handle not found");
 
             auto request = shipHandles.at (sender).sendItemRequest();
             direction.initialise (request.initItem().initDirection());
@@ -137,8 +137,8 @@ namespace cg {
             auto [iterator, success] = shipHandles.emplace (sender.username, results.getRemote());
             KJ_ASSERT (success);
         }).detach ([&] (kj::Exception && e) {
-            KJ_DLOG (WARNING, "Exception on registering ship to client", this, e.getDescription ());
-            doneCallback (receiver);
+            KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
+//            doneCallback (receiver);
         });
     }
 
@@ -181,8 +181,8 @@ namespace cg {
             KJ_REQUIRE (!connections.contains (name), name, "Duplicate client identifier");
             result.then ([&] (capnp::Response <Backend::Synchro::SyncResults> results) {
                 connections.emplace (name, Connection {results.getRemote()});
-            }).detach ([this] (kj::Exception && e) {
-                KJ_DLOG (WARNING, "Exception on syncing after a connect request", this, e.getDescription());
+            }).detach ([] (kj::Exception && e) {
+                KJ_DLOG (WARNING, "Exception on syncing after a connect request", e.getDescription());
             });
         });
         synchro->setOnSync ([this] (std::string const & name, Backend::ShipRegistrar::Client client) {
