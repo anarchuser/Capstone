@@ -115,8 +115,8 @@ namespace cg {
                                 sendItemCallback (sender, direction);
                             });
                         }).detach ([&] (kj::Exception && e) {
-                            KJ_DLOG (WARNING, "Exception on establishing missing connection", e.getDescription ());
-                            doneCallback (connection.first);
+//                            KJ_DLOG (WARNING, "Exception on establishing missing connection", e.getDescription ());
+//                            doneCallback (connection.first);
                         });
                 return;
             }
