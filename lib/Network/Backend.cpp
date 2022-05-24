@@ -46,8 +46,8 @@ namespace cg {
 
         // Store connection details (callback handles and 'new ship' callback)
         log ("Store connection details");
-//        auto [iterator, success] = shipHandles.insert_or_assign (username, handle);
-//        KJ_ASSERT (success);
+        auto [iterator, success] = shipHandles.emplace (username, handle);
+        KJ_ASSERT (success);
 
         broadcastSpaceship (spaceship);
 
@@ -64,7 +64,10 @@ namespace cg {
     }
 
     kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote) {
+        log ("Exchanging registrars");
+
         connections.insert ({name, Connection {remote}});
+        KJ_ASSERT (connections.contains (name));
 
         auto local = kj::heap <ShipRegistrarImpl> ();
         local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
@@ -75,6 +78,9 @@ namespace cg {
 
     void BackendImpl::sendItemCallback (std::string const & ship, Direction direction) {
         for (auto & connection : connections) {
+
+            log (connection.first);
+
             auto & shipHandles = connection.second.shipHandles;
 
             // TODO: if connection does not exist, create it!
@@ -119,14 +125,7 @@ namespace cg {
 
         request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
             KJ_REQUIRE (results.hasRemote());
-            auto [iterator, success] = shipHandles.insert_or_assign (sender.username, results.getRemote());
-//            Backend::ShipHandle::Client remote = results.getRemote();
-//            std::pair <std::string const, Backend::ShipHandle::Client> pair (sender.username, remote);
-//            auto [iterator, success] = shipHandles.emplace (sender.username, remote);
-//            auto [iterator, success] = shipHandles.emplace (std::move (pair));
-//            auto [iterator, success] = shipHandles.insert ({sender.username, remote});
-//            auto [iterator, success] = shipHandles.insert_or_assign (sender.username, std::move (remote));
-            log ("Success!");
+            auto [iterator, success] = shipHandles.insert ({sender.username, results.getRemote()});
             KJ_ASSERT (success);
         }).detach ([&] (kj::Exception && e) {
             KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
