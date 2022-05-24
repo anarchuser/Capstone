@@ -56,6 +56,16 @@ namespace cg {
         return kj::mv (sink);
     }
 
+    kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (Backend::ShipRegistrar::Client remote) {
+        registrars.emplace_back (remote);
+
+        auto local = kj::heap <ShipRegistrarImpl> ();
+        local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
+            return registerShipCallback (spaceship, handle);
+        });
+        return local;
+    }
+
     void BackendImpl::sendItemCallback (std::string const & ship, Direction direction) {
         KJ_REQUIRE (shipHandles.contains (ship), ship, "Cannot forward directions; ship handle not found");
         auto request = shipHandles.at (ship).sendItemRequest();
@@ -85,8 +95,6 @@ namespace cg {
                         registrars.erase (registrar);
             });
         }
-
-        // TODO: distribute new ship to each connection
     }
 
     ::kj::Promise <void> BackendImpl::registerClient (RegisterClientContext context) {
@@ -95,14 +103,8 @@ namespace cg {
 
         log ("Registering game client");
 
-        registrars.push_back (params.getS2c_registrar());
-
         auto results = context.initResults();
-        auto registrar = kj::heap <ShipRegistrarImpl> ();
-        registrar->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
-            return registerShipCallback (spaceship, handle);
-        });
-        results.setC2s_registrar (kj::mv (registrar));
+        results.setC2s_registrar (exchangeRegistrars (params.getS2c_registrar()));
 
         return kj::READY_NOW;
     }
@@ -111,12 +113,8 @@ namespace cg {
         log ("Synchro requested");
 
         auto synchro = kj::heap <cg::SynchroImpl> ();
-        synchro->setOnConnect ([this] (Backend::ShipRegistrar::Client remote) {
-            auto local = kj::heap <ShipRegistrarImpl> ();
-            local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
-                return registerShipCallback (spaceship, handle);
-            });
-            return kj::mv (local);
+        synchro->setOnConnect ([this] (Backend::ShipRegistrar::Client client) {
+            return exchangeRegistrars (client);
         });
         context.initResults ().setTheir (kj ::mv (synchro));
 

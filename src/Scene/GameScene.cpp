@@ -23,8 +23,6 @@ namespace kt {
         spWorld world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
         addChild (world);
 
-
-
         // Generate a couple of planets, number based on world size
         auto planetAnimation = gameResources.getResAnim ("venus");
         for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
@@ -55,6 +53,12 @@ namespace kt {
         registerClient.setS2c_registrar (kj::mv (s2c));
         auto c2s = registerClient.send().wait(waitscope).getC2s_registrar();
         registrar = std::make_unique <::Backend::ShipRegistrar::Client> (c2s);
+
+        try {
+            joinGame (REMOTE_ADDRESS, SERVER_PORT);
+        } catch (std::exception & e) {
+            logs::warning (e.what());
+        }
 
         Spaceship::resetCounter();
         spKeyboardSpaceship ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);

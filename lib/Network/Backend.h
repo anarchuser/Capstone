@@ -40,9 +40,10 @@ namespace cg {
         void sendItemCallback (std::string const & sender, Direction direction);
         void doneCallback     (std::string username);
 
-        void broadcastSpaceship  (Spaceship const & sender);
+        void broadcastSpaceship (Spaceship const & sender);
 
         kj::Own <ShipHandleImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
+        kj::Own <ShipRegistrarImpl> exchangeRegistrars (Backend::ShipRegistrar::Client remote);
 
         void log (std::string const & msg);
 

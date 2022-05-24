@@ -52,12 +52,20 @@ namespace kt {
     }
 
     void KeyboardSpaceship::update (UpdateState const & us) {
-        onUpdate(queried);
+        try {
+            onUpdate(queried);
+        } catch (std::bad_function_call & e) {
+//            logs::warning ("KeyboardSpaceship::onUpdate not configured");
+        }
         Spaceship::update (us);
     }
 
     void KeyboardSpaceship::destroy () {
-        onDone();
+        try {
+            onDone();
+        } catch (std::bad_function_call & e) {
+//            logs::warning ("KeyboardSpaceship::onDone not configured");
+        }
         Spaceship::destroy ();
         instance = nullptr;
     }
