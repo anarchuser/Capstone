@@ -77,7 +77,6 @@ namespace cg {
             log (connection.first);
         }
         log ("||||||||");
-        log ("||||||||");
 
         auto local = kj::heap <ShipRegistrarImpl> ();
         local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
@@ -166,7 +165,6 @@ namespace cg {
 
     ::kj::Promise <void> BackendImpl::synchro (SynchroContext context) {
         log ("Synchro requested");
-
 
         auto synchro = kj::heap <cg::SynchroImpl> ();
         synchro->setOnConnect ([this] (std::string const & name, Backend::ShipRegistrar::Client client) {

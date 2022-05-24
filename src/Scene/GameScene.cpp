@@ -188,9 +188,10 @@ namespace kt {
             logs::error ("Connection timed out - could not establish connection to local backend!");
         }();
 
-        auto connectRequest = localSynchro.connectRequest();
-        connectRequest.setOther (remoteSynchro);
-        connectRequest.send().wait (waitscope);
+        auto connectRequest = remoteSynchro.connectRequest();
+        connectRequest.setOther (localSynchro);
+        connectRequest.setName (USERNAME);
+        connectRequest.send().wait (remote.getWaitScope());
     }
 }
 
