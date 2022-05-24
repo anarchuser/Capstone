@@ -111,7 +111,13 @@ namespace cg {
         log ("Synchro requested");
 
         auto synchro = kj::heap <cg::SynchroImpl> ();
-        synchro->setOnConnect ([this]() { log ("Someone connected to my synchro impl!"); });
+        synchro->setOnConnect ([this] (Backend::ShipRegistrar::Client remote) {
+            auto local = kj::heap <ShipRegistrarImpl> ();
+            local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
+                return registerShipCallback (spaceship, handle);
+            });
+            return kj::mv (local);
+        });
         context.initResults ().setTheir (kj ::mv (synchro));
 
         return kj::READY_NOW;
