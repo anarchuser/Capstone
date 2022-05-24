@@ -5,7 +5,7 @@ namespace cg {
             : rng_seed {seed}
             , name {name} {}
 
-    BackendImpl::Connection::Connection (Backend::ShipRegistrar::Client client): registrar {client} {}
+    BackendImpl::Connection::Connection (Backend::ShipRegistrar::Client client): registrar {std::move (client)} {}
 
     void BackendImpl::log (std::string const & msg) {
         std::stringstream ss;
@@ -152,7 +152,7 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, std::string const & receiver) {
         KJ_REQUIRE (connections.contains (receiver));
 
-        auto connection = connections.at (receiver);
+        auto & connection = connections.at (receiver);
         auto sender = ship.username;
         if (connection.shipHandles.contains (sender)) {
             log ("Connection from ship " + sender + " to " + receiver + " exists already");
@@ -161,9 +161,9 @@ namespace cg {
 
         auto request = connection.registrar.registerShipRequest ();
         ship.initialise (request.initSpaceship());
-        connection.shipHandles.emplace (sender, request.send().getRemote());
-
-        return kj::READY_NOW;
+        return request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
+            connection.shipHandles.emplace (sender, results.getRemote());
+        });
     }
 
     void BackendImpl::broadcastSpaceship (Spaceship const & sender) {
