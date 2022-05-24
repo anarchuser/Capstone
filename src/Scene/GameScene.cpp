@@ -32,7 +32,7 @@ namespace kt {
             }, float (rng.random ({0.3, 0.7})));
         }
 
-        auto registerClient = client.getMain <::Backend>().registerClientRequest();
+        auto registerClient = client.getMain <::Backend>().connectRequest();
         auto s2c = kj::heap <cg::ShipRegistrarImpl>();
         s2c->setOnRegisterShip ([&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
             auto & username = spaceship.username;
@@ -173,25 +173,9 @@ namespace kt {
     }
 
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
-        remoteClients.push_back (std::make_unique <capnp::EzRpcClient> (ip, port));
-        auto & remote = * remoteClients.back();
-        auto remoteSynchro = remote.getMain<::Backend>().synchroRequest().send().getRemote();
-
-        static auto localSynchro = [this]() {
-            for (int i = 0; i < 120; i++) {
-                try {
-                    return client.getMain<::Backend>().synchroRequest().send().getRemote();
-                } catch (std::exception & e) {
-                    logs::messageln ("Failed to connect to local client! Retrying...");
-                    std::this_thread::sleep_for (std::chrono::milliseconds (500));
-                }
-            }
-            logs::error ("Connection timed out - could not establish connection to local backend!");
-        }();
-
-        auto connectRequest = localSynchro.connectRequest();
-        connectRequest.setOther (remoteSynchro);
-        connectRequest.send().wait (waitscope);
+        capnp::EzRpcClient remote (ip, port);
+        auto request = client.getMain <::Backend>().joinRequest();
+        request.setRemote (remote.getMain<::Backend>());
     }
 }
 

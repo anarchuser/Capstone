@@ -23,6 +23,46 @@ namespace cg {
         return kj::READY_NOW;
     }
 
+    ::kj::Promise <void> BackendImpl::connect (ConnectContext context) {
+        log ("Connect request received");
+
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasName());
+        KJ_REQUIRE (params.hasS2c_registrar());
+        auto [iterator, success] = connections.emplace (params.getName(), params.getS2c_registrar());
+        KJ_ASSERT (success);
+
+        auto registrar = kj::heap <ShipRegistrarImpl> ();
+        registrar->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
+            return registerShipCallback (spaceship, handle);
+        });
+
+        auto results = context.getResults();
+        results.setC2s_registrar(kj::mv (registrar));
+        results.setRemote (name);
+
+        return kj::READY_NOW;
+    }
+
+    ::kj::Promise <void> BackendImpl::join (JoinContext context) {
+        log ("Join request received");
+
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasRemote());
+        auto request = params.getRemote().connectRequest ();
+        request.setName (name);
+        auto registrar = kj::heap <ShipRegistrarImpl> ();
+        registrar->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
+            return registerShipCallback (spaceship, handle);
+        });
+        request.setS2c_registrar (kj::mv (registrar));
+        return request.send().then ([&] (capnp::Response <Backend::ConnectResults> results) {
+            KJ_REQUIRE (results.hasC2s_registrar());
+            auto [iterator, success] = connections.emplace (results.getRemote(), results.getC2s_registrar());
+            KJ_ASSERT (success);
+        });
+    }
+
     kj::Own <ShipHandleImpl> BackendImpl::registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
         std::string const & username = spaceship.username;
         KJ_REQUIRE (connections.contains (username), username, "Tried to register a ship without being registered");
@@ -61,19 +101,6 @@ namespace cg {
         });
 
         return kj::mv (sink);
-    }
-
-    kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote) {
-        log ("Exchanging registrars");
-
-        connections.emplace (name, Connection {remote});
-        KJ_ASSERT (connections.contains (name));
-
-        auto local = kj::heap <ShipRegistrarImpl> ();
-        local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
-            return registerShipCallback (spaceship, handle);
-        });
-        return local;
     }
 
     void BackendImpl::sendItemCallback (std::string const & sender, Direction direction) {
@@ -146,52 +173,6 @@ namespace cg {
         for (auto & connection : connections) {
             distributeSpaceship (sender, connection.first);
         }
-    }
-
-    ::kj::Promise <void> BackendImpl::registerClient (RegisterClientContext context) {
-        auto params = context.getParams();
-        KJ_REQUIRE (params.hasS2c_registrar());
-        std::string name = params.getName();
-
-        log ("Registering game client: " + name);
-
-        connections.insert_or_assign (name, Connection {params.getS2c_registrar()});
-
-        auto results = context.initResults();
-        results.setC2s_registrar (exchangeRegistrars (params.getName(), params.getS2c_registrar()));
-
-        return kj::READY_NOW;
-    }
-
-    ::kj::Promise <void> BackendImpl::synchro (SynchroContext context) {
-        log ("Synchro requested");
-
-        auto synchro = kj::heap <cg::SynchroImpl> ();
-        synchro->setOnConnect ([this] (std::string const & name, Backend::Synchro::Client client) {
-            KJ_REQUIRE (!synchros.contains (name));
-            synchros.emplace (name, client);
-            auto request = client.syncRequest();
-            request.setName (this->name);
-            auto local = kj::heap <ShipRegistrarImpl> ();
-            local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
-                return registerShipCallback (spaceship, handle);
-            });
-            request.setLocal (kj::mv (local));
-            auto result = request.send();
-            KJ_REQUIRE (!connections.contains (name), name, "Duplicate client identifier");
-            result.then ([&] (capnp::Response <Backend::Synchro::SyncResults> results) {
-                connections.emplace (name, Connection {results.getRemote()});
-            }).detach ([] (kj::Exception && e) {
-                KJ_DLOG (WARNING, "Exception on syncing after a connect request", e.getDescription());
-            });
-        });
-        synchro->setOnSync ([this] (std::string const & name, Backend::ShipRegistrar::Client client) {
-            return exchangeRegistrars (name, client);
-        });
-        context.initResults().setRemote (kj ::mv (synchro));
-        context.getResults().setName (name);
-
-        return kj::READY_NOW;
     }
 }
 

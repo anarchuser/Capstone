@@ -8,7 +8,6 @@
 #include "Data/Address.h"
 #include "ShipHandle/ShipHandle.h"
 #include "ShipRegistrar/ShipRegistrar.h"
-#include "Synchro/Synchro.h"
 
 #include <atomic>
 #include <functional>
@@ -41,9 +40,6 @@ namespace cg {
         /// List of everything that demands knowledge of every ship there is
         std::unordered_map <std::string, Connection> connections;
 
-        /// List of synchros
-        std::unordered_map <std::string, Backend::Synchro::Client> synchros;
-
         /// Seed used to initialise the game. Returned by `randomSeed`
         std::size_t const rng_seed;
 
@@ -57,8 +53,6 @@ namespace cg {
 
         /// Callback to call when our registrar received a new spaceship
         kj::Own <ShipHandleImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
-        /// Insert the remote registrar handle into list of connections and return a registrar of our own
-        kj::Own <ShipRegistrarImpl> exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote);
 
         /// Distribute spaceship to one connection
         void distributeSpaceship (Spaceship const & sender, std::string const & receiver);
@@ -71,8 +65,8 @@ namespace cg {
         /** RPC function calls **/
         ::kj::Promise <void> ping (PingContext context) override;
         ::kj::Promise <void> seed (SeedContext context) override;
-        ::kj::Promise <void> registerClient (RegisterClientContext context) override;
-        ::kj::Promise <void> synchro (SynchroContext context) override;
+        ::kj::Promise <void> connect (ConnectContext context) override;
+        ::kj::Promise <void> join (JoinContext context) override;
     };
 } // cg
 
