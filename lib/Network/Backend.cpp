@@ -66,17 +66,8 @@ namespace cg {
     kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote) {
         log ("Exchanging registrars");
 
-        for (auto & connection : connections) {
-            log (connection.first);
-        }
-        log ("========");
-
-        connections.insert ({name, Connection {remote}});
+        connections.emplace (name, Connection {remote});
         KJ_ASSERT (connections.contains (name));
-        for (auto & connection : connections) {
-            log (connection.first);
-        }
-        log ("||||||||");
 
         auto local = kj::heap <ShipRegistrarImpl> ();
         local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
@@ -85,14 +76,23 @@ namespace cg {
         return local;
     }
 
-    void BackendImpl::sendItemCallback (std::string const & ship, Direction direction) {
+    void BackendImpl::sendItemCallback (std::string const & sender, Direction direction) {
         for (auto & connection : connections) {
             auto & shipHandles = connection.second.shipHandles;
 
-            // TODO: if connection does not exist, create it!
-            KJ_REQUIRE (shipHandles.contains (ship), ship, "Cannot forward directions; ship handle not found");
+            if (!shipHandles.contains (sender)) {
+                connections.at (sender).shipHandles.at (sender).getSpaceshipRequest ().send().then (
+                        [&] (capnp::Response <Backend::ShipHandle::GetSpaceshipResults> response) {
+                            distributeSpaceship (Spaceship (response.getSpaceship()), connection.first);
+                            sendItemCallback (sender, direction);
+                        }).detach ([] (kj::Exception && e) {
+                            KJ_DLOG (WARNING, "Exception on establishing missing connection: ", e.getDescription ());
+                        });
+                return;
+            }
+            KJ_REQUIRE (shipHandles.contains (sender), sender, "Cannot forward directions; ship handle not found");
 
-            auto request = shipHandles.at (ship).sendItemRequest();
+            auto request = shipHandles.at (sender).sendItemRequest();
             direction.initialise (request.initItem().initDirection());
             request.send().then ([](...){});
         }
@@ -131,7 +131,7 @@ namespace cg {
 
         request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
             KJ_REQUIRE (results.hasRemote());
-            auto [iterator, success] = shipHandles.insert ({sender.username, results.getRemote()});
+            auto [iterator, success] = shipHandles.emplace (sender.username, results.getRemote());
             KJ_ASSERT (success);
         }).detach ([&] (kj::Exception && e) {
             KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
@@ -152,9 +152,6 @@ namespace cg {
 
         log ("Registering game client: " + name);
 
-        if (connections.contains (name)) {
-            connections.erase (name);
-        }
         connections.insert_or_assign (name, Connection {params.getS2c_registrar()});
 
         auto results = context.initResults();
