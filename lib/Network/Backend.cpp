@@ -77,12 +77,14 @@ namespace cg {
     }
 
     void BackendImpl::broadcastSpaceship (Spaceship const & sender) {
-        auto request = gameClient->registerShipRequest();
-        sender.initialise (request.initSpaceship());
-        request.send().detach ([&] (kj::Exception && e) {
-                    KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription());
-                    gameClient.reset();
-        });
+        for (auto registrar = registrars.begin(); registrar != registrars.end(); registrar++) {
+            auto request = registrar->registerShipRequest ();
+            sender.initialise (request.initSpaceship ());
+            request.send ().detach ([&] (kj::Exception && e) {
+                        KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
+                        registrars.erase (registrar);
+            });
+        }
 
         // TODO: distribute new ship to each connection
     }
@@ -90,11 +92,10 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::registerClient (RegisterClientContext context) {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasS2c_registrar());
-        KJ_REQUIRE (!gameClient);
 
         log ("Registering game client");
 
-        gameClient = std::make_unique <Backend::ShipRegistrar::Client> (params.getS2c_registrar());
+        registrars.push_back (params.getS2c_registrar());
 
         auto results = context.initResults();
         auto registrar = kj::heap <ShipRegistrarImpl> ();
@@ -110,9 +111,8 @@ namespace cg {
         log ("Synchro requested");
 
         auto synchro = kj::heap <cg::SynchroImpl> ();
-        synchro->setOnConnect ([this]() {
-            log ("Someone connected to my synchro impl!");
-        });
+        synchro->setOnConnect ([this]() { log ("Someone connected to my synchro impl!"); });
+        synchro->setOnSync ([this] (Backend::ShipRegistrar::Client client) { registrars.emplace_back (client); });
         context.initResults ().setTheir (kj ::mv (synchro));
 
         return kj::READY_NOW;

@@ -29,13 +29,10 @@ namespace cg {
     class BackendImpl final: public Backend::Server {
     private:
         /// List of connected game clients
-        std::unique_ptr <Backend::ShipRegistrar::Client> gameClient;
+        std::vector <Backend::ShipRegistrar::Client> registrars;
 
         /// Handles to all spaceships registered to the server
         std::unordered_map <std::string, Backend::ShipHandle::Client> shipHandles;
-
-        /// Map address -> remote server connection
-        std::unordered_map <std::string, Backend::Synchro::Client> connections;
 
         /// Seed used to initialise the game. Returned by `randomSeed`
         std::size_t const rng_seed;

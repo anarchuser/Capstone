@@ -43,7 +43,10 @@ interface Backend {
     # The thing exchanged between servers as communication basis
 
         connect @0 (other :Synchro);
-        # Connect to this synchro, passing along a back-reference
+        # Connect to this synchro, passing along a back-reference ("hand shake")
+
+        sync @1 (registrate :ShipRegistrar);
+        # Transmit a registrate handle
     }
 
     interface ShipRegistrar {
