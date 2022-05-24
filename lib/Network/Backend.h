@@ -37,18 +37,20 @@ namespace cg {
         /// Seed used to initialise the game. Returned by `randomSeed`
         std::size_t const rng_seed;
 
+        std::string const name;
+
         void sendItemCallback (std::string const & sender, Direction direction);
         void doneCallback     (std::string username);
 
         void broadcastSpaceship (Spaceship const & sender);
 
         kj::Own <ShipHandleImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
-        kj::Own <ShipRegistrarImpl> exchangeRegistrars (Backend::ShipRegistrar::Client remote);
+        kj::Own <ShipRegistrarImpl> exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote);
 
         void log (std::string const & msg);
 
     public:
-        explicit BackendImpl (std::size_t seed);
+        explicit BackendImpl (std::size_t seed, std::string name);
 
         /// RPC function calls
         ::kj::Promise <void> ping (PingContext context) override;

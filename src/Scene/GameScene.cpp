@@ -173,12 +173,12 @@ namespace kt {
 
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
         capnp::EzRpcClient remote (ip, port);
-        auto remoteSynchro = remote.getMain<::Backend>().synchroRequest().send().getTheir();
+        auto remoteSynchro = remote.getMain<::Backend>().synchroRequest().send().getRemote();
 
         static auto localSynchro = [this]() {
             for (int i = 0; i < 120; i++) {
                 try {
-                    return client.getMain<::Backend>().synchroRequest().send().getTheir();
+                    return client.getMain<::Backend>().synchroRequest().send().getRemote();
                 } catch (std::exception & e) {
                     logs::messageln ("Failed to connect to local client! Retrying...");
                     std::this_thread::sleep_for (std::chrono::milliseconds (500));

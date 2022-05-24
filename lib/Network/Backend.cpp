@@ -1,7 +1,9 @@
 #include "Backend.h"
 
 namespace cg {
-    BackendImpl::BackendImpl (std::size_t seed): rng_seed {seed} {}
+    BackendImpl::BackendImpl (std::size_t seed, std::string name)
+            : rng_seed {seed}
+            , name {name} {}
 
     void BackendImpl::log (std::string const & msg) {
         std::stringstream ss;
@@ -56,7 +58,7 @@ namespace cg {
         return kj::mv (sink);
     }
 
-    kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (Backend::ShipRegistrar::Client remote) {
+    kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote) {
         registrars.emplace_back (remote);
 
         auto local = kj::heap <ShipRegistrarImpl> ();
@@ -104,7 +106,7 @@ namespace cg {
         log ("Registering game client");
 
         auto results = context.initResults();
-        results.setC2s_registrar (exchangeRegistrars (params.getS2c_registrar()));
+        results.setC2s_registrar (exchangeRegistrars (params.getName(), params.getS2c_registrar()));
 
         return kj::READY_NOW;
     }
@@ -114,9 +116,10 @@ namespace cg {
 
         auto synchro = kj::heap <cg::SynchroImpl> ();
         synchro->setOnConnect ([this] (Backend::ShipRegistrar::Client client) {
-            return exchangeRegistrars (client);
+            return exchangeRegistrars (name, client);
         });
-        context.initResults ().setTheir (kj ::mv (synchro));
+        context.initResults().setRemote (kj ::mv (synchro));
+        context.getResults().setName (name);
 
         return kj::READY_NOW;
     }

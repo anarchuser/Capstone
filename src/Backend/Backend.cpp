@@ -18,7 +18,7 @@ namespace kt {
     void Backend::serve () {
         for (int i = 0; i < 100; i++) {
             try {
-                auto server = capnp::EzRpcServer (kj::heap<cg::BackendImpl> (seed), address);
+                auto server = capnp::EzRpcServer (kj::heap<cg::BackendImpl> (seed, USERNAME), address);
                 port = server.getPort ().wait (server.getWaitScope ());
 
                 auto & exec = kj::getCurrentThreadExecutor ();

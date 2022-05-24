@@ -42,7 +42,7 @@ interface Backend {
     interface Synchro {
     # The thing exchanged between servers as communication basis
 
-        connect @0 (other :Synchro) -> (registrar :ShipRegistrar);
+        connect @0 (name :Text, other :Synchro) -> (registrar :ShipRegistrar);
         # Connect to this synchro, passing along a back-reference ("hand shake")
     }
 
@@ -68,9 +68,9 @@ interface Backend {
     seed @1 () -> (seed :UInt64);
     # Request RNG seed server is running for
 
-    registerClient @2 (s2c_registrar :ShipRegistrar) -> (c2s_registrar :ShipRegistrar);
+    registerClient @2 (name :Text, s2c_registrar :ShipRegistrar) -> (c2s_registrar :ShipRegistrar);
     # Register game client. Returned registrar can be used to sync individual spaceships
 
-    synchro @3 () -> (their :Synchro);
+    synchro @3 () -> (name :Text, remote :Synchro);
     # Returns a Synchro instance of this backend
 }
