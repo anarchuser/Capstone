@@ -35,6 +35,8 @@ namespace cg {
 
             /// Handles to all spaceships registered to the server
             std::unordered_map <std::string, Backend::ShipHandle::Client> shipHandles;
+
+            explicit Connection (Backend::ShipRegistrar::Client client);
         };
 
         /// List of everything that demands knowledge of every ship there is

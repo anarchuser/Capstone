@@ -5,6 +5,8 @@ namespace cg {
             : rng_seed {seed}
             , name {name} {}
 
+    BackendImpl::Connection::Connection (Backend::ShipRegistrar::Client client): registrar{client} {}
+
     void BackendImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Backend @" << this << ": '" << msg << "'";
@@ -28,7 +30,7 @@ namespace cg {
         KJ_REQUIRE (params.hasName());
         KJ_REQUIRE (params.hasS2c_registrar());
         log ("Connect request received from " + std::string (params.getName()));
-        auto [iterator, success] = connections.emplace (params.getName(), params.getS2c_registrar());
+        auto [iterator, success] = connections.emplace (params.getName(), Connection (params.getS2c_registrar()));
         KJ_ASSERT (success);
 
         auto registrar = kj::heap <ShipRegistrarImpl> ();
@@ -57,7 +59,7 @@ namespace cg {
         request.setS2c_registrar (kj::mv (registrar));
         return request.send().then ([&] (capnp::Response <Backend::ConnectResults> results) {
             KJ_REQUIRE (results.hasC2s_registrar());
-            auto [iterator, success] = connections.emplace (results.getRemote(), results.getC2s_registrar());
+            auto [iterator, success] = connections.emplace (results.getRemote(), Connection (results.getC2s_registrar()));
             KJ_ASSERT (success);
         });
     }
