@@ -54,12 +54,6 @@ namespace kt {
         auto c2s = registerClient.send().wait(waitscope).getC2s_registrar();
         registrar = std::make_unique <::Backend::ShipRegistrar::Client> (c2s);
 
-        try {
-            joinGame (REMOTE_ADDRESS, SERVER_PORT);
-        } catch (std::exception & e) {
-            logs::warning (e.what());
-        }
-
         Spaceship::resetCounter();
         spKeyboardSpaceship ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);
 
