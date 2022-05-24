@@ -66,8 +66,18 @@ namespace cg {
     kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote) {
         log ("Exchanging registrars");
 
+        for (auto & connection : connections) {
+            log (connection.first);
+        }
+        log ("========");
+
         connections.insert ({name, Connection {remote}});
         KJ_ASSERT (connections.contains (name));
+        for (auto & connection : connections) {
+            log (connection.first);
+        }
+        log ("||||||||");
+        log ("||||||||");
 
         auto local = kj::heap <ShipRegistrarImpl> ();
         local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
@@ -78,9 +88,6 @@ namespace cg {
 
     void BackendImpl::sendItemCallback (std::string const & ship, Direction direction) {
         for (auto & connection : connections) {
-
-            log (connection.first);
-
             auto & shipHandles = connection.second.shipHandles;
 
             // TODO: if connection does not exist, create it!
@@ -160,8 +167,9 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::synchro (SynchroContext context) {
         log ("Synchro requested");
 
+
         auto synchro = kj::heap <cg::SynchroImpl> ();
-        synchro->setOnConnect ([this] (Backend::ShipRegistrar::Client client) {
+        synchro->setOnConnect ([this] (std::string const & name, Backend::ShipRegistrar::Client client) {
             return exchangeRegistrars (name, client);
         });
         context.initResults().setRemote (kj ::mv (synchro));

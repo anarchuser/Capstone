@@ -19,7 +19,7 @@ namespace cg {
         auto results = context.initResults ();
         try {
             if (params.hasOther()) {
-                results.setRegistrar (onConnect (params.getOther().connectRequest().send().getRegistrar()));
+                results.setRegistrar (onConnect (params.getName(), params.getOther().connectRequest().send().getRegistrar()));
             }
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "Synchro::connect called without valid callback registered");

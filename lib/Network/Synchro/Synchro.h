@@ -8,7 +8,7 @@
 #include <functional>
 
 namespace cg {
-    using ConnectCallback = std::function <kj::Own <ShipRegistrarImpl> (Backend::ShipRegistrar::Client)>;
+    using ConnectCallback = std::function <kj::Own <ShipRegistrarImpl> (std::string const &, Backend::ShipRegistrar::Client)>;
 
     class SynchroImpl final: public Backend::Synchro::Server {
     private:
