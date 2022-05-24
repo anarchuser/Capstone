@@ -87,7 +87,7 @@ namespace cg {
                             sendItemCallback (sender, direction);
                         }).detach ([&] (kj::Exception && e) {
                             KJ_DLOG (WARNING, "Exception on establishing missing connection: ", e.getDescription ());
-                            connections.erase (connection.first);
+                            doneCallback (connection.first);
                         });
                 return;
             }
@@ -111,6 +111,7 @@ namespace cg {
                 // TODO: execute handle.doneRequest() here
             }
         }
+        connections.erase (sender);
     }
 
     void BackendImpl::distributeSpaceship (Spaceship const & sender, std::string const & receiver) {
@@ -136,7 +137,7 @@ namespace cg {
             KJ_ASSERT (success);
         }).detach ([&] (kj::Exception && e) {
             KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
-            connections.erase (receiver);
+            doneCallback (receiver);
         });
     }
 
@@ -165,7 +166,25 @@ namespace cg {
         log ("Synchro requested");
 
         auto synchro = kj::heap <cg::SynchroImpl> ();
-        synchro->setOnConnect ([this] (std::string const & name, Backend::ShipRegistrar::Client client) {
+        synchro->setOnConnect ([this] (std::string const & name, Backend::Synchro::Client client) {
+            KJ_REQUIRE (!synchros.contains (name));
+            synchros.emplace (name, client);
+            auto request = client.syncRequest();
+            request.setName (this->name);
+            auto local = kj::heap <ShipRegistrarImpl> ();
+            local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
+                return registerShipCallback (spaceship, handle);
+            });
+            request.setLocal (kj::mv (local));
+            auto result = request.send();
+            KJ_REQUIRE (connections.contains (name));
+            result.then ([&] (capnp::Response <Backend::Synchro::SyncResults> results) {
+                connections.emplace (name, Connection {results.getRemote()});
+            }).detach ([] (kj::Exception && e) {
+                KJ_DLOG (WARNING, "Exception on syncing after a connect request: ", e.getDescription());
+            });
+        });
+        synchro->setOnSync ([this] (std::string const & name, Backend::ShipRegistrar::Client client) {
             return exchangeRegistrars (name, client);
         });
         context.initResults().setRemote (kj ::mv (synchro));

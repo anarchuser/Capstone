@@ -41,6 +41,9 @@ namespace cg {
         /// List of everything that demands knowledge of every ship there is
         std::unordered_map <std::string, Connection> connections;
 
+        /// List of synchros
+        std::unordered_map <std::string, Backend::Synchro::Client> synchros;
+
         /// Seed used to initialise the game. Returned by `randomSeed`
         std::size_t const rng_seed;
 
