@@ -146,7 +146,7 @@ namespace cg {
     }
 
     ::kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & sender, std::string const & receiver) {
-        log ("Distributing spaceship from " + sender.username + " to " + receiver);
+//        log ("Distributing spaceship from " + sender.username + " to " + receiver);
 
         KJ_REQUIRE (connections.contains (receiver));
         KJ_REQUIRE (connections.contains (sender.username));
@@ -165,6 +165,7 @@ namespace cg {
         return request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
             KJ_REQUIRE (results.hasRemote());
             auto [iterator, success] = shipHandles.emplace (sender.username, std::make_unique <Backend::ShipHandle::Client> (results.getRemote()));
+            log ("Success!");
             KJ_ASSERT (success);
         });
     }
