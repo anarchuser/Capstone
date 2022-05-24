@@ -71,7 +71,7 @@ namespace cg {
 
         // If username exists already, replace:
         if (shipHandles.contains (username)) {
-            return kj::heap<ShipHandleImpl>();
+//            return kj::heap<ShipHandleImpl>();
 //            KJ_DLOG (WARNING, "Duplicate username detected");
 //            doneCallback (username);
         }
@@ -88,7 +88,7 @@ namespace cg {
 
         // Store connection details (callback handles and 'new ship' callback)
         log ("Store connection details");
-        auto [iterator, success] = shipHandles.emplace (username, std::make_unique <Backend::ShipHandle::Client> (handle));
+        auto [iterator, success] = shipHandles.emplace (username, handle);
         KJ_ASSERT (success);
 
         broadcastSpaceship (spaceship);
@@ -110,21 +110,20 @@ namespace cg {
             auto & shipHandles = connection.second.shipHandles;
 
             if (!shipHandles.contains (sender)) {
-                connections.at (sender).shipHandles.at (sender)->getSpaceshipRequest ().send().then (
+                connections.at (sender).shipHandles.at (sender).getSpaceshipRequest ().send().then (
                         [&] (capnp::Response <Backend::ShipHandle::GetSpaceshipResults> response) {
                             return distributeSpaceship (Spaceship (response.getSpaceship()), connection.first).then ([&] () {
                                 sendItemCallback (sender, direction);
                             });
                         }).detach ([&] (kj::Exception && e) {
                             KJ_DLOG (WARNING, "Exception on establishing missing connection", e.getDescription ());
-//                            doneCallback (connection.first);
+                            doneCallback (connection.first);
                         });
-//                distributeSpaceship (Spaceship (sender), connection.first).then([](){});
                 return;
             }
             KJ_REQUIRE (shipHandles.contains (sender), sender, "Cannot forward directions; ship handle not found");
 
-            auto request = shipHandles.at (sender)->sendItemRequest();
+            auto request = shipHandles.at (sender).sendItemRequest();
             direction.initialise (request.initItem().initDirection());
             request.send().then ([](...){});
         }
@@ -165,7 +164,7 @@ namespace cg {
 
         return request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
             KJ_REQUIRE (results.hasRemote());
-            auto [iterator, success] = shipHandles.emplace (sender.username, std::make_unique <Backend::ShipHandle::Client> (results.getRemote()));
+            auto [iterator, success] = shipHandles.emplace (sender.username, results.getRemote());
             log ("Success!");
             KJ_ASSERT (success);
         });
