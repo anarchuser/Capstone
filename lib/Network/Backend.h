@@ -34,7 +34,7 @@ namespace cg {
             Backend::ShipRegistrar::Client registrar;
 
             /// Handles to all spaceships registered to the server
-            std::unordered_map <std::string, Backend::ShipHandle::Client> shipHandles;
+            std::unordered_map <std::string, std::unique_ptr <Backend::ShipHandle::Client>> shipHandles;
         };
 
         /// List of everything that demands knowledge of every ship there is
@@ -55,7 +55,7 @@ namespace cg {
         kj::Own <ShipHandleImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
 
         /// Distribute spaceship to one connection
-        void distributeSpaceship (Spaceship const & sender, std::string const & receiver);
+        ::kj::Promise <void> distributeSpaceship (Spaceship const & sender, std::string const & receiver);
         /// Distribute spaceship to every connection
         void broadcastSpaceship (Spaceship const & sender);
 

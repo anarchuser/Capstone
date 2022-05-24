@@ -44,7 +44,9 @@ namespace kt {
                     return ship->getHandle();
                 }
             }
-            world->removeChild (world->getChild (username, oxygine::ep_ignore_error));
+            spWorld world = safeSpCast <World> (getFirstChild());
+
+            if (auto child = world->getChild (username, oxygine::ep_ignore_error)) world->removeChild (child);
 
             spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, username);
             ship->setData (spaceship);
