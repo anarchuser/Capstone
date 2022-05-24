@@ -66,8 +66,6 @@ namespace cg {
     kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote) {
         connections.insert ({name, Connection {remote}});
 
-        // TODO: broadcast existing connections to here...?
-
         auto local = kj::heap <ShipRegistrarImpl> ();
         local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
             return registerShipCallback (spaceship, handle);
@@ -102,18 +100,29 @@ namespace cg {
         }
     }
 
-    void BackendImpl::broadcastSpaceship (Spaceship const & sender) {
-        for (auto connection = connections.begin(); connection != connections.end(); connection++) {
-            if (connection->second.shipHandles.contains (sender.username)) return;
+    void BackendImpl::distributeSpaceship (Spaceship const & sender, std::string const & receiver) {
+        KJ_REQUIRE (connections.contains (receiver));
+        KJ_REQUIRE (connections.contains (sender.username));
 
-            auto request = connection->second.registrar.registerShipRequest();
-            sender.initialise (request.initSpaceship());
-            request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
-                connection->second.shipHandles.insert ({sender.username, results.getRemote()});
-            }).detach ([&] (kj::Exception && e) {
-                KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
-                connections.erase (connection);
-            });
+        auto & connection = connections.at (receiver);
+        auto & shipHandles = connection.shipHandles;
+        if (shipHandles.contains (sender.username)) return;
+
+        auto & registrar = connection.registrar;
+        auto request = registrar.registerShipRequest();
+        sender.initialise (request.initSpaceship());
+
+        request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
+            shipHandles.insert ({sender.username, results.getRemote()});
+        }).detach ([&] (kj::Exception && e) {
+            KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
+            connections.erase (receiver);
+        });
+    }
+
+    void BackendImpl::broadcastSpaceship (Spaceship const & sender) {
+        for (auto & connection : connections) {
+            distributeSpaceship (sender, connection.first);
         }
     }
 

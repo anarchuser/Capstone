@@ -57,6 +57,8 @@ namespace cg {
         /// Insert the remote registrar handle into list of connections and return a registrar of our own
         kj::Own <ShipRegistrarImpl> exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote);
 
+        /// Distribute spaceship to one connection
+        void distributeSpaceship (Spaceship const & sender, std::string const & receiver);
         /// Distribute spaceship to every connection
         void broadcastSpaceship (Spaceship const & sender);
 
