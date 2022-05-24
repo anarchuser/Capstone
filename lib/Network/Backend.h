@@ -28,31 +28,42 @@
 namespace cg {
     class BackendImpl final: public Backend::Server {
     private:
-        /// List of connected game clients
-        std::vector <Backend::ShipRegistrar::Client> registrars;
+        void log (std::string const & msg);
 
-        /// Handles to all spaceships registered to the server
-        std::unordered_map <std::string, Backend::ShipHandle::Client> shipHandles;
+        struct Connection {
+            /// Registrar to send new ship registered requests to
+            Backend::ShipRegistrar::Client registrar;
+
+            /// Handles to all spaceships registered to the server
+            std::unordered_map <std::string, Backend::ShipHandle::Client> shipHandles;
+        };
+
+        /// List of everything that demands knowledge of every ship there is
+        std::unordered_map <std::string, Connection> connections;
 
         /// Seed used to initialise the game. Returned by `randomSeed`
         std::size_t const rng_seed;
 
+        /// Identifier of this backend
         std::string const name;
 
+        /// Callback to execute when any ship updates their directions
         void sendItemCallback (std::string const & sender, Direction direction);
-        void doneCallback     (std::string username);
+        /// Callback to execute when any ship got destroyed
+        void doneCallback     (std::string const & sender);
 
-        void broadcastSpaceship (Spaceship const & sender);
-
+        /// Callback to call when our registrar received a new spaceship
         kj::Own <ShipHandleImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
+        /// Insert the remote registrar handle into list of connections and return a registrar of our own
         kj::Own <ShipRegistrarImpl> exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote);
 
-        void log (std::string const & msg);
+        /// Distribute spaceship to every connection
+        void broadcastSpaceship (Spaceship const & sender);
 
     public:
         explicit BackendImpl (std::size_t seed, std::string name);
 
-        /// RPC function calls
+        /** RPC function calls **/
         ::kj::Promise <void> ping (PingContext context) override;
         ::kj::Promise <void> seed (SeedContext context) override;
         ::kj::Promise <void> registerClient (RegisterClientContext context) override;

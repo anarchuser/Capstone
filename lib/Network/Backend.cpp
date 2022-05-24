@@ -24,8 +24,12 @@ namespace cg {
     }
 
     kj::Own <ShipHandleImpl> BackendImpl::registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
-        // If username exists already, replace:
         std::string const & username = spaceship.username;
+        KJ_REQUIRE (connections.contains (username), username, "Tried to register a ship without being registered");
+
+        auto & shipHandles = connections.at (username).shipHandles;
+
+        // If username exists already, replace:
         if (shipHandles.contains (username)) {
             doneCallback (username);
         }
@@ -41,7 +45,8 @@ namespace cg {
         log (std::string ("Health: " + std::to_string (spaceship.health)));
 
         // Store connection details (callback handles and 'new ship' callback)
-        auto [iterator, success] = shipHandles.insert ({username, handle});
+        log ("store connection details");
+        auto [iterator, success] = shipHandles.insert_or_assign (username, handle);
         KJ_ASSERT (success);
 
         broadcastSpaceship (spaceship);
@@ -59,7 +64,9 @@ namespace cg {
     }
 
     kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote) {
-        registrars.emplace_back (remote);
+        connections.insert ({name, Connection {remote}});
+
+        // TODO: broadcast existing connections to here...?
 
         auto local = kj::heap <ShipRegistrarImpl> ();
         local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
@@ -69,32 +76,43 @@ namespace cg {
     }
 
     void BackendImpl::sendItemCallback (std::string const & ship, Direction direction) {
-        KJ_REQUIRE (shipHandles.contains (ship), ship, "Cannot forward directions; ship handle not found");
-        auto request = shipHandles.at (ship).sendItemRequest();
-        direction.initialise (request.initItem().initDirection());
-        // TODO: look for a better way
-        // TODO: does this need detachment?
-        request.send().then ([](...){});
+        for (auto & connection : connections) {
+            auto & shipHandles = connection.second.shipHandles;
 
-        // TODO: forward direction to each connection
+            // TODO: if connection does not exist, create it!
+            KJ_REQUIRE (shipHandles.contains (ship), ship, "Cannot forward directions; ship handle not found");
+
+            auto request = shipHandles.at (ship).sendItemRequest();
+            direction.initialise (request.initItem().initDirection());
+            request.send().then ([](...){});
+        }
     }
 
-    void BackendImpl::doneCallback (std::string username) {
-        if (shipHandles.contains (username)) {
-            log ("Closing sinks from " + username);
+    void BackendImpl::doneCallback (std::string const & sender) {
+        for (auto & connection : connections) {
+            auto & shipHandles = connection.second.shipHandles;
+            if (shipHandles.contains (sender)) {
+                log ("Closing sinks from " + sender);
 
-            auto handle = std::move (shipHandles.at (username));
-            shipHandles.erase (username);
+                auto handle = std::move (shipHandles.at (sender));
+                shipHandles.erase (sender);
+
+                // TODO: execute handle.doneRequest() here
+            }
         }
     }
 
     void BackendImpl::broadcastSpaceship (Spaceship const & sender) {
-        for (auto registrar = registrars.begin(); registrar != registrars.end(); registrar++) {
-            auto request = registrar->registerShipRequest ();
-            sender.initialise (request.initSpaceship ());
-            request.send ().detach ([&] (kj::Exception && e) {
-                        KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
-                        registrars.erase (registrar);
+        for (auto connection = connections.begin(); connection != connections.end(); connection++) {
+            if (connection->second.shipHandles.contains (sender.username)) return;
+
+            auto request = connection->second.registrar.registerShipRequest();
+            sender.initialise (request.initSpaceship());
+            request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
+                connection->second.shipHandles.insert ({sender.username, results.getRemote()});
+            }).detach ([&] (kj::Exception && e) {
+                KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
+                connections.erase (connection);
             });
         }
     }
@@ -102,8 +120,14 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::registerClient (RegisterClientContext context) {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasS2c_registrar());
+        std::string name = params.getName();
 
-        log ("Registering game client");
+        log ("Registering game client: " + name);
+
+        if (connections.contains (name)) {
+            connections.erase (name);
+        }
+        connections.insert_or_assign (name, Connection {params.getS2c_registrar()});
 
         auto results = context.initResults();
         results.setC2s_registrar (exchangeRegistrars (params.getName(), params.getS2c_registrar()));
