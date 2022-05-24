@@ -3,7 +3,7 @@
 namespace cg {
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
-        ss << "SynchroImpl @" << this << ": '" << msg << "'";
+        ss << "Synchro @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
         std::cout << ss.str() << std::endl;
     }
