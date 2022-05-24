@@ -112,7 +112,6 @@ namespace cg {
 
         auto synchro = kj::heap <cg::SynchroImpl> ();
         synchro->setOnConnect ([this]() { log ("Someone connected to my synchro impl!"); });
-        synchro->setOnSync ([this] (Backend::ShipRegistrar::Client client) { registrars.emplace_back (client); });
         context.initResults ().setTheir (kj ::mv (synchro));
 
         return kj::READY_NOW;
