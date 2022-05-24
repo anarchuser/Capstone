@@ -5,7 +5,7 @@ namespace cg {
             : rng_seed {seed}
             , name {name} {}
 
-    BackendImpl::Connection::Connection (Backend::ShipRegistrar::Client client): registrar{client} {}
+    BackendImpl::Connection::Connection (Backend::ShipRegistrar::Client client): registrar {client} {}
 
     void BackendImpl::log (std::string const & msg) {
         std::stringstream ss;
@@ -74,11 +74,11 @@ namespace cg {
         if (shipHandles.contains (username)) {
 //            return kj::heap<ShipHandleImpl>();
 //            KJ_DLOG (WARNING, "Duplicate username detected");
-//            doneCallback (username);
+            doneCallback (username);
         }
         KJ_REQUIRE (! shipHandles.contains (username), username, "Username already in use");
 
-        log (std::string ("Ship registration received from ") + username);
+        log (std::string ("Registration from ") + username + " of ship " + username);
         log (std::string ("Position: ( ")
              + std::to_string (spaceship.position[0]) + " | "
              + std::to_string (spaceship.position[1]) + " )");
@@ -92,7 +92,7 @@ namespace cg {
         auto [iterator, success] = shipHandles.emplace (username, handle);
         KJ_ASSERT (success);
 
-//        broadcastSpaceship (spaceship);
+        broadcastSpaceship (spaceship);
 
         log ("Send ShipHandle back to " + username);
         auto sink = kj::heap <ShipHandleImpl> ();
@@ -117,8 +117,8 @@ namespace cg {
                                 sendItemCallback (sender, direction);
                             });
                         }).detach ([&] (kj::Exception && e) {
-//                            KJ_DLOG (WARNING, "Exception on establishing missing connection", e.getDescription ());
-//                            doneCallback (connection.first);
+                            KJ_DLOG (WARNING, "Exception on establishing missing connection", e.getDescription ());
+                            doneCallback (connection.first);
                         });
                 return;
             }
@@ -140,35 +140,30 @@ namespace cg {
                 shipHandles.erase (sender);
 
                 // TODO: execute handle.doneRequest() here
+
+                if (shipHandles.empty()) {
+                    connections.erase (connection.first);
+                }
             }
         }
         log ("Erasing connection to " + sender);
-        connections.erase (sender);
     }
 
-    ::kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & sender, std::string const & receiver) {
-//        log ("Distributing spaceship from " + sender.username + " to " + receiver);
-
+    ::kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, std::string const & receiver) {
         KJ_REQUIRE (connections.contains (receiver));
-        KJ_REQUIRE (connections.contains (sender.username));
 
-        auto & connection = connections.at (receiver);
-        auto & shipHandles = connection.shipHandles;
-        if (shipHandles.contains (sender.username)) {
-            log ("Connection exists already");
+        auto connection = connections.at (receiver);
+        auto sender = ship.username;
+        if (connection.shipHandles.contains (sender)) {
+            log ("Connection from ship " + sender + " to " + receiver + " exists already");
             return kj::READY_NOW;
-        };
+        }
 
-        auto & registrar = connection.registrar;
-        auto request = registrar.registerShipRequest();
-        sender.initialise (request.initSpaceship());
+        auto request = connection.registrar.registerShipRequest ();
+        ship.initialise (request.initSpaceship());
+        connection.shipHandles.emplace (sender, request.send().getRemote());
 
-        return request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
-            KJ_REQUIRE (results.hasRemote());
-            auto [iterator, success] = shipHandles.emplace (sender.username, results.getRemote());
-            log ("Success!");
-            KJ_ASSERT (success);
-        });
+        return kj::READY_NOW;
     }
 
     void BackendImpl::broadcastSpaceship (Spaceship const & sender) {
