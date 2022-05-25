@@ -8,9 +8,6 @@ namespace cg {
         std::cout << ss.str () << std::endl;
     }
 
-    void ShipSinkImpl::setOnDone (DoneCallback && callback) { onDone = callback; }
-    void ShipSinkImpl::setOnSendItem (SendItemCallback && callback) { onSendItem = callback; }
-
     ::kj::Promise <void> ShipSinkImpl::done (DoneContext context) {
         try {
             return onDone();

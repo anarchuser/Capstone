@@ -21,9 +21,9 @@ namespace cg {
         SetShipCallback onSetShip;
 
     public:
-        inline void setOnGetSink (GetSinkCallback && callback);
-        inline void setOnGetShip (GetShipCallback && callback);
-        inline void setOnSetShip (SetShipCallback && callback);
+        inline void setOnGetSink (GetSinkCallback && callback) { onGetSink = callback; };
+        inline void setOnGetShip (GetShipCallback && callback) { onGetShip = callback; };
+        inline void setOnSetShip (SetShipCallback && callback) { onSetShip = callback; };
 
         ::kj::Promise <void> getSink (GetSinkContext context) override;
         ::kj::Promise <void> getShip (GetShipContext context) override;

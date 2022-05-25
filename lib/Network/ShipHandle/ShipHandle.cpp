@@ -8,10 +8,6 @@ namespace cg {
         std::cout << ss.str () << std::endl;
     }
 
-    void ShipHandleImpl::setOnGetSink (GetSinkCallback && callback) { onGetSink = callback; }
-    void ShipHandleImpl::setOnGetShip (GetShipCallback && callback) { onGetShip = callback; }
-    void ShipHandleImpl::setOnSetShip (SetShipCallback && callback) { onSetShip = callback; }
-
     ::kj::Promise <void> ShipHandleImpl::getSink (GetSinkContext context) {
         log ("Sink requested");
         auto results = context.getResults();

@@ -2,11 +2,13 @@
 #define CAPSTONE_NETWORK_REGISTRAR_H
 
 #include "Network/Backend.h"
+#include "Network/ShipSink/ShipSink.h"
+#include "Network/ShipHandle/ShipHandle.h"
 
 #include <functional>
 
 namespace cg {
-    using RegisterShipCallback = std::function <void ()>;
+    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, Backend::ShipHandle::Client)>;
 
     class RegistrarImpl final: public Backend::Registrar::Server {
     private:

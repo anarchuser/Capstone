@@ -1,7 +1,9 @@
 #include "Backend.h"
 
 namespace cg {
-    BackendImpl::BackendImpl (std::size_t seed) : rng_seed {seed} {}
+    BackendImpl::BackendImpl (std::size_t seed)
+            : rng_seed {seed}
+            {}
 
     void BackendImpl::log (std::string const & msg) {
         std::stringstream ss;
@@ -31,8 +33,8 @@ namespace cg {
 
         auto results = context.getResults();
         auto registrar = kj::heap <RegistrarImpl>();
-        registrar->setOnRegisterShip ([this] () {
-            log ("Register Ship Callback");
+        registrar->setOnRegisterShip ([this] (Spaceship ship, Backend::ShipHandle::Client handle) {
+            return registerShip (ship, handle);
         });
         results.setRegistrar (kj::mv (registrar));
 
@@ -54,6 +56,20 @@ namespace cg {
         results.setLocal (kj::heap <SynchroImpl> ());
 
         return kj::READY_NOW;
+    }
+
+    kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, Backend::ShipHandle::Client client) {
+
+        // Prepare ShipSink
+        auto sink = kj::heap <ShipSinkImpl>();
+        sink->setOnDone ([this] () {
+            log ("onDone callback");
+            return kj::READY_NOW;
+        });
+        sink->setOnSendItem ([] (Direction) {
+            return kj::READY_NOW;
+        });
+        return sink;
     }
 }
 

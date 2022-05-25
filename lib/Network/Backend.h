@@ -5,6 +5,8 @@
 
 #include "Synchro/Synchro.h"
 #include "Registrar/Registrar.h"
+#include "ShipSink/ShipSink.h"
+#include "ShipHandle/ShipHandle.h"
 
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
@@ -25,6 +27,7 @@
 
 namespace cg {
     using namespace std::string_literals;
+    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, Backend::ShipHandle::Client)>;
 
     class BackendImpl final: public Backend::Server {
     private:
@@ -39,6 +42,9 @@ namespace cg {
 
         /// List of connected synchros (the things this backend should synchronise with)
         std::vector <Backend::Synchro::Client> synchros;
+
+        /// RegisterShip callback
+        kj::Own <ShipSinkImpl> registerShip (Spaceship const & ship, Backend::ShipHandle::Client);
 
     public:
         explicit BackendImpl (std::size_t seed);

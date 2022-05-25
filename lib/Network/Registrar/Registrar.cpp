@@ -14,9 +14,12 @@ namespace cg {
 
     ::kj::Promise <void> RegistrarImpl::registerShip (RegisterShipContext context) {
         log ("Register ship requested");
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasShip());
+        KJ_REQUIRE (params.hasHandle());
 
         try {
-            onRegisterShip();
+            context.getResults().setSink (onRegisterShip (Spaceship (params.getShip()), params.getHandle()));
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "RegistrarImpl::registerShip called without valid callback registered");
         }

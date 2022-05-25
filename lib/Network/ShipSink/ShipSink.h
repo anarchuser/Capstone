@@ -1,7 +1,8 @@
 #ifndef CAPSTONE_NETWORK_SHIPSINK_H
 #define CAPSTONE_NETWORK_SHIPSINK_H
 
-#include "Network/Backend.h"
+#include "Data/Direction.h"
+#include "Data/Spaceship.h"
 
 #include <functional>
 
@@ -18,8 +19,8 @@ namespace cg {
         SendItemCallback onSendItem;
 
     public:
-        inline void setOnDone (DoneCallback && callback);
-        inline void setOnSendItem (SendItemCallback && callback);
+        inline void setOnDone (DoneCallback && callback) { onDone = callback; };
+        inline void setOnSendItem (SendItemCallback && callback) { onSendItem = callback; };
 
         ::kj::Promise <void> done (DoneContext context) override;
         ::kj::Promise <void> sendItem (SendItemContext context) override;
