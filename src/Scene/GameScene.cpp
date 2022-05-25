@@ -55,8 +55,22 @@ namespace kt {
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
-        auto subscriber = kj::heap <cg::RegistrarImpl> ();
-        return subscriber;
+        auto registrar = kj::heap <cg::RegistrarImpl> ();
+        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client const &) {
+            spWorld world = safeSpCast <World> (getLastChild());
+
+            if (auto ship = KeyboardSpaceship::instance) {
+                if (ship->getName() == data.username) {
+                    ship->setData (data);
+                    return ship->getSink();
+                }
+            }
+
+            spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, data.username);
+            ship->setData (data);
+            return ship->getSink();
+        });
+        return registrar;
     }
 
     GameScene::~GameScene() noexcept {

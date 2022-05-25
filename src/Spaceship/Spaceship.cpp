@@ -174,6 +174,19 @@ namespace kt {
         health = spaceship.health;
         updateScoreboard ();
     }
+
+    kj::Own <cg::ShipSinkImpl> Spaceship::getSink () {
+        auto handle = kj::heap <cg::ShipSinkImpl> ();
+        handle->setOnDone ([this] {
+            destroy();
+            return kj::READY_NOW;
+        });
+        handle->setOnSendItem ([this] (cg::Direction direction) {
+            updateDirection (direction);
+            return kj::READY_NOW;
+        });
+        return handle;
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */
