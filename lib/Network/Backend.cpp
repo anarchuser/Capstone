@@ -60,6 +60,7 @@ namespace cg {
 
     kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, Backend::ShipHandle::Client client) {
 
+
         // Prepare ShipSink
         auto sink = kj::heap <ShipSinkImpl>();
         sink->setOnDone ([this] () {
@@ -67,6 +68,7 @@ namespace cg {
             return kj::READY_NOW;
         });
         sink->setOnSendItem ([] (Direction) {
+            KJ_LOG (INFO, "Item received!");
             return kj::READY_NOW;
         });
         return sink;

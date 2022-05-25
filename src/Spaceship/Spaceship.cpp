@@ -176,15 +176,23 @@ namespace kt {
     }
 
     kj::Own <cg::ShipSinkImpl> Spaceship::getSink () {
-        auto handle = kj::heap <cg::ShipSinkImpl> ();
-        handle->setOnDone ([this] {
+        auto sink = kj::heap <cg::ShipSinkImpl> ();
+        sink->setOnDone ([this] {
             destroy();
             return kj::READY_NOW;
         });
-        handle->setOnSendItem ([this] (cg::Direction direction) {
+        sink->setOnSendItem ([this] (cg::Direction direction) {
             updateDirection (direction);
             return kj::READY_NOW;
         });
+        return sink;
+    }
+
+    kj::Own <cg::ShipHandleImpl> Spaceship::getHandle () {
+        auto handle = kj::heap <cg::ShipHandleImpl> ();
+        handle->setOnGetSink ([this] () { return getSink(); });
+        handle->setOnGetShip ([this] () { return getData(); });
+        handle->setOnSetShip ([this] (cg::Spaceship const & ship) { setData (ship); });
         return handle;
     }
 }

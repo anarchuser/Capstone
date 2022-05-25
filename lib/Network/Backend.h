@@ -31,11 +31,16 @@ namespace cg {
 
     class BackendImpl final: public Backend::Server {
     private:
-        /// Log function of this implementation
-        void log (std::string const & msg);
+        struct RegisteredShip {
+            Backend::ShipHandle::Client handle;
+            std::vector <Backend::ShipSink::Client> sinks;
+        };
 
         /// Seed of random number generator of currently running game
         std::size_t const rng_seed;
+
+        /// List of all ships in possession
+        std::unordered_map <std::string, RegisteredShip> ships;
 
         /// List of connected clients (the things that we want to keep up to date)
         std::vector <Backend::Registrar::Client> clients;
@@ -45,6 +50,9 @@ namespace cg {
 
         /// RegisterShip callback
         kj::Own <ShipSinkImpl> registerShip (Spaceship const & ship, Backend::ShipHandle::Client);
+
+        /// Log function of this implementation
+        void log (std::string const & msg);
 
     public:
         explicit BackendImpl (std::size_t seed);

@@ -43,6 +43,19 @@ namespace kt {
         Spaceship::resetCounter();
         spKeyboardSpaceship ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);
 
+        auto request = handle.registrar.registerShipRequest();
+        ship->getData().initialise (request.initShip());
+        request.setHandle (ship->getHandle());
+        handle.keyboard_sink = std::make_unique <::Backend::ShipSink::Client> (request.send().wait (waitscope).getSink());
+        ship->setOnUpdate ([this] (cg::Direction const & direction) {
+            auto request = handle.keyboard_sink->sendItemRequest();
+            direction.initialise (request.initItem().initDirection());
+            return request.send();
+        });
+        ship->setOnDone ([this] () {
+            return handle.keyboard_sink->doneRequest().send();
+        });
+
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;

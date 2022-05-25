@@ -39,6 +39,7 @@ namespace kt {
         struct Handle {
             ::Backend::Registrar::Client registrar;
             ::Backend::Synchro::Client synchro;
+            std::unique_ptr <::Backend::ShipSink::Client> keyboard_sink;
         } handle;
 
         /// Resources used throughout the game (font, background, sprites)

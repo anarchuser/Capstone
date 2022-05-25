@@ -55,7 +55,7 @@ namespace kt {
         try {
             onUpdate(queried);
         } catch (std::bad_function_call & e) {
-//            logs::warning ("KeyboardSpaceship::onUpdate not configured");
+            logs::warning ("KeyboardSpaceship::onUpdate not configured");
         }
         Spaceship::update (us);
     }
@@ -64,7 +64,7 @@ namespace kt {
         try {
             onDone();
         } catch (std::bad_function_call & e) {
-//            logs::warning ("KeyboardSpaceship::onDone not configured");
+            logs::warning ("KeyboardSpaceship::onDone not configured");
         }
         Spaceship::destroy ();
         instance = nullptr;
