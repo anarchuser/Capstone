@@ -28,6 +28,7 @@ interface Backend {
     }
 
     interface Registrar {
+        registerShip @0 () -> ();
     }
 
     interface Synchro {

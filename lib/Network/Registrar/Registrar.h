@@ -3,14 +3,22 @@
 
 #include "Network/Backend.h"
 
-namespace cg {
+#include <functional>
 
-class RegistrarImpl final: public Backend::Registrar::Server {
+namespace cg {
+    using RegisterShipCallback = std::function <void ()>;
+
+    class RegistrarImpl final: public Backend::Registrar::Server {
     private:
         /// Log function of this implementation
         void log (std::string const & msg);
 
+        RegisterShipCallback onRegisterShip;
+
     public:
+        void setOnRegisterShip (RegisterShipCallback && callback);
+
+        ::kj::Promise <void> registerShip (RegisterShipContext context) override;
     };
 
 } // cg

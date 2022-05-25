@@ -31,6 +31,9 @@ namespace cg {
 
         auto results = context.getResults();
         auto registrar = kj::heap <RegistrarImpl>();
+        registrar->setOnRegisterShip ([this] () {
+            log ("Register Ship Callback");
+        });
         results.setRegistrar (kj::mv (registrar));
 
         auto synchro = kj::heap <SynchroImpl>();
