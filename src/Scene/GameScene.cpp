@@ -13,6 +13,7 @@ namespace kt {
             , backend {seed, SERVER_FULL_ADDRESS}
             , client {SERVER_FULL_ADDRESS}
             , waitscope {client.getWaitScope()}
+            , synchro {client.getMain <::Backend>().connectRequest().send().wait (client.getWaitScope()).getSynchro()}
             {
 
         logs::messageln ("Seed: %lu", rng.seed);
@@ -32,51 +33,8 @@ namespace kt {
             }, float (rng.random ({0.3, 0.7})));
         }
 
-        auto registerClient = client.getMain <::Backend>().connectRequest();
-        auto s2c = kj::heap <cg::ShipRegistrarImpl>();
-        s2c->setOnRegisterShip ([&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
-            auto & username = spaceship.username;
-            logs::messageln ("Received sink for spaceship '%s'", username.c_str());
-
-            if (auto ship = KeyboardSpaceship::instance) {
-                if (ship->getName() == username) {
-                    ship->setData (spaceship);
-                    return ship->getHandle();
-                }
-            }
-            spWorld world = safeSpCast <World> (getFirstChild());
-
-            if (auto child = world->getChild (username, oxygine::ep_ignore_error)) world->removeChild (child);
-
-            spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, username);
-            ship->setData (spaceship);
-            return ship->getHandle();
-        });
-        registerClient.setS2c_registrar (kj::mv (s2c));
-        registerClient.setName (USERNAME);
-        auto c2s = registerClient.send().wait(waitscope).getC2s_registrar();
-        registrar = std::make_unique <::Backend::ShipRegistrar::Client> (c2s);
-
         Spaceship::resetCounter();
         spKeyboardSpaceship ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);
-
-        auto registerShip = registrar->registerShipRequest();
-        ship->getData().initialise (registerShip.initSpaceship());
-        registerShip.setHandle (ship->getHandle());
-        auto result = registerShip.send().wait (waitscope);
-        handle = std::make_unique <::Backend::ShipHandle::Client> (result.getRemote());
-        ship->setOnDone ([&]() {
-            handle->doneRequest().send().wait (waitscope);
-        });
-        ship->setOnUpdate ([&] (cg::Direction direction) {
-            auto request = handle->sendItemRequest();
-            direction.initialise (request.initItem().initDirection());
-            try {
-                request.send().wait (waitscope);
-            } catch (...) {
-                ship->destroy();
-            }
-        });
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
@@ -109,10 +67,6 @@ namespace kt {
     }
 
     void GameScene::update (UpdateState const & us) {
-        // TODO: don't pause in multiplayer games
-//        if (hardPause) return;
-//        if (softPause) return;
-
         if (!KeyboardSpaceship::instance) {
             ONCE (onMenu (nullptr));
         }
@@ -178,7 +132,7 @@ namespace kt {
         remoteClients.emplace_back (std::make_unique <capnp::EzRpcClient> (ip, port));
         auto & remote = * remoteClients.back();
         auto request = client.getMain <::Backend>().joinRequest();
-        request.setRemote (remote.getMain<::Backend>());
+        request.setSynchro (synchro);
         request.send().wait (waitscope);
     }
 }

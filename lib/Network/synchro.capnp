@@ -3,13 +3,6 @@
 interface Backend {
 # The thing running as backend, synchronising registered spaceships across servers
 
-    struct Maybe(T) {
-        union {
-            nothing @0 :Void;
-            value   @1 :T;
-        }
-    }
-
     struct Direction {
         accelerate  @0 :Int8 = -1;
         decelerate  @1 :Int8 = -1;
@@ -34,25 +27,10 @@ interface Backend {
         y @1 :Float32;
     }
 
-    struct Address {
-        ip   @0 :Text;
-        port @1 :UInt16;
+    interface Subscriber {
     }
 
-    interface ShipRegistrar {
-    # A registrar to tell the game client that a new spaceship has been registered
-
-        registerShip @0 (spaceship :Spaceship, handle :ShipHandle) -> (remote :ShipHandle);
-        # Tell the game client of the new spaceship
-    }
-
-    interface ShipHandle {
-    # A handle for a connected spaceship giving the backend control over it
-
-        done @0 ();
-        sendItem @1 (item :Item);
-        getSpaceship @2 () -> (spaceship :Spaceship);
-        setSpaceship @3 (spaceship :Spaceship) -> ();
+    interface Synchro {
     }
 
     ping @0 ();
@@ -61,9 +39,9 @@ interface Backend {
     seed @1 () -> (seed :UInt64);
     # Request RNG seed server is running for
 
-    connect @2 (name :Text, s2c_registrar :ShipRegistrar) -> (remote :Text, c2s_registrar :ShipRegistrar);
-    # Register game client. Returned registrar can be used to sync individual spaceships
+    connect @2 (client :Subscriber) -> (synchro :Synchro);
+    # Subscribe to Backend, get a local synchro instance
 
-    join @3 (remote :Backend);
-    # Tell the local backend of a remote backend
+    join @3 (synchro :Synchro);
+    # Tell a remote backend of our local synchro
 }

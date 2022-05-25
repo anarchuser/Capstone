@@ -174,17 +174,6 @@ namespace kt {
         health = spaceship.health;
         updateScoreboard ();
     }
-
-    kj::Own <cg::ShipHandleImpl> Spaceship::getHandle () {
-        setAwake (true);
-
-        auto handle = kj::heap <cg::ShipHandleImpl> ();
-        handle->setOnDone         (CLOSURE (this, & Spaceship::destroy));
-        handle->setOnSendItem     (CLOSURE (this, & Spaceship::updateDirection));
-        handle->setOnGetSpaceship (CLOSURE (this, & Spaceship::getData));
-        handle->setOnSetSpaceship (CLOSURE (this, & Spaceship::setData));
-        return handle;
-    }
 }
 
 /* Copyright © 2022 Aaron Alef */

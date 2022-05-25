@@ -82,8 +82,6 @@ namespace kt {
         cg::Spaceship getData () const;
         void setData (cg::Spaceship const & spaceship);
 
-        virtual kj::Own <cg::ShipHandleImpl> getHandle ();
-
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
         static void resetCounter();
     };

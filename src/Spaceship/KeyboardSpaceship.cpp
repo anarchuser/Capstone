@@ -69,17 +69,6 @@ namespace kt {
         Spaceship::destroy ();
         instance = nullptr;
     }
-
-    kj::Own <cg::ShipHandleImpl> KeyboardSpaceship::getHandle () {
-        setAwake (true);
-
-        auto handle = kj::heap <cg::ShipHandleImpl> ();
-        handle->setOnDone         (CLOSURE (this, & KeyboardSpaceship::destroy));
-        handle->setOnSendItem     (CLOSURE (this, & KeyboardSpaceship::updateDirection));
-        handle->setOnGetSpaceship (CLOSURE (this, & KeyboardSpaceship::getData));
-        handle->setOnSetSpaceship (CLOSURE (this, & KeyboardSpaceship::setData));
-        return handle;
-    }
 }
 
 /* Copyright © 2022 Aaron Alef */
