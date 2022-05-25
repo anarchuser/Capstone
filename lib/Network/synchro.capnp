@@ -27,8 +27,19 @@ interface Backend {
         y @1 :Float32;
     }
 
+    interface ShipSink {
+        done @0 ();
+        sendItem @1 (item :Item);
+    }
+
+    interface ShipHandle {
+        getSink @0 () -> (sink :ShipSink);
+        getShip @1 () -> (ship :Spaceship);
+        setShip @2 (ship :Spaceship) -> ();
+    }
+
     interface Registrar {
-        registerShip @0 () -> ();
+        registerShip @0 (ship :Spaceship, handle :ShipHandle) -> (sink :ShipSink);
     }
 
     interface Synchro {
