@@ -13,7 +13,13 @@ namespace kt {
             , backend {seed, SERVER_FULL_ADDRESS}
             , client {SERVER_FULL_ADDRESS}
             , waitscope {client.getWaitScope()}
-            , synchro {client.getMain <::Backend>().connectRequest().send().wait (client.getWaitScope()).getSynchro()}
+            , synchro {[&] () {
+                auto request = client.getMain <::Backend>().connectRequest();
+                // TODO: set a valid subscriber event
+                auto result = request.send().wait (client.getWaitScope());
+                KJ_REQUIRE (result.hasSynchro());
+                return result.getSynchro();
+            }()}
             {
 
         logs::messageln ("Seed: %lu", rng.seed);

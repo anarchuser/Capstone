@@ -24,6 +24,9 @@
 namespace cg {
     class BackendImpl final: public Backend::Server {
     private:
+        /// Log function of this implementation
+        void log (std::string const & msg);
+
         /// Seed of random number generator of currently running game
         std::size_t const rng_seed;
 
@@ -32,9 +35,6 @@ namespace cg {
 
         /// List of connected synchros (the things this backend should synchronise with)
         std::vector <Backend::Synchro::Client> synchros;
-
-        /// Log function of this implementation
-        void log (std::string const & msg);
 
     public:
         explicit BackendImpl (std::size_t seed);
