@@ -5,7 +5,7 @@ namespace cg {
             : rng_seed {seed}
             {}
 
-    BackendImpl::RegisteredShip::RegisteredShip (Backend::ShipHandle::Client && handle): handle {handle} {}
+    BackendImpl::RegisteredShip::RegisteredShip (Backend::ShipHandle::Client handle): handle {handle} {}
 
     void BackendImpl::log (std::string const & msg) {
         std::stringstream ss;
@@ -60,7 +60,7 @@ namespace cg {
         return kj::READY_NOW;
     }
 
-    kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, Backend::ShipHandle::Client client) {
+    kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, Backend::ShipHandle::Client handle) {
         auto username = ship.username;
         if (ships.contains (username)) {
             log ("username " + username + " existed already");
@@ -73,7 +73,7 @@ namespace cg {
         log ("Velocity: \\ " + std::to_string (ship.velocity[0]) + " | " + std::to_string (ship.velocity[1]) + " /");
         log ("Health: " + std::to_string (ship.health));
 
-        auto [iterator, success] = ships.emplace (username, RegisteredShip (std::move (client)));
+        auto [iterator, success] = ships.emplace (username, RegisteredShip (handle));
         KJ_ASSERT (success);
 
         detach (broadcastSpaceship (ship));
@@ -102,8 +102,10 @@ namespace cg {
         KJ_REQUIRE (ships.contains (sender));
         KJ_REQUIRE (ships.contains (receiver));
 
-        return ships.at (sender).handle.getSinkRequest().send()
-                .then ([&] (capnp::Response <Backend::ShipHandle::GetSinkResults> results) {
+        auto request = clients.front().registerShipRequest ();
+        ship.initialise (request.initShip());
+        return request.send().then ([&] (capnp::Response <Backend::Registrar::RegisterShipResults> results) {
+                    log ("Received sink from " + sender);
                     ships.at (receiver).sinks.emplace (sender, results.getSink());
                 });
     }
@@ -125,6 +127,8 @@ namespace cg {
     }
 
     kj::Promise <void> BackendImpl::sendItemCallback (std::string const & username, Direction const & direction) {
+        log ("Processing item sent by " + username);
+
         if (!ships.contains (username)) {
             log ("Received sendItem request for " + username + ", for which no record exists (anymore?)");
             return kj::READY_NOW;

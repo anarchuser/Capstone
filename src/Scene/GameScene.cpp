@@ -72,6 +72,8 @@ namespace kt {
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client const &) {
             spWorld world = safeSpCast <World> (getLastChild());
 
+            logs::messageln ("I am never ever actually called!");
+
             if (auto ship = KeyboardSpaceship::instance) {
                 if (ship->getName() == data.username) {
                     ship->setData (data);

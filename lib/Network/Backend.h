@@ -35,7 +35,7 @@ namespace cg {
             Backend::ShipHandle::Client handle;
             std::unordered_map <std::string, Backend::ShipSink::Client> sinks;
 
-            explicit RegisteredShip (Backend::ShipHandle::Client && handle);
+            explicit RegisteredShip (Backend::ShipHandle::Client handle);
         };
 
         /// Seed of random number generator of currently running game
