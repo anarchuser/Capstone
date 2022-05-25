@@ -5,12 +5,12 @@
 
 namespace cg {
 
-    class SubscriberImpl final: Backend::Subscriber::Server {
+class SubscriberImpl final: public Backend::Subscriber::Server {
     private:
         /// Log function of this implementation
         void log (std::string const & msg);
 
-
+    public:
     };
 
 } // cg

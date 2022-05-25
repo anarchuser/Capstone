@@ -15,7 +15,7 @@ namespace kt {
             , waitscope {client.getWaitScope()}
             , synchro {[&] () {
                 auto request = client.getMain <::Backend>().connectRequest();
-                // TODO: set a valid subscriber event
+                request.setClient (getSubscriberImpl());
                 auto result = request.send().wait (client.getWaitScope());
                 KJ_REQUIRE (result.hasSynchro());
                 return result.getSynchro();
@@ -64,6 +64,11 @@ namespace kt {
                     break;
             }
         });
+    }
+
+    kj::Own <cg::SubscriberImpl> GameScene::getSubscriberImpl () {
+        auto subscriber = kj::heap <cg::SubscriberImpl> ();
+        return subscriber;
     }
 
     GameScene::~GameScene() noexcept {

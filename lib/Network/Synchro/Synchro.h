@@ -5,11 +5,12 @@
 
 namespace cg {
 
-    class SynchroImpl final: Backend::Synchro::Server {
+    class SynchroImpl final: public Backend::Synchro::Server {
     private:
         /// Log function of this implementation
         void log (std::string const & msg);
 
+    public:
     };
 
 } // cg

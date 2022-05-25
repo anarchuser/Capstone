@@ -20,6 +20,7 @@
 
 #include "Random/random.h"
 #include "Network/Backend.h"
+#include "Network/Subscriber/Subscriber.h"
 
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
 #define RANDOM_SEED
@@ -47,6 +48,8 @@ namespace kt {
 
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         void joinGame (std::string const & ip, unsigned short port);
+
+        kj::Own <cg::SubscriberImpl> getSubscriberImpl ();
         
     public:
         /// Inject a new Game instance with random seed into the stage
