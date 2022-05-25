@@ -25,6 +25,8 @@
  */
 
 namespace cg {
+    using namespace std::string_literals;
+
     class BackendImpl final: public Backend::Server {
     private:
         void log (std::string const & msg);
@@ -59,7 +61,7 @@ namespace cg {
         /// Distribute spaceship to one connection
         ::kj::Promise <void> distributeSpaceship (Spaceship const & sender, std::string const & receiver);
         /// Distribute spaceship to every connection
-        void broadcastSpaceship (Spaceship const & sender);
+        ::kj::Promise <void> broadcastSpaceship (Spaceship const & sender);
 
     public:
         explicit BackendImpl (std::size_t seed, std::string name);
