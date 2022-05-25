@@ -14,7 +14,6 @@
 #include <unordered_map>
 #include <vector>
 #include <numeric>
-
 #include <ranges>
 
 /* Following Cap'n Proto Server example:
@@ -22,6 +21,8 @@
  */
 
 namespace cg {
+    using namespace std::string_literals;
+
     class BackendImpl final: public Backend::Server {
     private:
         /// Log function of this implementation

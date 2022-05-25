@@ -24,12 +24,25 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::connect (ConnectContext context) {
         log ("Connect request received");
 
-        context.getResults().setSynchro (kj::heap <Backend::Synchro::Server> ());
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasClient());
+        clients.push_back (params.getClient());
+        log ("Number of clients connected: "s += std::to_string (clients.size()));
+
+        auto results = context.getResults();
+        results.setSynchro (kj::heap <Backend::Synchro::Server> ());
+
         return kj::READY_NOW;
     }
 
     ::kj::Promise <void> BackendImpl::join (JoinContext context) {
         log ("Join request received");
+
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasSynchro());
+        synchros.push_back (params.getSynchro());
+        log ("Number of synchros connected: "s += std::to_string (synchros.size()));
+
         return kj::READY_NOW;
     }
 }
