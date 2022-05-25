@@ -30,7 +30,11 @@ namespace cg {
         log ("Number of clients connected: "s += std::to_string (clients.size()));
 
         auto results = context.getResults();
-        results.setSynchro (kj::heap <SynchroImpl> ());
+        auto registrar = kj::heap <RegistrarImpl>();
+        results.setRegistrar (kj::mv (registrar));
+
+        auto synchro = kj::heap <SynchroImpl>();
+        results.setSynchro (kj::mv (synchro));
 
         return kj::READY_NOW;
     }
