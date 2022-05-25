@@ -42,6 +42,6 @@ interface Backend {
     connect @2 (client :Subscriber) -> (synchro :Synchro);
     # Subscribe to Backend, get a local synchro instance
 
-    join @3 (synchro :Synchro);
+    join @3 (remote :Synchro) -> (local :Synchro);
     # Tell a remote backend of our local synchro
 }

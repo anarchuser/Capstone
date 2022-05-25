@@ -3,6 +3,8 @@
 
 #include "Network/config.h"
 
+#include "Synchro/Synchro.h"
+
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
 
