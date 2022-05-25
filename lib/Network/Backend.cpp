@@ -25,8 +25,8 @@ namespace cg {
         log ("Connect request received");
 
         auto params = context.getParams();
-        KJ_REQUIRE (params.hasClient());
-        clients.push_back (params.getClient());
+        KJ_REQUIRE (params.hasRegistrar());
+        clients.push_back (params.getRegistrar());
         log ("Number of clients connected: "s += std::to_string (clients.size()));
 
         auto results = context.getResults();

@@ -1,11 +1,11 @@
-#ifndef CAPSTONE_NETWORK_SUBSCRIBER_H
-#define CAPSTONE_NETWORK_SUBSCRIBER_H
+#ifndef CAPSTONE_NETWORK_REGISTRAR_H
+#define CAPSTONE_NETWORK_REGISTRAR_H
 
 #include "Network/Backend.h"
 
 namespace cg {
 
-class SubscriberImpl final: public Backend::Subscriber::Server {
+class RegistrarImpl final: public Backend::Registrar::Server {
     private:
         /// Log function of this implementation
         void log (std::string const & msg);
@@ -15,6 +15,6 @@ class SubscriberImpl final: public Backend::Subscriber::Server {
 
 } // cg
 
-#endif //CAPSTONE_NETWORK_SUBSCRIBER_H
+#endif //CAPSTONE_NETWORK_REGISTRAR_H
 
 /* Copyright © 2022 Aaron Alef */

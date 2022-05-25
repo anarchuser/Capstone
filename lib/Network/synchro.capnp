@@ -27,7 +27,7 @@ interface Backend {
         y @1 :Float32;
     }
 
-    interface Subscriber {
+    interface Registrar {
     }
 
     interface Synchro {
@@ -39,7 +39,7 @@ interface Backend {
     seed @1 () -> (seed :UInt64);
     # Request RNG seed server is running for
 
-    connect @2 (client :Subscriber) -> (synchro :Synchro);
+    connect @2 (registrar :Registrar) -> (registrar :Registrar, synchro :Synchro);
     # Subscribe to Backend, get a local synchro instance
 
     join @3 (remote :Synchro) -> (local :Synchro);

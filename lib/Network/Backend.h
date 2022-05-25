@@ -4,6 +4,7 @@
 #include "Network/config.h"
 
 #include "Synchro/Synchro.h"
+#include "Registrar/Registrar.h"
 
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
@@ -34,7 +35,7 @@ namespace cg {
         std::size_t const rng_seed;
 
         /// List of connected clients (the things that we want to keep up to date)
-        std::vector <Backend::Subscriber::Client> clients;
+        std::vector <Backend::Registrar::Client> clients;
 
         /// List of connected synchros (the things this backend should synchronise with)
         std::vector <Backend::Synchro::Client> synchros;

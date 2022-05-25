@@ -1,9 +1,9 @@
-#include "Subscriber.h"
+#include "Registrar.h"
 
 namespace cg {
-    void SubscriberImpl::log (std::string const & msg) {
+    void RegistrarImpl::log (std::string const & msg) {
         std::stringstream ss;
-        ss << "Subscriber @" << this << ": '" << msg << "'";
+        ss << "Registrar @" << this << ": '" << msg << "'";
                 KJ_DLOG (INFO, ss.str());
         std::cout << ss.str() << std::endl;
     }

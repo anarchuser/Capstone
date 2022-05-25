@@ -20,7 +20,7 @@
 
 #include "Random/random.h"
 #include "Network/Backend.h"
-#include "Network/Subscriber/Subscriber.h"
+#include "Network/Registrar/Registrar.h"
 
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
 #define RANDOM_SEED
@@ -31,25 +31,25 @@ namespace kt {
     /// Handles the actual game. Responsible for initialising the World with its objects and providing an options menu
     class GameScene : public Scene {
     private:
-        /// Resources used throughout the game (font, background, sprites)
-        Resources gameResources;
-        /// Random number generator based on the seed given. Ensures every random number used depends on this seed
-        HashedRNG rng;
-        /// Set to true when the menu is open (Escape was pressed). Overrides soft pause.
-        bool hardPause = false;
-        /// Set to true when pause is requested (default button `P`). pauses game independently of menu (hard) pause
-        bool softPause = true;
-
         Backend backend;
         std::vector <std::unique_ptr <capnp::EzRpcClient>> remoteClients;
         capnp::EzRpcClient client;
         kj::WaitScope & waitscope;
-        ::Backend::Synchro::Client synchro;
+
+        struct Handle {
+            ::Backend::Registrar::Client registrar;
+            ::Backend::Synchro::Client synchro;
+        } handle;
+
+        /// Resources used throughout the game (font, background, sprites)
+        Resources gameResources;
+        /// Random number generator based on the seed given. Ensures every random number used depends on this seed
+        HashedRNG rng;
 
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         void joinGame (std::string const & ip, unsigned short port);
 
-        kj::Own <cg::SubscriberImpl> getSubscriberImpl ();
+        kj::Own <cg::RegistrarImpl> getRegistrarImpl ();
         
     public:
         /// Inject a new Game instance with random seed into the stage

@@ -13,12 +13,13 @@ namespace kt {
             , backend {seed, SERVER_FULL_ADDRESS}
             , client {SERVER_FULL_ADDRESS}
             , waitscope {client.getWaitScope()}
-            , synchro {[&] () {
+            , handle {[this] () {
                 auto request = client.getMain <::Backend>().connectRequest();
-                request.setClient (getSubscriberImpl());
-                auto result = request.send().wait (client.getWaitScope());
+                request.setRegistrar (getRegistrarImpl());
+                auto result = request.send().wait (waitscope);
                 KJ_REQUIRE (result.hasSynchro());
-                return result.getSynchro();
+                KJ_REQUIRE (result.hasRegistrar());
+                return Handle {result.getRegistrar(), result.getSynchro()};
             }()}
             {
 
@@ -46,19 +47,6 @@ namespace kt {
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;
             switch (keysym.scancode) {
-                case SDL_SCANCODE_P:
-                    softPause = !softPause;
-                    break;
-                case SDL_SCANCODE_W:
-                case SDL_SCANCODE_A:
-                case SDL_SCANCODE_S:
-                case SDL_SCANCODE_D:
-                case SDL_SCANCODE_UP:
-                case SDL_SCANCODE_LEFT:
-                case SDL_SCANCODE_DOWN:
-                case SDL_SCANCODE_RIGHT:
-                    softPause = false;
-                    break;
                 case SDL_SCANCODE_ESCAPE:
                     onMenu (event);
                     break;
@@ -66,8 +54,8 @@ namespace kt {
         });
     }
 
-    kj::Own <cg::SubscriberImpl> GameScene::getSubscriberImpl () {
-        auto subscriber = kj::heap <cg::SubscriberImpl> ();
+    kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
+        auto subscriber = kj::heap <cg::RegistrarImpl> ();
         return subscriber;
     }
 
@@ -86,7 +74,6 @@ namespace kt {
     }
 
     void GameScene::onMenu (Event * event) {
-        hardPause = !hardPause;
         static auto size = getSize();
         static spDialog dialog = [this]() {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
@@ -143,7 +130,7 @@ namespace kt {
         remoteClients.emplace_back (std::make_unique <capnp::EzRpcClient> (ip, port));
         auto & remote = * remoteClients.back();
         auto remoteRequest = remote.getMain <::Backend>().joinRequest();
-        remoteRequest.setRemote (synchro);
+        remoteRequest.setRemote (handle.synchro);
         auto remoteSynchro = remoteRequest.send().wait (remote.getWaitScope()).getLocal();
 
         auto localRequest = client.getMain <::Backend>().joinRequest();
