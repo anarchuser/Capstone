@@ -33,7 +33,9 @@ namespace cg {
     private:
         struct RegisteredShip {
             Backend::ShipHandle::Client handle;
-            std::vector <Backend::ShipSink::Client> sinks;
+            std::unordered_map <std::string, Backend::ShipSink::Client> sinks;
+
+            explicit RegisteredShip (Backend::ShipHandle::Client && handle);
         };
 
         /// Seed of random number generator of currently running game
@@ -50,6 +52,10 @@ namespace cg {
 
         /// RegisterShip callback
         kj::Own <ShipSinkImpl> registerShip (Spaceship const & ship, Backend::ShipHandle::Client);
+        kj::Promise <void> broadcastSpaceship (Spaceship const & ship);
+        kj::Promise <void> distributeSpaceship (Spaceship const & ship, std::string const & receiver);
+        kj::Promise <void> doneCallback (std::string const & username);
+        kj::Promise <void> sendItemCallback (std::string const & username, Direction const & direction);
 
         /// Log function of this implementation
         void log (std::string const & msg);
