@@ -204,7 +204,7 @@ namespace cg {
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult().catch_ ([this, & sinks, & username] (kj::Exception && e) {
             log ("Connection lost to " + username);
-            sinks.erase (username);
+            doneCallback (username);
         });
     }
 }
