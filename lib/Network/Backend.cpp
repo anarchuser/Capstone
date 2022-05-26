@@ -46,6 +46,7 @@ namespace cg {
         });
         results.setSynchro (kj::mv (synchro));
 
+        return broadcastSpaceship (Spaceship ("first"));
         return kj::READY_NOW;
     }
 
@@ -79,6 +80,7 @@ namespace cg {
             KJ_REQUIRE (results.hasRegistrar());
             clients.emplace_back (results.getRegistrar());
             log ("Number of clients connected: "s += std::to_string (clients.size()));
+            broadcastSpaceship (Spaceship ("second"));
         });
     }
 
@@ -139,7 +141,10 @@ namespace cg {
 
         log ("Distributing ship " + sender);
 
+        // FIXME: registerShipRequest() throws a segfault
+        log ("vvvvvvvv");
         auto request = receiver.registrar.registerShipRequest();
+        log ("^^^^^^^^");
         ship.initialise (request.initShip());
         request.setHandle (ships.at (sender));
         auto promise = request.send();
@@ -173,6 +178,7 @@ namespace cg {
         if (receiver == clients.end()) return kj::READY_NOW;
         auto & sinks = receiver->sinks;
         if (!sinks.contains (username)) {
+            return kj::READY_NOW;
             log ("Missing sink to ship " + username);
             KJ_REQUIRE (ships.contains (username));
             return ships.at (username).getShipRequest().send()
