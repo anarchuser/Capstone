@@ -63,6 +63,12 @@ namespace cg {
         });
         context.getResults().setLocal (kj::mv (result));
 
+//        detach (broadcastSpaceship (ship));
+        for (auto & ship : ships) {
+            log ("Broadcasting ship to everyone - " + ship.first);
+            detach (broadcastSpaceship (Spaceship (ship.first, {5, 5})));
+        }
+
         /// Connect back to received synchro
         auto connectRequest = params.getRemote().connectRequest();
         auto synchro = kj::heap <SynchroImpl> ();
@@ -114,6 +120,7 @@ namespace cg {
 
 //        detach (broadcastSpaceship (ship));
         for (auto & ship : ships) {
+            log ("Broadcasting ship to everyone - " + ship.first);
             detach (broadcastSpaceship (Spaceship (ship.first, {5, 5})));
         }
 
