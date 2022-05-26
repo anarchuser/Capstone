@@ -187,7 +187,7 @@ namespace cg {
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult().catch_ ([this, & sinks, & username] (kj::Exception && e) {
             KJ_DLOG (WARNING, e.getDescription());
-            sinks.erase (username);
+//            sinks.erase (username);
         });
     }
 }
