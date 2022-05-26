@@ -18,8 +18,9 @@ namespace cg {
             context.getResults().setSink (onRegisterShip (Spaceship (params.getShip()), params.getHandle()));
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "RegistrarImpl::registerShip called without valid callback registered");
-        } catch (std::exception & e) {
-            log ("Unknown exception caught; likely Duplicate username");
+        }
+        catch (std::exception & e) {
+//            log ("Unknown exception caught; likely Duplicate username");
         }
         return kj::READY_NOW;
     }

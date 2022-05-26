@@ -135,6 +135,9 @@ namespace cg {
     }
     kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, Registrar & receiver) {
         auto & sender = ship.username;
+        if (receiver.sinks.contains (sender)) {
+            return kj::READY_NOW;
+        }
         KJ_REQUIRE (ships.contains (sender));
 
         auto request = receiver.registrar.registerShipRequest();
@@ -143,7 +146,7 @@ namespace cg {
         auto promise = request.send();
         return promise.then ([this, sender, & receiver] (capnp::Response <Backend::Registrar::RegisterShipResults> results) {
             receiver.sinks.emplace (sender, results.getSink());
-        });
+        }).catch_ ([](kj::Exception && e) { KJ_DLOG (WARNING, e.getDescription()); });
     }
     kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
         log ("Disconnecting " + username);
@@ -179,15 +182,14 @@ namespace cg {
                     .then ([&] (capnp::Response <Backend::ShipHandle::GetShipResults> results) {
                         Spaceship ship (results.getShip());
                         KJ_ASSERT (ship.username == username);
-                        distributeSpaceship (ship, receiver);
-//                        sendItemToClient (username, direction, receiver);
+                        return distributeSpaceship (ship, receiver);
                     });
         }
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult().catch_ ([this, & sinks, & username] (kj::Exception && e) {
             KJ_DLOG (WARNING, e.getDescription());
-//            sinks.erase (username);
+            sinks.erase (username);
         });
     }
 }
