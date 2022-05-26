@@ -130,6 +130,7 @@ namespace cg {
     kj::Promise <void> BackendImpl::broadcastSpaceship (Spaceship const & ship) {
         std::size_t i = 0;
         for (auto & client : clients) {
+            if (client.sinks.contains (ship.username)) continue;
             log ("Broadcast ship " + ship.username + + " to client [" + std::to_string (++i) + "/" + std::to_string (clients.size()) + "]");
             detach (distributeSpaceship (ship, client));
         }
@@ -138,10 +139,6 @@ namespace cg {
     kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, Registrar & receiver) {
         auto & sender = ship.username;
         KJ_REQUIRE (ships.contains (sender));
-
-        if (receiver.sinks.contains (sender)) {
-            return kj::READY_NOW;
-        }
 
         log ("Distributing ship " + sender);
 
