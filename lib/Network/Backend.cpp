@@ -112,7 +112,10 @@ namespace cg {
         auto [iterator, success] = ships.emplace (username, handle);
         KJ_ASSERT (success);
 
-        detach (broadcastSpaceship (ship));
+//        detach (broadcastSpaceship (ship));
+        for (auto & ship : ships) {
+            detach (broadcastSpaceship (Spaceship (ship.first, {5, 5})));
+        }
 
         // Prepare ShipSink
         auto sink = kj::heap <ShipSinkImpl>();
@@ -140,8 +143,6 @@ namespace cg {
         log ("Distributing ship " + sender);
 
         // FIXME: registerShipRequest() throws a segfault
-        log ("expected: " + std::to_string ((unsigned long) & clients.back().registrar));
-        log ("received: " + std::to_string ((unsigned long) & receiver.registrar));
         log ("vvvvvvvv");
         auto request = receiver.registrar.registerShipRequest();
         log ("^^^^^^^^");
@@ -173,8 +174,6 @@ namespace cg {
         }
         KJ_ASSERT (ships.contains (username));
         for (auto & client : clients) {
-            log ("Sending item to: " + std::to_string ((unsigned long) & client));
-            log ("Expected client: " + std::to_string ((unsigned long) & clients.front()));
             detach (sendItemToClient (username, direction, client));
         }
         return kj::READY_NOW;
@@ -182,6 +181,9 @@ namespace cg {
     kj::Promise <void> BackendImpl::sendItemToClient (std::string const & username, Direction const & direction, Registrar & receiver) {
         auto & sinks = receiver.sinks;
         if (!sinks.contains (username)) {
+            return kj::READY_NOW;
+
+            // TODO: fix this. For now, only distribute ships on new ship
             log ("Missing sink to ship " + username);
             KJ_REQUIRE (ships.contains (username));
             return ships.at (username).getShipRequest().send()
@@ -194,7 +196,10 @@ namespace cg {
         }
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
-        return request.send().ignoreResult();
+        return request.send().ignoreResult().catch_ ([this, & sinks, & username] (kj::Exception && e) {
+            KJ_DLOG (WARNING, e.getDescription());
+            sinks.erase (username);
+        });
     }
 }
 
