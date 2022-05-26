@@ -139,6 +139,10 @@ namespace cg {
         auto & sender = ship.username;
         KJ_REQUIRE (ships.contains (sender));
 
+        if (receiver.sinks.contains (sender)) {
+            return kj::READY_NOW;
+        }
+
         log ("Distributing ship " + sender);
 
         // FIXME: registerShipRequest() throws a segfault
