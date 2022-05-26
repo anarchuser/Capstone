@@ -176,22 +176,22 @@ namespace cg {
         auto & sinks = receiver.sinks;
 
         /**** dump ships and clients maps ****/
-        std::cout << "==== ships (" << ships.size() << ") ====" << std::endl;
-        for (auto & ship : ships) {
-            std::cout << "|  - " << ship.first << std::endl;
-        }
-        std::cout << "==== clients (" << clients.size() << ") ====" << std::endl;
-        for (auto & client : clients) {
-            std::cout << "  == sinks (" << client.sinks.size() << ") ==  " << std::endl;
-            for (auto & sink : client.sinks) {
-                std::cout << "|    - " << sink.first << std::endl;
-            }
-        }
-        std::cout << "################" << std::endl;
+//        std::cout << "==== ships (" << ships.size() << ") ====" << std::endl;
+//        for (auto & ship : ships) {
+//            std::cout << "|  - " << ship.first << std::endl;
+//        }
+//        std::cout << "==== clients (" << clients.size() << ") ====" << std::endl;
+//        for (auto & client : clients) {
+//            std::cout << "  == sinks (" << client.sinks.size() << ") ==  " << std::endl;
+//            for (auto & sink : client.sinks) {
+//                std::cout << "|    - " << sink.first << std::endl;
+//            }
+//        }
+//        std::cout << "################" << std::endl;
         /**** DUMP END ****/
 
         if (!sinks.contains (username)) {
-            log ("Missing sink to ship " + username);
+//            log ("Missing sink to ship " + username);
             KJ_REQUIRE (ships.contains (username));
             return ships.at (username).getShipRequest().send()
                     .then ([&] (capnp::Response <Backend::ShipHandle::GetShipResults> results) {
@@ -204,7 +204,7 @@ namespace cg {
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult().catch_ ([this, & sinks, & username] (kj::Exception && e) {
             log ("Connection lost to " + username);
-            doneCallback (username);
+            sinks.erase (username);
         });
     }
 }

@@ -9,7 +9,7 @@ namespace cg {
     }
 
     ::kj::Promise <void> RegistrarImpl::registerShip (RegisterShipContext context) {
-        log ("Register ship requested");
+//        log ("Register ship requested");
         auto params = context.getParams();
         KJ_REQUIRE (params.hasShip());
         KJ_REQUIRE (params.hasHandle());
