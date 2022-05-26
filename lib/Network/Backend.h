@@ -20,6 +20,7 @@
 #include <vector>
 #include <numeric>
 #include <ranges>
+#include <iterator>
 
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
@@ -31,21 +32,21 @@ namespace cg {
 
     class BackendImpl final: public Backend::Server {
     private:
-        struct RegisteredShip {
-            Backend::ShipHandle::Client handle;
-            std::unordered_map <std::string, Backend::ShipSink::Client> sinks;
-
-            explicit RegisteredShip (Backend::ShipHandle::Client handle);
-        };
-
         /// Seed of random number generator of currently running game
         std::size_t const rng_seed;
 
+        struct Registrar {
+            Backend::Registrar::Client registrar;
+            std::unordered_map <std::string, Backend::ShipSink::Client> sinks;
+
+            explicit Registrar (Backend::Registrar::Client registrar);
+        };
+
         /// List of all ships in possession
-        std::unordered_map <std::string, RegisteredShip> ships;
+        std::unordered_map <std::string, Backend::ShipHandle::Client> ships;
 
         /// List of connected clients (the things that we want to keep up to date)
-        std::vector <Backend::Registrar::Client> clients;
+        std::vector <Registrar> clients;
 
         /// List of connected synchros (the things this backend should synchronise with)
         std::vector <Backend::Synchro::Client> synchros;
@@ -53,9 +54,10 @@ namespace cg {
         /// RegisterShip callback
         kj::Own <ShipSinkImpl> registerShip (Spaceship const & ship, Backend::ShipHandle::Client);
         kj::Promise <void> broadcastSpaceship (Spaceship const & ship);
-        kj::Promise <void> distributeSpaceship (Spaceship const & ship, std::string const & receiver);
+        kj::Promise <void> distributeSpaceship (Spaceship const & ship, Registrar & receiver);
         kj::Promise <void> doneCallback (std::string const & username);
         kj::Promise <void> sendItemCallback (std::string const & username, Direction const & direction);
+        kj::Promise <void> sendItemToClient (std::string const & username, Direction const & direction, std::vector <Registrar>::iterator receiver);
 
         /// Log function of this implementation
         void log (std::string const & msg);

@@ -20,9 +20,8 @@ namespace cg {
     ::kj::Promise <void> ShipSinkImpl::sendItem (SendItemContext context) {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasItem());
-        auto item = params.getItem();
-        KJ_REQUIRE (item.hasDirection());
-        auto directions = item.getDirection();
+        KJ_REQUIRE (params.getItem().hasDirection());
+        auto directions = params.getItem().getDirection();
 
         try {
             return onSendItem (Direction (directions));

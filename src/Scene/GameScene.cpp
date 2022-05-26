@@ -47,13 +47,13 @@ namespace kt {
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
         handle.keyboard_sink = std::make_unique <::Backend::ShipSink::Client> (request.send().wait (waitscope).getSink());
-        ship->setOnUpdate ([this] (cg::Direction const & direction) {
-            auto request = handle.keyboard_sink->sendItemRequest();
-            direction.initialise (request.initItem().initDirection());
-            return request.send();
+        ship->setOnUpdate ([this, ship] (cg::Direction const & direction) {
+            auto request = handle.keyboard_sink->sendItemRequest ();
+            direction.initialise (request.initItem ().initDirection ());
+            request.send ().wait (waitscope);
         });
         ship->setOnDone ([this] () {
-            return handle.keyboard_sink->doneRequest().send();
+            handle.keyboard_sink->doneRequest().send().wait (waitscope);
         });
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
@@ -68,14 +68,13 @@ namespace kt {
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
-        auto registrar = kj::heap <cg::RegistrarImpl> ();
+        auto registrar = kj::heap <cg::RegistrarImpl> ("GameScene");
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client const &) {
             spWorld world = safeSpCast <World> (getLastChild());
 
-            logs::messageln ("I am never ever actually called!");
-
             if (auto ship = KeyboardSpaceship::instance) {
                 if (ship->getName() == data.username) {
+                    auto * ship = KeyboardSpaceship::instance;
                     ship->setData (data);
                     return ship->getSink();
                 }
