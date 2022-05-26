@@ -141,6 +141,8 @@ namespace cg {
         request.setHandle (ships.at (sender));
         auto promise = request.send();
         return promise.then ([this, sender, & receiver] (capnp::Response <Backend::Registrar::RegisterShipResults> results) {
+            // Check again if nothing's changed
+            if (receiver.sinks.contains (sender)) return;
             receiver.sinks.emplace (sender, results.getSink());
         });
     }
@@ -184,7 +186,6 @@ namespace cg {
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult().catch_ ([this, & sinks, & username] (kj::Exception && e) {
-            KJ_DLOG (WARNING, e.getDescription());
             sinks.erase (username);
         });
     }
