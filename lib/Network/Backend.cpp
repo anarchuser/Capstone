@@ -98,10 +98,6 @@ namespace cg {
 
     kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, Backend::ShipHandle::Client handle) {
         auto username = ship.username;
-//        if (ships.contains (username)) {
-//            log ("username " + username + " existed already");
-//            ships.erase (username);
-//        }
         KJ_REQUIRE (!ships.contains (username), username, "Name duplication detected");
 
         log ("Registering ship " + username);
@@ -146,7 +142,7 @@ namespace cg {
         auto promise = request.send();
         return promise.then ([this, sender, & receiver] (capnp::Response <Backend::Registrar::RegisterShipResults> results) {
             receiver.sinks.emplace (sender, results.getSink());
-        }).catch_ ([](kj::Exception && e) { KJ_DLOG (WARNING, e.getDescription()); });
+        });
     }
     kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
         log ("Disconnecting " + username);
