@@ -4,8 +4,8 @@ namespace cg {
     void RegistrarImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Registrar @" << this << ": '" << msg << "'";
-                KJ_DLOG (INFO, ss.str());
-        std::cout << ss.str() << std::endl;
+        KJ_DLOG (INFO, ss.str());
+//        std::cout << ss.str() << std::endl;
     }
 
     ::kj::Promise <void> RegistrarImpl::registerShip (RegisterShipContext context) {

@@ -5,7 +5,7 @@ namespace cg {
         std::stringstream ss;
         ss << "ShipSink @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str ());
-        std::cout << ss.str () << std::endl;
+//        std::cout << ss.str () << std::endl;
     }
 
     ::kj::Promise <void> ShipSinkImpl::done (DoneContext context) {

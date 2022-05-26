@@ -4,8 +4,8 @@ namespace cg {
     void ShipHandleImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "ShipHandle @" << this << ": '" << msg << "'";
-                KJ_DLOG (INFO, ss.str ());
-        std::cout << ss.str () << std::endl;
+        KJ_DLOG (INFO, ss.str ());
+//        std::cout << ss.str () << std::endl;
     }
 
     ::kj::Promise <void> ShipHandleImpl::getSink (GetSinkContext context) {
