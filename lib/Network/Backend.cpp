@@ -46,7 +46,7 @@ namespace cg {
         });
         results.setSynchro (kj::mv (synchro));
 
-        return broadcastSpaceship (Spaceship ("first"));
+        return broadcastAll();
         return kj::READY_NOW;
     }
 
@@ -80,7 +80,7 @@ namespace cg {
             KJ_REQUIRE (results.hasRegistrar());
             clients.emplace_back (results.getRegistrar());
             log ("Number of clients connected: "s += std::to_string (clients.size()));
-            broadcastSpaceship (Spaceship ("second"));
+            broadcastAll();
         });
     }
 
@@ -194,6 +194,14 @@ namespace cg {
         return request.send().ignoreResult().then ([this, & username, & direction, receiver] () {
             return sendItemToClient (username, direction, receiver + 1);
         });
+    }
+
+
+    ::kj::Promise <void> BackendImpl::broadcastAll () {
+        for (auto & ship : ships) {
+            detach (broadcastSpaceship (Spaceship (ship.first)));
+        }
+        return kj::READY_NOW;
     }
 }
 
