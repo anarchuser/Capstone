@@ -53,6 +53,7 @@ namespace kt {
             request.send ().wait (waitscope);
         });
         ship->setOnDone ([this] () {
+            logs::messageln ("Executing onDone callback");
             handle.keyboard_sink->doneRequest().send().wait (waitscope);
         });
 
@@ -68,7 +69,7 @@ namespace kt {
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
-        auto registrar = kj::heap <cg::RegistrarImpl> ("GameScene");
+        auto registrar = kj::heap <cg::RegistrarImpl> ();
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client const &) {
             spWorld world = safeSpCast <World> (getLastChild());
 

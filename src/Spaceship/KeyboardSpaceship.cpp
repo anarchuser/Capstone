@@ -69,6 +69,12 @@ namespace kt {
         Spaceship::destroy ();
         instance = nullptr;
     }
+
+    kj::Own <cg::ShipSinkImpl> KeyboardSpaceship::getSink () {
+        auto sink = Spaceship::getSink();
+        sink->setOnDone ([]() { return kj::READY_NOW; });
+        return sink;
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

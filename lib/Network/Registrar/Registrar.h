@@ -18,8 +18,6 @@ namespace cg {
         RegisterShipCallback onRegisterShip;
 
     public:
-        explicit RegistrarImpl (std::string const & msg = "default");
-
         void setOnRegisterShip (RegisterShipCallback && callback);
 
         ::kj::Promise <void> registerShip (RegisterShipContext context) override;

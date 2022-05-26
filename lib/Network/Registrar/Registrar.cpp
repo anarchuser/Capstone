@@ -1,10 +1,6 @@
 #include "Registrar.h"
 
 namespace cg {
-    RegistrarImpl::RegistrarImpl (std::string const & msg) {
-        log (msg);
-    }
-
     void RegistrarImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Registrar @" << this << ": '" << msg << "'";

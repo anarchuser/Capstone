@@ -42,6 +42,8 @@ namespace kt {
         void setOnDone (std::function <void ()> && onDone);
         void destroy () override;
 
+        kj::Own <cg::ShipSinkImpl> getSink() override;
+
         /// Current keyboard controlled spaceship instance
         static KeyboardSpaceship * instance;
     };

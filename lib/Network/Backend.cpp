@@ -34,7 +34,7 @@ namespace cg {
         log ("Number of clients connected: "s += std::to_string (clients.size()));
 
         auto results = context.getResults();
-        auto registrar = kj::heap <RegistrarImpl>("Backend");
+        auto registrar = kj::heap <RegistrarImpl>();
         registrar->setOnRegisterShip ([this] (Spaceship ship, Backend::ShipHandle::Client handle) {
             return registerShip (ship, handle);
         });
@@ -90,13 +90,12 @@ namespace cg {
     }
 
     kj::Promise <void> BackendImpl::broadcastSpaceship (Spaceship const & ship) {
-        kj::Promise <void> promise = kj::READY_NOW;
-        int i = 0;
+        std::size_t i = 0;
         for (auto & client : clients) {
             log ("Broadcast ship " + ship.username + + " to client [" + std::to_string (++i) + "/" + std::to_string (clients.size()) + "]");
             detach (distributeSpaceship (ship, client));
         }
-        return promise;
+        return kj::READY_NOW;
     }
     kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, Registrar & receiver) {
         auto & sender = ship.username;
@@ -115,7 +114,6 @@ namespace cg {
     kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
         log ("Disconnecting " + username);
         if (!ships.contains (username)) {
-            log ("No ship found");
             return kj::READY_NOW;
         }
         for (auto & client : clients) {
@@ -125,6 +123,7 @@ namespace cg {
             sinks.erase (username);
         }
         ships.erase (username);
+        return kj::READY_NOW;
     }
     kj::Promise <void> BackendImpl::sendItemCallback (std::string const & username, Direction const & direction) {
         if (!ships.contains (username)) {

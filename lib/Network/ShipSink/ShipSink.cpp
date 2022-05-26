@@ -4,11 +4,13 @@ namespace cg {
     void ShipSinkImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "ShipSink @" << this << ": '" << msg << "'";
-                KJ_DLOG (INFO, ss.str ());
+        KJ_DLOG (INFO, ss.str ());
         std::cout << ss.str () << std::endl;
     }
 
     ::kj::Promise <void> ShipSinkImpl::done (DoneContext context) {
+        log ("Ship closed stream");
+
         try {
             return onDone();
         } catch (std::bad_function_call & e) {

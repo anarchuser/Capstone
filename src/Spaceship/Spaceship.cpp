@@ -177,6 +177,7 @@ namespace kt {
 
     kj::Own <cg::ShipSinkImpl> Spaceship::getSink () {
         auto sink = kj::heap <cg::ShipSinkImpl> ();
+        setAwake (true);
         sink->setOnDone ([this] {
             destroy();
             return kj::READY_NOW;
