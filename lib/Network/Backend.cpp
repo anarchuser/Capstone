@@ -41,6 +41,9 @@ namespace cg {
         results.setRegistrar (kj::mv (registrar));
 
         auto synchro = kj::heap <SynchroImpl>();
+        synchro->setOnConnect ([this] (Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
+            return connectCallback (synchro, registrar);
+        });
         results.setSynchro (kj::mv (synchro));
 
         return kj::READY_NOW;
@@ -58,9 +61,9 @@ namespace cg {
         result->setOnConnect ([this] (Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
             return connectCallback (synchro, registrar);
         });
+        context.getResults().setLocal (kj::mv (result));
 
         /// Connect back to received synchro
-        context.getResults().setLocal (kj::mv (result));
         auto connectRequest = params.getRemote().connectRequest();
         auto synchro = kj::heap <SynchroImpl> ();
         synchro->setOnConnect ([this] (Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
