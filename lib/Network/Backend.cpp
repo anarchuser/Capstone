@@ -63,12 +63,6 @@ namespace cg {
         });
         context.getResults().setLocal (kj::mv (result));
 
-//        detach (broadcastSpaceship (ship));
-        for (auto & ship : ships) {
-            log ("Broadcasting ship to everyone - " + ship.first);
-            detach (broadcastSpaceship (Spaceship (ship.first, {5, 5})));
-        }
-
         /// Connect back to received synchro
         auto connectRequest = params.getRemote().connectRequest();
         auto synchro = kj::heap <SynchroImpl> ();
@@ -118,11 +112,7 @@ namespace cg {
         auto [iterator, success] = ships.emplace (username, handle);
         KJ_ASSERT (success);
 
-//        detach (broadcastSpaceship (ship));
-        for (auto & ship : ships) {
-            log ("Broadcasting ship to everyone - " + ship.first);
-            detach (broadcastSpaceship (Spaceship (ship.first, {5, 5})));
-        }
+        detach (broadcastSpaceship (ship));
 
         // Prepare ShipSink
         auto sink = kj::heap <ShipSinkImpl>();
@@ -147,12 +137,7 @@ namespace cg {
         auto & sender = ship.username;
         KJ_REQUIRE (ships.contains (sender));
 
-        log ("Distributing ship " + sender);
-
-        // FIXME: registerShipRequest() throws a segfault
-        log ("vvvvvvvv");
         auto request = receiver.registrar.registerShipRequest();
-        log ("^^^^^^^^");
         ship.initialise (request.initShip());
         request.setHandle (ships.at (sender));
         auto promise = request.send();
@@ -188,9 +173,6 @@ namespace cg {
     kj::Promise <void> BackendImpl::sendItemToClient (std::string const & username, Direction const & direction, Registrar & receiver) {
         auto & sinks = receiver.sinks;
         if (!sinks.contains (username)) {
-            return kj::READY_NOW;
-
-            // TODO: fix this. For now, only distribute ships on new ship
             log ("Missing sink to ship " + username);
             KJ_REQUIRE (ships.contains (username));
             return ships.at (username).getShipRequest().send()
