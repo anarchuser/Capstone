@@ -51,10 +51,15 @@ namespace cg {
         /// List of connected synchros (the things this backend should synchronise with)
         std::vector <Backend::Synchro::Client> synchros;
 
+        /// Synchro callbacks
+        kj::Own <RegistrarImpl> connectCallback (Backend::Synchro::Client synchro, Backend::Registrar::Client remoteRegistrar);
+
         /// RegisterShip callback
         kj::Own <ShipSinkImpl> registerShip (Spaceship const & ship, Backend::ShipHandle::Client);
         kj::Promise <void> broadcastSpaceship (Spaceship const & ship);
         kj::Promise <void> distributeSpaceship (Spaceship const & ship, Registrar & receiver);
+
+        /// ShipSink callbacks
         kj::Promise <void> doneCallback (std::string const & username);
         kj::Promise <void> sendItemCallback (std::string const & username, Direction const & direction);
         kj::Promise <void> sendItemToClient (std::string const & username, Direction const & direction, std::vector <Registrar>::iterator receiver);

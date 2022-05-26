@@ -43,6 +43,7 @@ interface Backend {
     }
 
     interface Synchro {
+        connect @0 (synchro :Synchro, registrar :Registrar) -> (registrar :Registrar);
     }
 
     ping @0 ();

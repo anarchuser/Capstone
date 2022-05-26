@@ -8,10 +8,6 @@ namespace cg {
         std::cout << ss.str() << std::endl;
     }
 
-    void RegistrarImpl::setOnRegisterShip (RegisterShipCallback && callback) {
-        onRegisterShip = callback;
-    }
-
     ::kj::Promise <void> RegistrarImpl::registerShip (RegisterShipContext context) {
         log ("Register ship requested");
         auto params = context.getParams();

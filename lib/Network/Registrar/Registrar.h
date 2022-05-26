@@ -18,7 +18,7 @@ namespace cg {
         RegisterShipCallback onRegisterShip;
 
     public:
-        void setOnRegisterShip (RegisterShipCallback && callback);
+        inline void setOnRegisterShip (RegisterShipCallback && callback) { onRegisterShip = callback; }
 
         ::kj::Promise <void> registerShip (RegisterShipContext context) override;
     };

@@ -51,13 +51,46 @@ namespace cg {
 
         auto params = context.getParams();
         KJ_REQUIRE (params.hasRemote());
-        synchros.push_back (params.getRemote());
+        synchros.emplace_back (params.getRemote());
         log ("Number of synchros connected: "s += std::to_string (synchros.size()));
 
-        auto results = context.getResults();
-        results.setLocal (kj::heap <SynchroImpl> ());
+        auto result = kj::heap <SynchroImpl> ();
+        result->setOnConnect ([this] (Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
+            return connectCallback (synchro, registrar);
+        });
 
-        return kj::READY_NOW;
+        /// Connect back to received synchro
+        context.getResults().setLocal (kj::mv (result));
+        auto connectRequest = params.getRemote().connectRequest();
+        auto synchro = kj::heap <SynchroImpl> ();
+        synchro->setOnConnect ([this] (Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
+            return connectCallback (synchro, registrar);
+        });
+        connectRequest.setSynchro (kj::mv (synchro));
+        auto registrar = kj::heap <RegistrarImpl> ();
+        registrar->setOnRegisterShip ([this] (Spaceship ship, Backend::ShipHandle::Client handle) {
+            return registerShip (ship, handle);
+        });
+        connectRequest.setRegistrar (kj::mv (registrar));
+        return connectRequest.send().then ([this] (capnp::Response <Backend::Synchro::ConnectResults> results) {
+            KJ_REQUIRE (results.hasRegistrar());
+            clients.emplace_back (results.getRegistrar());
+            log ("Number of clients connected: "s += std::to_string (clients.size()));
+        });
+    }
+
+    ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (Backend::Synchro::Client synchro, Backend::Registrar::Client remoteRegistrar) {
+        clients.emplace_back (remoteRegistrar);
+        log ("Number of clients connected: "s += std::to_string (clients.size()));
+
+        synchros.emplace_back (synchro);
+        log ("Number of synchros connected: "s += std::to_string (synchros.size()));
+
+        auto registrar = kj::heap <RegistrarImpl>();
+        registrar->setOnRegisterShip ([this] (Spaceship ship, Backend::ShipHandle::Client handle) {
+            return registerShip (ship, handle);
+        });
+        return registrar;
     }
 
     kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, Backend::ShipHandle::Client handle) {
