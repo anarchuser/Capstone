@@ -59,12 +59,10 @@ namespace cg {
         kj::Promise <void> broadcastSpaceship (Spaceship const & ship);
         kj::Promise <void> distributeSpaceship (Spaceship const & ship, Registrar & receiver);
 
-        kj::Promise <void> broadcastAll();
-
         /// ShipSink callbacks
         kj::Promise <void> doneCallback (std::string const & username);
         kj::Promise <void> sendItemCallback (std::string const & username, Direction const & direction);
-        kj::Promise <void> sendItemToClient (std::string const & username, Direction const & direction, std::vector <Registrar>::iterator receiver);
+        kj::Promise <void> sendItemToClient (std::string const & username, Direction const & direction, Registrar& receiver);
 
         /// Log function of this implementation
         void log (std::string const & msg);

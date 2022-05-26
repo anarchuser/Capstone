@@ -46,7 +46,6 @@ namespace cg {
         });
         results.setSynchro (kj::mv (synchro));
 
-        return broadcastAll();
         return kj::READY_NOW;
     }
 
@@ -80,7 +79,6 @@ namespace cg {
             KJ_REQUIRE (results.hasRegistrar());
             clients.emplace_back (results.getRegistrar());
             log ("Number of clients connected: "s += std::to_string (clients.size()));
-            broadcastAll();
         });
     }
 
@@ -130,7 +128,6 @@ namespace cg {
     kj::Promise <void> BackendImpl::broadcastSpaceship (Spaceship const & ship) {
         std::size_t i = 0;
         for (auto & client : clients) {
-            if (client.sinks.contains (ship.username)) continue;
             log ("Broadcast ship " + ship.username + + " to client [" + std::to_string (++i) + "/" + std::to_string (clients.size()) + "]");
             detach (distributeSpaceship (ship, client));
         }
@@ -143,6 +140,8 @@ namespace cg {
         log ("Distributing ship " + sender);
 
         // FIXME: registerShipRequest() throws a segfault
+        log ("expected: " + std::to_string ((unsigned long) & clients.back().registrar));
+        log ("received: " + std::to_string ((unsigned long) & receiver.registrar));
         log ("vvvvvvvv");
         auto request = receiver.registrar.registerShipRequest();
         log ("^^^^^^^^");
@@ -173,36 +172,29 @@ namespace cg {
             return kj::READY_NOW;
         }
         KJ_ASSERT (ships.contains (username));
-        return sendItemToClient (username, direction, clients.begin());
+        for (auto & client : clients) {
+            log ("Sending item to: " + std::to_string ((unsigned long) & client));
+            log ("Expected client: " + std::to_string ((unsigned long) & clients.front()));
+            detach (sendItemToClient (username, direction, client));
+        }
+        return kj::READY_NOW;
     }
-    kj::Promise <void> BackendImpl::sendItemToClient (std::string const & username, Direction const & direction, std::vector <Registrar>::iterator receiver) {
-        if (receiver == clients.end()) return kj::READY_NOW;
-        auto & sinks = receiver->sinks;
+    kj::Promise <void> BackendImpl::sendItemToClient (std::string const & username, Direction const & direction, Registrar & receiver) {
+        auto & sinks = receiver.sinks;
         if (!sinks.contains (username)) {
-            return kj::READY_NOW;
             log ("Missing sink to ship " + username);
             KJ_REQUIRE (ships.contains (username));
             return ships.at (username).getShipRequest().send()
                     .then ([&] (capnp::Response <Backend::ShipHandle::GetShipResults> results) {
                         Spaceship ship (results.getShip());
                         KJ_ASSERT (ship.username == username);
-                        distributeSpaceship (ship, * receiver);
-                        sendItemToClient (username, direction, receiver);
+                        distributeSpaceship (ship, receiver);
+//                        sendItemToClient (username, direction, receiver);
                     });
         }
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
-        return request.send().ignoreResult().then ([this, & username, & direction, receiver] () {
-            return sendItemToClient (username, direction, receiver + 1);
-        });
-    }
-
-
-    ::kj::Promise <void> BackendImpl::broadcastAll () {
-        for (auto & ship : ships) {
-            detach (broadcastSpaceship (Spaceship (ship.first)));
-        }
-        return kj::READY_NOW;
+        return request.send().ignoreResult();
     }
 }
 
