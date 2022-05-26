@@ -8,6 +8,7 @@
 #include "box2d.h"
 
 #include <thread>
+#include <memory>
 
 #include "src/UI/Dialog.h"
 #include "src/Planet/Planet.h"
@@ -19,7 +20,7 @@
 
 #include "Random/random.h"
 #include "Network/Backend.h"
-#include "Network/ShipRegistrar/ShipRegistrar.h"
+#include "Network/Registrar/Registrar.h"
 
 /// [OPTIONAL] The random seed determines the placement of planets, amongst others
 #define RANDOM_SEED
@@ -30,24 +31,26 @@ namespace kt {
     /// Handles the actual game. Responsible for initialising the World with its objects and providing an options menu
     class GameScene : public Scene {
     private:
+        Backend backend;
+        std::vector <std::unique_ptr <capnp::EzRpcClient>> remoteClients;
+        capnp::EzRpcClient client;
+        kj::WaitScope & waitscope;
+
+        struct Handle {
+            ::Backend::Registrar::Client registrar;
+            ::Backend::Synchro::Client synchro;
+            std::unique_ptr <::Backend::ShipSink::Client> keyboard_sink = nullptr;
+        } handle;
+
         /// Resources used throughout the game (font, background, sprites)
         Resources gameResources;
         /// Random number generator based on the seed given. Ensures every random number used depends on this seed
         HashedRNG rng;
-        /// Set to true when the menu is open (Escape was pressed). Overrides soft pause.
-        bool hardPause = false;
-        /// Set to true when pause is requested (default button `P`). pauses game independently of menu (hard) pause
-        bool softPause = true;
-
-        Backend backend;
-        capnp::EzRpcClient client;
-        kj::WaitScope & waitscope;
-        std::unique_ptr <::Backend::ShipRegistrar::Client> registrar;
-        std::unique_ptr <::Backend::ShipHandle::Client> handle;
-        std::vector <std::unique_ptr <capnp::EzRpcClient>> remoteClients;
 
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         void joinGame (std::string const & ip, unsigned short port);
+
+        kj::Own <cg::RegistrarImpl> getRegistrarImpl ();
         
     public:
         /// Inject a new Game instance with random seed into the stage

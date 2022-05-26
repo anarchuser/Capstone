@@ -1,9 +1,11 @@
 #include "Backend.h"
 
 namespace cg {
-    BackendImpl::BackendImpl (std::size_t seed, std::string name)
+    BackendImpl::BackendImpl (std::size_t seed)
             : rng_seed {seed}
-            , name {name} {}
+            {}
+
+    BackendImpl::Registrar::Registrar (Backend::Registrar::Client registrar): registrar {registrar} {}
 
     void BackendImpl::log (std::string const & msg) {
         std::stringstream ss;
@@ -23,175 +25,133 @@ namespace cg {
         return kj::READY_NOW;
     }
 
-    kj::Own <ShipHandleImpl> BackendImpl::registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
-        std::string const & username = spaceship.username;
-        KJ_REQUIRE (connections.contains (username), username, "Tried to register a ship without being registered");
+    ::kj::Promise <void> BackendImpl::connect (ConnectContext context) {
+        log ("Connect request received");
 
-        auto & shipHandles = connections.at (username).shipHandles;
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasRegistrar());
+        clients.emplace_back (params.getRegistrar());
+        log ("Number of clients connected: "s += std::to_string (clients.size()));
 
-        // If username exists already, replace:
-        if (shipHandles.contains (username)) {
-            doneCallback (username);
+        auto results = context.getResults();
+        auto registrar = kj::heap <RegistrarImpl>();
+        registrar->setOnRegisterShip ([this] (Spaceship ship, Backend::ShipHandle::Client handle) {
+            return registerShip (ship, handle);
+        });
+        results.setRegistrar (kj::mv (registrar));
+
+        auto synchro = kj::heap <SynchroImpl>();
+        results.setSynchro (kj::mv (synchro));
+
+        return kj::READY_NOW;
+    }
+
+    ::kj::Promise <void> BackendImpl::join (JoinContext context) {
+        log ("Join request received");
+
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasRemote());
+        synchros.push_back (params.getRemote());
+        log ("Number of synchros connected: "s += std::to_string (synchros.size()));
+
+        auto results = context.getResults();
+        results.setLocal (kj::heap <SynchroImpl> ());
+
+        return kj::READY_NOW;
+    }
+
+    kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, Backend::ShipHandle::Client handle) {
+        auto username = ship.username;
+        if (ships.contains (username)) {
+            log ("username " + username + " existed already");
+            ships.erase (username);
         }
-        KJ_REQUIRE (! shipHandles.contains (username), username, "Username already in use");
+        KJ_REQUIRE (!ships.contains (username), username, "Name duplication detected");
 
-        log (std::string ("Join request received from user ") + username);
-        log (std::string ("Position: ( ")
-             + std::to_string (spaceship.position[0]) + " | "
-             + std::to_string (spaceship.position[1]) + " )");
-        log (std::string ("Velocity: ( ")
-                + std::to_string (spaceship.velocity[0]) + " | "
-                + std::to_string (spaceship.velocity[1]) + " )");
-        log (std::string ("Health: " + std::to_string (spaceship.health)));
+        log ("Registering ship " + username);
+        log ("Position: / "  + std::to_string (ship.position[0]) + " | " + std::to_string (ship.position[1]) + " \\");
+        log ("Velocity: \\ " + std::to_string (ship.velocity[0]) + " | " + std::to_string (ship.velocity[1]) + " /");
+        log ("Health: " + std::to_string (ship.health));
 
-        // Store connection details (callback handles and 'new ship' callback)
-        log ("Store connection details");
-        auto [iterator, success] = shipHandles.emplace (username, handle);
+        auto [iterator, success] = ships.emplace (username, handle);
         KJ_ASSERT (success);
 
-        broadcastSpaceship (spaceship);
+        detach (broadcastSpaceship (ship));
 
-        log ("Send ShipHandle back to " + username);
-        auto sink = kj::heap <ShipHandleImpl> ();
-        sink->setOnSendItem ([this, username] (Direction direction) {
-            sendItemCallback (username, direction);
-        });
+        // Prepare ShipSink
+        auto sink = kj::heap <ShipSinkImpl>();
         sink->setOnDone ([this, username] () {
-            doneCallback (username);
+            return doneCallback (username);
         });
-
-        return kj::mv (sink);
-    }
-
-    kj::Own <ShipRegistrarImpl> BackendImpl::exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote) {
-        log ("Exchanging registrars");
-
-        connections.emplace (name, Connection {remote});
-        KJ_ASSERT (connections.contains (name));
-
-        auto local = kj::heap <ShipRegistrarImpl> ();
-        local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
-            return registerShipCallback (spaceship, handle);
+        sink->setOnSendItem ([this, username] (Direction const & direction) {
+            return sendItemCallback (username, direction);
         });
-        return local;
+        return sink;
     }
 
-    void BackendImpl::sendItemCallback (std::string const & sender, Direction direction) {
-        for (auto & connection : connections) {
-            auto & shipHandles = connection.second.shipHandles;
-
-            if (!shipHandles.contains (sender)) {
-                connections.at (sender).shipHandles.at (sender).getSpaceshipRequest ().send().then (
-                        [&] (capnp::Response <Backend::ShipHandle::GetSpaceshipResults> response) {
-                            distributeSpaceship (Spaceship (response.getSpaceship()), connection.first);
-                            sendItemCallback (sender, direction);
-                        }).detach ([&] (kj::Exception && e) {
-                            KJ_DLOG (WARNING, "Exception on establishing missing connection: ", e.getDescription ());
-//                            doneCallback (connection.first);
-                        });
-                return;
-            }
-            KJ_REQUIRE (shipHandles.contains (sender), sender, "Cannot forward directions; ship handle not found");
-
-            auto request = shipHandles.at (sender).sendItemRequest();
-            direction.initialise (request.initItem().initDirection());
-            request.send().then ([](...){});
+    kj::Promise <void> BackendImpl::broadcastSpaceship (Spaceship const & ship) {
+        std::size_t i = 0;
+        for (auto & client : clients) {
+            log ("Broadcast ship " + ship.username + + " to client [" + std::to_string (++i) + "/" + std::to_string (clients.size()) + "]");
+            detach (distributeSpaceship (ship, client));
         }
-    }
-
-    void BackendImpl::doneCallback (std::string const & sender) {
-        for (auto & connection : connections) {
-            auto & shipHandles = connection.second.shipHandles;
-            if (shipHandles.contains (sender)) {
-                log ("Closing sinks from " + sender);
-
-                auto handle = std::move (shipHandles.at (sender));
-                shipHandles.erase (sender);
-
-                // TODO: execute handle.doneRequest() here
-            }
-        }
-        log ("Erasing connection to " + sender);
-        connections.erase (sender);
-    }
-
-    void BackendImpl::distributeSpaceship (Spaceship const & sender, std::string const & receiver) {
-        log ("Distributing spaceship from " + sender.username + " to " + receiver);
-
-        KJ_REQUIRE (connections.contains (receiver));
-        KJ_REQUIRE (connections.contains (sender.username));
-
-        auto & connection = connections.at (receiver);
-        auto & shipHandles = connection.shipHandles;
-        if (shipHandles.contains (sender.username)) {
-            log ("Connection exists already");
-            return;
-        };
-
-        auto & registrar = connection.registrar;
-        auto request = registrar.registerShipRequest();
-        sender.initialise (request.initSpaceship());
-
-        request.send().then ([&] (capnp::Response <Backend::ShipRegistrar::RegisterShipResults> results) {
-            KJ_REQUIRE (results.hasRemote());
-            auto [iterator, success] = shipHandles.emplace (sender.username, results.getRemote());
-            KJ_ASSERT (success);
-        }).detach ([&] (kj::Exception && e) {
-            KJ_DLOG (WARNING, "Exception on registering ship to client", e.getDescription ());
-//            doneCallback (receiver);
-        });
-    }
-
-    void BackendImpl::broadcastSpaceship (Spaceship const & sender) {
-        for (auto & connection : connections) {
-            distributeSpaceship (sender, connection.first);
-        }
-    }
-
-    ::kj::Promise <void> BackendImpl::registerClient (RegisterClientContext context) {
-        auto params = context.getParams();
-        KJ_REQUIRE (params.hasS2c_registrar());
-        std::string name = params.getName();
-
-        log ("Registering game client: " + name);
-
-        connections.insert_or_assign (name, Connection {params.getS2c_registrar()});
-
-        auto results = context.initResults();
-        results.setC2s_registrar (exchangeRegistrars (params.getName(), params.getS2c_registrar()));
-
         return kj::READY_NOW;
     }
+    kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, Registrar & receiver) {
+        auto & sender = ship.username;
+        KJ_REQUIRE (ships.contains (sender));
 
-    ::kj::Promise <void> BackendImpl::synchro (SynchroContext context) {
-        log ("Synchro requested");
+        log ("Distributing ship " + sender);
 
-        auto synchro = kj::heap <cg::SynchroImpl> ();
-        synchro->setOnConnect ([this] (std::string const & name, Backend::Synchro::Client client) {
-            KJ_REQUIRE (!synchros.contains (name));
-            synchros.emplace (name, client);
-            auto request = client.syncRequest();
-            request.setName (this->name);
-            auto local = kj::heap <ShipRegistrarImpl> ();
-            local->setOnRegisterShip ([this] (Spaceship const & spaceship, Backend::ShipHandle::Client handle) {
-                return registerShipCallback (spaceship, handle);
-            });
-            request.setLocal (kj::mv (local));
-            auto result = request.send();
-            KJ_REQUIRE (!connections.contains (name), name, "Duplicate client identifier");
-            result.then ([&] (capnp::Response <Backend::Synchro::SyncResults> results) {
-                connections.emplace (name, Connection {results.getRemote()});
-            }).detach ([] (kj::Exception && e) {
-                KJ_DLOG (WARNING, "Exception on syncing after a connect request", e.getDescription());
-            });
+        auto request = receiver.registrar.registerShipRequest();
+        ship.initialise (request.initShip());
+        request.setHandle (ships.at (sender));
+        auto promise = request.send();
+        return promise.then ([this, sender, & receiver] (capnp::Response <Backend::Registrar::RegisterShipResults> results) {
+            receiver.sinks.emplace (sender, results.getSink());
         });
-        synchro->setOnSync ([this] (std::string const & name, Backend::ShipRegistrar::Client client) {
-            return exchangeRegistrars (name, client);
-        });
-        context.initResults().setRemote (kj ::mv (synchro));
-        context.getResults().setName (name);
-
+    }
+    kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
+        log ("Disconnecting " + username);
+        if (!ships.contains (username)) {
+            return kj::READY_NOW;
+        }
+        for (auto & client : clients) {
+            auto & sinks = client.sinks;
+            if (!sinks.contains (username)) continue;
+            detach (sinks.at (username).doneRequest().send().ignoreResult());
+            sinks.erase (username);
+        }
+        ships.erase (username);
         return kj::READY_NOW;
+    }
+    kj::Promise <void> BackendImpl::sendItemCallback (std::string const & username, Direction const & direction) {
+        if (!ships.contains (username)) {
+            log ("Received sendItem request for " + username + ", for which no record exists (anymore?)");
+            return kj::READY_NOW;
+        }
+        KJ_ASSERT (ships.contains (username));
+        return sendItemToClient (username, direction, clients.begin());
+    }
+    kj::Promise <void> BackendImpl::sendItemToClient (std::string const & username, Direction const & direction, std::vector <Registrar>::iterator receiver) {
+        if (receiver == clients.end()) return kj::READY_NOW;
+        auto & sinks = receiver->sinks;
+        if (!sinks.contains (username)) {
+            log ("Missing sink to ship " + username);
+            KJ_REQUIRE (ships.contains (username));
+            return ships.at (username).getShipRequest().send()
+                    .then ([&] (capnp::Response <Backend::ShipHandle::GetShipResults> results) {
+                        Spaceship ship (results.getShip());
+                        KJ_ASSERT (ship.username == username);
+                        distributeSpaceship (ship, * receiver);
+                        sendItemToClient (username, direction, receiver);
+                    });
+        }
+        auto request = sinks.at (username).sendItemRequest();
+        direction.initialise (request.initItem().initDirection());
+        return request.send().ignoreResult().then ([this, & username, & direction, receiver] () {
+            return sendItemToClient (username, direction, receiver + 1);
+        });
     }
 }
 

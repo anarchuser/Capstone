@@ -18,13 +18,11 @@ namespace kt {
     void Backend::serve () {
         for (int i = 0; i < 100; i++) {
             try {
-                auto server = capnp::EzRpcServer (kj::heap<cg::BackendImpl> (seed, USERNAME), address);
+                auto server = capnp::EzRpcServer (kj::heap <cg::BackendImpl> (seed), address);
                 port = server.getPort ().wait (server.getWaitScope ());
-
-                auto & exec = kj::getCurrentThreadExecutor ();
-
                 logs::messageln ("Backend starts serving now");
 
+                auto & exec = kj::getCurrentThreadExecutor();
                 while (!stop) {
                     exec.executeAsync ([this] () {
                         std::this_thread::yield ();

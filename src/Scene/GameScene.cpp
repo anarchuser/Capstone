@@ -13,6 +13,14 @@ namespace kt {
             , backend {seed, SERVER_FULL_ADDRESS}
             , client {SERVER_FULL_ADDRESS}
             , waitscope {client.getWaitScope()}
+            , handle {[this] () {
+                auto request = client.getMain <::Backend>().connectRequest();
+                request.setRegistrar (getRegistrarImpl());
+                auto result = request.send().wait (waitscope);
+                KJ_REQUIRE (result.hasSynchro());
+                KJ_REQUIRE (result.hasRegistrar());
+                return Handle {result.getRegistrar(), result.getSynchro()};
+            }()}
             {
 
         logs::messageln ("Seed: %lu", rng.seed);
@@ -32,72 +40,52 @@ namespace kt {
             }, float (rng.random ({0.3, 0.7})));
         }
 
-        auto registerClient = client.getMain <::Backend>().registerClientRequest();
-        auto s2c = kj::heap <cg::ShipRegistrarImpl>();
-        s2c->setOnRegisterShip ([&] (cg::Spaceship const & spaceship, ::Backend::ShipHandle::Client handle) {
-            auto & username = spaceship.username;
-            logs::messageln ("Received sink for spaceship '%s'", username.c_str());
-
-            if (auto ship = KeyboardSpaceship::instance) {
-                if (ship->getName() == username) {
-                    ship->setData (spaceship);
-                    return ship->getHandle();
-                }
-            }
-            world->removeChild (world->getChild (username, oxygine::ep_ignore_error));
-
-            spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, username);
-            ship->setData (spaceship);
-            return ship->getHandle();
-        });
-        registerClient.setS2c_registrar (kj::mv (s2c));
-        registerClient.setName (USERNAME);
-        auto c2s = registerClient.send().wait(waitscope).getC2s_registrar();
-        registrar = std::make_unique <::Backend::ShipRegistrar::Client> (c2s);
-
         Spaceship::resetCounter();
         spKeyboardSpaceship ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);
 
-        auto registerShip = registrar->registerShipRequest();
-        ship->getData().initialise (registerShip.initSpaceship());
-        registerShip.setHandle (ship->getHandle());
-        auto result = registerShip.send().wait (waitscope);
-        handle = std::make_unique <::Backend::ShipHandle::Client> (result.getRemote());
-        ship->setOnDone ([&]() {
-            handle->doneRequest().send().wait (waitscope);
+        auto request = handle.registrar.registerShipRequest();
+        ship->getData().initialise (request.initShip());
+        request.setHandle (ship->getHandle());
+        handle.keyboard_sink = std::make_unique <::Backend::ShipSink::Client> (request.send().wait (waitscope).getSink());
+        ship->setOnUpdate ([this, ship] (cg::Direction const & direction) {
+            auto request = handle.keyboard_sink->sendItemRequest ();
+            direction.initialise (request.initItem ().initDirection ());
+            request.send ().wait (waitscope);
         });
-        ship->setOnUpdate ([&] (cg::Direction direction) {
-            auto request = handle->sendItemRequest();
-            direction.initialise (request.initItem().initDirection());
-            try {
-                request.send().wait (waitscope);
-            } catch (...) {
-                ship->destroy();
-            }
+        ship->setOnDone ([this] () {
+            logs::messageln ("Executing onDone callback");
+            handle.keyboard_sink->doneRequest().send().wait (waitscope);
         });
 
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;
             switch (keysym.scancode) {
-                case SDL_SCANCODE_P:
-                    softPause = !softPause;
-                    break;
-                case SDL_SCANCODE_W:
-                case SDL_SCANCODE_A:
-                case SDL_SCANCODE_S:
-                case SDL_SCANCODE_D:
-                case SDL_SCANCODE_UP:
-                case SDL_SCANCODE_LEFT:
-                case SDL_SCANCODE_DOWN:
-                case SDL_SCANCODE_RIGHT:
-                    softPause = false;
-                    break;
                 case SDL_SCANCODE_ESCAPE:
                     onMenu (event);
                     break;
             }
         });
+    }
+
+    kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
+        auto registrar = kj::heap <cg::RegistrarImpl> ();
+        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client const &) {
+            spWorld world = safeSpCast <World> (getLastChild());
+
+            if (auto ship = KeyboardSpaceship::instance) {
+                if (ship->getName() == data.username) {
+                    auto * ship = KeyboardSpaceship::instance;
+                    ship->setData (data);
+                    return ship->getSink();
+                }
+            }
+
+            spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, data.username);
+            ship->setData (data);
+            return ship->getSink();
+        });
+        return registrar;
     }
 
     GameScene::~GameScene() noexcept {
@@ -107,10 +95,6 @@ namespace kt {
     }
 
     void GameScene::update (UpdateState const & us) {
-        // TODO: don't pause in multiplayer games
-//        if (hardPause) return;
-//        if (softPause) return;
-
         if (!KeyboardSpaceship::instance) {
             ONCE (onMenu (nullptr));
         }
@@ -119,7 +103,6 @@ namespace kt {
     }
 
     void GameScene::onMenu (Event * event) {
-        hardPause = !hardPause;
         static auto size = getSize();
         static spDialog dialog = [this]() {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
@@ -173,25 +156,15 @@ namespace kt {
     }
 
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
-        remoteClients.push_back (std::make_unique <capnp::EzRpcClient> (ip, port));
+        remoteClients.emplace_back (std::make_unique <capnp::EzRpcClient> (ip, port));
         auto & remote = * remoteClients.back();
-        auto remoteSynchro = remote.getMain<::Backend>().synchroRequest().send().getRemote();
+        auto remoteRequest = remote.getMain <::Backend>().joinRequest();
+        remoteRequest.setRemote (handle.synchro);
+        auto remoteSynchro = remoteRequest.send().wait (remote.getWaitScope()).getLocal();
 
-        static auto localSynchro = [this]() {
-            for (int i = 0; i < 120; i++) {
-                try {
-                    return client.getMain<::Backend>().synchroRequest().send().getRemote();
-                } catch (std::exception & e) {
-                    logs::messageln ("Failed to connect to local client! Retrying...");
-                    std::this_thread::sleep_for (std::chrono::milliseconds (500));
-                }
-            }
-            logs::error ("Connection timed out - could not establish connection to local backend!");
-        }();
-
-        auto connectRequest = localSynchro.connectRequest();
-        connectRequest.setOther (remoteSynchro);
-        connectRequest.send().wait (waitscope);
+        auto localRequest = client.getMain <::Backend>().joinRequest();
+        localRequest.setRemote (remoteSynchro);
+        localRequest.send().wait (waitscope);
     }
 }
 

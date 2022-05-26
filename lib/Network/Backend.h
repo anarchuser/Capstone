@@ -3,12 +3,13 @@
 
 #include "Network/config.h"
 
+#include "Synchro/Synchro.h"
+#include "Registrar/Registrar.h"
+#include "ShipSink/ShipSink.h"
+#include "ShipHandle/ShipHandle.h"
+
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
-#include "Data/Address.h"
-#include "ShipHandle/ShipHandle.h"
-#include "ShipRegistrar/ShipRegistrar.h"
-#include "Synchro/Synchro.h"
 
 #include <atomic>
 #include <functional>
@@ -18,61 +19,57 @@
 #include <unordered_map>
 #include <vector>
 #include <numeric>
-
 #include <ranges>
+#include <iterator>
 
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
  */
 
 namespace cg {
+    using namespace std::string_literals;
+    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, Backend::ShipHandle::Client)>;
+
     class BackendImpl final: public Backend::Server {
     private:
-        void log (std::string const & msg);
-
-        struct Connection {
-            /// Registrar to send new ship registered requests to
-            Backend::ShipRegistrar::Client registrar;
-
-            /// Handles to all spaceships registered to the server
-            std::unordered_map <std::string, Backend::ShipHandle::Client> shipHandles;
-        };
-
-        /// List of everything that demands knowledge of every ship there is
-        std::unordered_map <std::string, Connection> connections;
-
-        /// List of synchros
-        std::unordered_map <std::string, Backend::Synchro::Client> synchros;
-
-        /// Seed used to initialise the game. Returned by `randomSeed`
+        /// Seed of random number generator of currently running game
         std::size_t const rng_seed;
 
-        /// Identifier of this backend
-        std::string const name;
+        struct Registrar {
+            Backend::Registrar::Client registrar;
+            std::unordered_map <std::string, Backend::ShipSink::Client> sinks;
 
-        /// Callback to execute when any ship updates their directions
-        void sendItemCallback (std::string const & sender, Direction direction);
-        /// Callback to execute when any ship got destroyed
-        void doneCallback     (std::string const & sender);
+            explicit Registrar (Backend::Registrar::Client registrar);
+        };
 
-        /// Callback to call when our registrar received a new spaceship
-        kj::Own <ShipHandleImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
-        /// Insert the remote registrar handle into list of connections and return a registrar of our own
-        kj::Own <ShipRegistrarImpl> exchangeRegistrars (std::string const & name, Backend::ShipRegistrar::Client remote);
+        /// List of all ships in possession
+        std::unordered_map <std::string, Backend::ShipHandle::Client> ships;
 
-        /// Distribute spaceship to one connection
-        void distributeSpaceship (Spaceship const & sender, std::string const & receiver);
-        /// Distribute spaceship to every connection
-        void broadcastSpaceship (Spaceship const & sender);
+        /// List of connected clients (the things that we want to keep up to date)
+        std::vector <Registrar> clients;
+
+        /// List of connected synchros (the things this backend should synchronise with)
+        std::vector <Backend::Synchro::Client> synchros;
+
+        /// RegisterShip callback
+        kj::Own <ShipSinkImpl> registerShip (Spaceship const & ship, Backend::ShipHandle::Client);
+        kj::Promise <void> broadcastSpaceship (Spaceship const & ship);
+        kj::Promise <void> distributeSpaceship (Spaceship const & ship, Registrar & receiver);
+        kj::Promise <void> doneCallback (std::string const & username);
+        kj::Promise <void> sendItemCallback (std::string const & username, Direction const & direction);
+        kj::Promise <void> sendItemToClient (std::string const & username, Direction const & direction, std::vector <Registrar>::iterator receiver);
+
+        /// Log function of this implementation
+        void log (std::string const & msg);
 
     public:
-        explicit BackendImpl (std::size_t seed, std::string name);
+        explicit BackendImpl (std::size_t seed);
 
         /** RPC function calls **/
-        ::kj::Promise <void> ping (PingContext context) override;
-        ::kj::Promise <void> seed (SeedContext context) override;
-        ::kj::Promise <void> registerClient (RegisterClientContext context) override;
-        ::kj::Promise <void> synchro (SynchroContext context) override;
+        ::kj::Promise <void> ping    (PingContext context) override;
+        ::kj::Promise <void> seed    (SeedContext context) override;
+        ::kj::Promise <void> connect (ConnectContext context) override;
+        ::kj::Promise <void> join    (JoinContext context) override;
     };
 } // cg
 

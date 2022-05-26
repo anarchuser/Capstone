@@ -3,13 +3,6 @@
 interface Backend {
 # The thing running as backend, synchronising registered spaceships across servers
 
-    struct Maybe(T) {
-        union {
-            nothing @0 :Void;
-            value   @1 :T;
-        }
-    }
-
     struct Direction {
         accelerate  @0 :Int8 = -1;
         decelerate  @1 :Int8 = -1;
@@ -34,34 +27,22 @@ interface Backend {
         y @1 :Float32;
     }
 
-    struct Address {
-        ip   @0 :Text;
-        port @1 :UInt16;
-    }
-
-    interface Synchro {
-    # The thing exchanged between servers as communication basis
-
-        connect @0 (name :Text, other :Synchro);
-        # Connect to this synchro, passing along a back-reference
-
-        sync @1 (name :Text, local :ShipRegistrar) -> (remote :ShipRegistrar);
-    }
-
-    interface ShipRegistrar {
-    # A registrar to tell the game client that a new spaceship has been registered
-
-        registerShip @0 (spaceship :Spaceship, handle :ShipHandle) -> (remote :ShipHandle);
-        # Tell the game client of the new spaceship
+    interface ShipSink {
+        done @0 ();
+        sendItem @1 (item :Item);
     }
 
     interface ShipHandle {
-    # A handle for a connected spaceship giving the backend control over it
+        getSink @0 () -> (sink :ShipSink);
+        getShip @1 () -> (ship :Spaceship);
+        setShip @2 (ship :Spaceship) -> ();
+    }
 
-        done @0 ();
-        sendItem @1 (item :Item);
-        getSpaceship @2 () -> (spaceship :Spaceship);
-        setSpaceship @3 (spaceship :Spaceship) -> ();
+    interface Registrar {
+        registerShip @0 (ship :Spaceship, handle :ShipHandle) -> (sink :ShipSink);
+    }
+
+    interface Synchro {
     }
 
     ping @0 ();
@@ -70,9 +51,9 @@ interface Backend {
     seed @1 () -> (seed :UInt64);
     # Request RNG seed server is running for
 
-    registerClient @2 (name :Text, s2c_registrar :ShipRegistrar) -> (c2s_registrar :ShipRegistrar);
-    # Register game client. Returned registrar can be used to sync individual spaceships
+    connect @2 (registrar :Registrar) -> (registrar :Registrar, synchro :Synchro);
+    # Subscribe to Backend, get a local synchro instance
 
-    synchro @3 () -> (name :Text, remote :Synchro);
-    # Returns a Synchro instance of this backend
+    join @3 (remote :Synchro) -> (local :Synchro);
+    # Tell a remote backend of our local synchro
 }
