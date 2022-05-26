@@ -143,7 +143,8 @@ namespace cg {
         return promise.then ([this, sender, & receiver] (capnp::Response <Backend::Registrar::RegisterShipResults> results) {
             // Check again if nothing's changed
             if (receiver.sinks.contains (sender)) return;
-            receiver.sinks.emplace (sender, results.getSink());
+//            receiver.sinks.emplace (sender, results.getSink());
+            receiver.sinks.insert_or_assign (sender, results.getSink());
         });
     }
     kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
@@ -173,6 +174,22 @@ namespace cg {
     }
     kj::Promise <void> BackendImpl::sendItemToClient (std::string const & username, Direction const & direction, Registrar & receiver) {
         auto & sinks = receiver.sinks;
+
+        /**** dump ships and clients maps ****/
+        std::cout << "==== ships (" << ships.size() << ") ====" << std::endl;
+        for (auto & ship : ships) {
+            std::cout << "|  - " << ship.first << std::endl;
+        }
+        std::cout << "==== clients (" << clients.size() << ") ====" << std::endl;
+        for (auto & client : clients) {
+            std::cout << "  == sinks (" << client.sinks.size() << ") ==  " << std::endl;
+            for (auto & sink : client.sinks) {
+                std::cout << "|    - " << sink.first << std::endl;
+            }
+        }
+        std::cout << "################" << std::endl;
+        /**** DUMP END ****/
+
         if (!sinks.contains (username)) {
             log ("Missing sink to ship " + username);
             KJ_REQUIRE (ships.contains (username));
@@ -186,6 +203,7 @@ namespace cg {
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult().catch_ ([this, & sinks, & username] (kj::Exception && e) {
+            log ("Connection lost to " + username);
             sinks.erase (username);
         });
     }
