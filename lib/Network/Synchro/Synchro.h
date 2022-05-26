@@ -8,6 +8,7 @@
 #include <functional>
 
 namespace cg {
+    class RegistrarImpl;
     using ConnectCallback = std::function <kj::Own <RegistrarImpl> (Backend::Synchro::Client, Backend::Registrar::Client)>;
 
     class SynchroImpl final: public Backend::Synchro::Server {
