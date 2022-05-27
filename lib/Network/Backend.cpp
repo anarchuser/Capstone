@@ -168,8 +168,8 @@ namespace cg {
         }
         KJ_ASSERT (ships.contains (username));
         for (auto & client : clients) {
-            sendItemToClient (username, direction, client).detach ([] (kj::Exception && e) {
-                KJ_DLOG (WARNING, "Exception on sendItem callback", e.getDescription ());
+            sendItemToClient (username, direction, client).detach ([&] (kj::Exception && e) {
+                client.sinks.erase (username);
             });
         }
         return kj::READY_NOW;

@@ -213,7 +213,12 @@ namespace kt {
         if (!remote) return std::chrono::nanoseconds (-1);
         auto pingRequest = remote->handle.pingRequest();
         auto start = std::chrono::high_resolution_clock::now();
-        pingRequest.send().wait (remote->waitscope);
+        try {
+            pingRequest.send().wait (remote->waitscope);
+        } catch (std::exception & e) {
+            logs::warning (e.what());
+            return std::chrono::nanoseconds (-1);
+        }
         auto end = std::chrono::high_resolution_clock::now();
         return end - start;
     }

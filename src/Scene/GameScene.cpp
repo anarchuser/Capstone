@@ -70,22 +70,27 @@ namespace kt {
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
         auto registrar = kj::heap <cg::RegistrarImpl> ();
-        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client handle) {
-            spWorld world = safeSpCast <World> (getLastChild());
+        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client handle) -> kj::Own <cg::ShipSinkImpl> {
+            try {
+                spWorld world = safeSpCast<World> (getFirstChild ());
 
-            if (auto ship = KeyboardSpaceship::instance) {
-                if (ship->getName() == data.username) {
-                    auto * ship = KeyboardSpaceship::instance;
-                    ship->setData (data);
-                    ship->setHandle (kj::heap <Spaceship::Remote> (handle, waitscope));
-                    return ship->getSink();
+                if (auto ship = KeyboardSpaceship::instance) {
+                    if (ship->getName () == data.username) {
+                        auto * ship = KeyboardSpaceship::instance;
+                        ship->setData (data);
+                        ship->setHandle (kj::heap<Spaceship::Remote> (handle, waitscope));
+                        return ship->getSink ();
+                    }
                 }
-            }
 
-            spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, data.username);
-            ship->setData (data);
-            ship->setHandle (kj::heap <Spaceship::Remote> (handle, waitscope));
-            return ship->getSink();
+                spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, data.username);
+                ship->setData (data);
+                ship->setHandle (kj::heap<Spaceship::Remote> (handle, waitscope));
+                return ship->getSink ();
+            } catch (std::exception & e) {
+                logs::warning ("Error on registering new spaceship");
+                return {};
+            }
         });
         return registrar;
     }
@@ -140,6 +145,7 @@ namespace kt {
     }
 
     void GameScene::onDisconnect (Event * event) {
+        KeyboardSpaceship::instance->destroy();
         detach();
         getStage()->removeAllEventListeners();
         this->~GameScene();
