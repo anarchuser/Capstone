@@ -45,8 +45,8 @@ namespace cg {
         auto results = context.getResults();
         results.setId (ID);
         auto registrar = kj::heap <RegistrarImpl>();
-        registrar->setOnRegisterShip ([this] (Spaceship ship, Backend::ShipHandle::Client handle) {
-            return registerShip (ship, ID, handle);
+        registrar->setOnRegisterShip ([this, id = params.getId()] (Spaceship ship, Backend::ShipHandle::Client handle) {
+            return registerShip (ship, id, handle);
         });
         results.setRegistrar (kj::mv (registrar));
 
@@ -100,8 +100,8 @@ namespace cg {
         log ("Number of clients connected: "s += std::to_string (clients.size()));
 
         auto registrar = kj::heap <RegistrarImpl>();
-        registrar->setOnRegisterShip ([this] (Spaceship ship, Backend::ShipHandle::Client handle) {
-            return registerShip (ship, ID, handle);
+        registrar->setOnRegisterShip ([this, id] (Spaceship ship, Backend::ShipHandle::Client handle) {
+            return registerShip (ship, id, handle);
         });
         return registrar;
     }
@@ -135,7 +135,7 @@ namespace cg {
 
     kj::Promise <void> BackendImpl::broadcastSpaceship (Spaceship const & ship) {
         std::size_t i = 0;
-        log ("Broadcast ship to " + std::to_string (clients.size()) + " clients");
+        log ("Number of clients: " + std::to_string (clients.size()));
         for (auto & client : clients) {
             log ("Broadcast ship " + ship.username + " to client " + client.first);
             detach (distributeSpaceship (ship, client.second));
@@ -253,11 +253,11 @@ namespace cg {
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult()
-//            .catch_ ([this, & sinks, & username] (kj::Exception && e) {
-//            log ("Connection lost to " + username);
-//            log (e.getDescription());
-//            sinks.erase (username);
-//        })
+            .catch_ ([this, & sinks, & username] (kj::Exception && e) {
+            log ("Connection lost to " + username);
+            log (e.getDescription());
+            sinks.erase (username);
+        })
         ;
     }
 }
