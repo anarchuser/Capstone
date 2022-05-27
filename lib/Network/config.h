@@ -5,6 +5,7 @@
 
 #include <kj/debug.h>
 #include <kj/memory.h>
+#include <kj/common.h>
 #include <capnp/ez-rpc.h>
 #include <capnp/message.h>
 
