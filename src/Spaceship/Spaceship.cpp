@@ -211,7 +211,7 @@ namespace kt {
 
     std::chrono::nanoseconds Spaceship::getPing () {
         if (!remote) return std::chrono::nanoseconds (-1);
-        auto pingRequest = remote->handle.getShipRequest();
+        auto pingRequest = remote->handle.pingRequest();
         auto start = std::chrono::high_resolution_clock::now();
         pingRequest.send().wait (remote->waitscope);
         auto end = std::chrono::high_resolution_clock::now();
