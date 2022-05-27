@@ -94,7 +94,7 @@ namespace kt {
         else {
             auto text = std::to_string (health) + " hp";
             if (remote) {
-                auto us = std::chrono::duration_cast<std::chrono::microseconds> (getPing());
+                auto us = std::chrono::duration_cast<std::chrono::milliseconds> (getPing());
                 text += " (" + std::to_string (us.count()) + ")";
             }
             updateScoreboard (text);
@@ -111,7 +111,7 @@ namespace kt {
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
-        if (us.time % 17 == 0) updateScoreboard ();
+        if (us.time % int (1000 / FPS) == 0) updateScoreboard ();
 
         // Update ship velocity
         if (direction.decelerate && !direction.accelerate) {
