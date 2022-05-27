@@ -175,14 +175,25 @@ namespace kt {
         updateScoreboard ();
     }
 
-    kj::Own <cg::ShipHandleImpl> Spaceship::getHandle () {
+    kj::Own <cg::ShipSinkImpl> Spaceship::getSink () {
+        auto sink = kj::heap <cg::ShipSinkImpl> ();
         setAwake (true);
+        sink->setOnDone ([this] {
+            destroy();
+            return kj::READY_NOW;
+        });
+        sink->setOnSendItem ([this] (cg::Direction direction) {
+            updateDirection (direction);
+            return kj::READY_NOW;
+        });
+        return sink;
+    }
 
+    kj::Own <cg::ShipHandleImpl> Spaceship::getHandle () {
         auto handle = kj::heap <cg::ShipHandleImpl> ();
-        handle->setOnDone         (CLOSURE (this, & Spaceship::destroy));
-        handle->setOnSendItem     (CLOSURE (this, & Spaceship::updateDirection));
-        handle->setOnGetSpaceship (CLOSURE (this, & Spaceship::getData));
-        handle->setOnSetSpaceship (CLOSURE (this, & Spaceship::setData));
+        handle->setOnGetSink ([this] () { return getSink(); });
+        handle->setOnGetShip ([this] () { return getData(); });
+        handle->setOnSetShip ([this] (cg::Spaceship const & ship) { setData (ship); });
         return handle;
     }
 }

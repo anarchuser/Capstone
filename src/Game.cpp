@@ -54,6 +54,8 @@ namespace kt {
 
         new MenuScene ();
 
+        logs::messageln ("Scene initialisation complete");
+
         // Main game loop. Returns true if done
         int done;
         do {

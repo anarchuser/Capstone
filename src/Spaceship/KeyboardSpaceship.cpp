@@ -52,25 +52,28 @@ namespace kt {
     }
 
     void KeyboardSpaceship::update (UpdateState const & us) {
-        onUpdate(queried);
+        try {
+            onUpdate(queried);
+        } catch (std::bad_function_call & e) {
+            logs::warning ("KeyboardSpaceship::onUpdate not configured");
+        }
         Spaceship::update (us);
     }
 
     void KeyboardSpaceship::destroy () {
-        onDone();
+        try {
+            onDone();
+        } catch (std::bad_function_call & e) {
+            logs::warning ("KeyboardSpaceship::onDone not configured");
+        }
         Spaceship::destroy ();
         instance = nullptr;
     }
 
-    kj::Own <cg::ShipHandleImpl> KeyboardSpaceship::getHandle () {
-        setAwake (true);
-
-        auto handle = kj::heap <cg::ShipHandleImpl> ();
-        handle->setOnDone         (CLOSURE (this, & KeyboardSpaceship::destroy));
-        handle->setOnSendItem     (CLOSURE (this, & KeyboardSpaceship::updateDirection));
-        handle->setOnGetSpaceship (CLOSURE (this, & KeyboardSpaceship::getData));
-        handle->setOnSetSpaceship (CLOSURE (this, & KeyboardSpaceship::setData));
-        return handle;
+    kj::Own <cg::ShipSinkImpl> KeyboardSpaceship::getSink () {
+        auto sink = Spaceship::getSink();
+        sink->setOnDone ([]() { return kj::READY_NOW; });
+        return sink;
     }
 }
 

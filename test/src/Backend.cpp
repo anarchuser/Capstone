@@ -34,39 +34,44 @@ SCENARIO ("A backend returns the seed it was initialised with") {
             }
         }
         WHEN ("I register as client") {
-            auto registerClientRequest = main.registerClientRequest();
+            auto registerClientRequest = main.connectRequest();
 
-            auto registrar = kj::heap <cg::ShipRegistrarImpl> ();
-            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, Backend::ShipHandle::Client sink) {
+            auto registrar = kj::heap <cg::RegistrarImpl> ();
+            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, Backend::ShipHandle::Client handle) {
                 CHECK (ship.health == HEALTH_VALUE);
 
-                auto drain = kj::heap <cg::ShipHandleImpl> ();
-                drain->setOnDone ([](){});
-                drain->setOnSendItem ([] (cg::Direction const & dir) {
+                auto sink = kj::heap <cg::ShipSinkImpl> ();
+                sink->setOnDone ([](){ return kj::READY_NOW; });
+                sink->setOnSendItem ([] (cg::Direction const & dir) {
                     REQUIRE (dir.accelerate  == -1);
                     REQUIRE (dir.decelerate  ==  1);
                     REQUIRE (dir.rotateLeft  == -1);
                     REQUIRE (dir.rotateRight == -1);
+                    return kj::READY_NOW;
                 });
-                return kj::mv (drain);
+                return kj::mv (sink);
             });
-            registerClientRequest.setS2c_registrar (kj::mv (registrar));
+            registerClientRequest.setRegistrar (kj::mv (registrar));
 
             THEN ("I get back a proper result without fail") {
                 auto registerClientResult = registerClientRequest.send().wait (waitScope);
-                REQUIRE (registerClientResult.hasC2s_registrar());
 
-                auto c2s = registerClientResult.getC2s_registrar();
+                REQUIRE (registerClientResult.hasSynchro());
+                auto synchro = registerClientResult.getSynchro();
+
+                REQUIRE (registerClientResult.hasRegistrar());
+                auto registrar = registerClientResult.getRegistrar();
 
                 WHEN ("I send a registerShip request back to the received registrar") {
-                    auto registerShipRequest = c2s.registerShipRequest();
-                    registerShipRequest.initSpaceship().setHealth (HEALTH_VALUE);
+                    auto registerShipRequest = registrar.registerShipRequest();
+                    registerShipRequest.initShip().setHealth (HEALTH_VALUE);
+                    registerShipRequest.setHandle (kj::heap <::Backend::ShipHandle::Server>());
 
                     THEN ("It returns a valid ShipHandle") {
                         auto registerShipResult = registerShipRequest.send().wait (waitScope);
-                        REQUIRE (registerShipResult.hasRemote());
+                        REQUIRE (registerShipResult.hasSink());
 
-                        auto sink = registerShipResult.getRemote();
+                        auto sink = registerShipResult.getSink();
 
                         WHEN ("I send a sendItem request") {
                             auto sendItemRequest = sink.sendItemRequest ();

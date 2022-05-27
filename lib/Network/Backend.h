@@ -3,10 +3,13 @@
 
 #include "Network/config.h"
 
+#include "Synchro/Synchro.h"
+#include "Registrar/Registrar.h"
+#include "ShipSink/ShipSink.h"
+#include "ShipHandle/ShipHandle.h"
+
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
-#include "ShipHandle/ShipHandle.h"
-#include "ShipRegistrar/ShipRegistrar.h"
 
 #include <atomic>
 #include <functional>
@@ -14,48 +17,64 @@
 #include <sstream>
 #include <memory>
 #include <unordered_map>
-
+#include <vector>
+#include <numeric>
 #include <ranges>
+#include <iterator>
 
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
  */
 
 namespace cg {
+    using namespace std::string_literals;
+    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, Backend::ShipHandle::Client)>;
+
     class BackendImpl final: public Backend::Server {
     private:
-
-        /// Handles to all spaceships registered to the server
-        //TODO: replace username with proper UUID
-        std::unordered_map <std::string, Backend::ShipHandle::Client> shipHandles;
-
-        /// List of connected game clients
-        std::vector <Backend::ShipRegistrar::Client> registrars;
-
-        /// Map address -> remote server connection
-        std::unordered_map <std::string, Backend::Synchro::Client> connections;
-
-        /// Seed used to initialise the game. Returned by `randomSeed`
+        /// Seed of random number generator of currently running game
         std::size_t const rng_seed;
 
-        void sendItemCallback (std::string const & sender, Direction direction);
-        void doneCallback     (std::string username);
+        struct Registrar {
+            Backend::Registrar::Client registrar;
+            std::unordered_map <std::string, Backend::ShipSink::Client> sinks;
 
-        void broadcastSpaceship  (Spaceship const & sender);
+            explicit Registrar (Backend::Registrar::Client registrar);
+        };
 
-        kj::Own <ShipHandleImpl> registerShipCallback (Spaceship const & spaceship, Backend::ShipHandle::Client handle);
+        /// List of all ships in possession
+        std::unordered_map <std::string, Backend::ShipHandle::Client> ships;
 
+        /// List of connected clients (the things that we want to keep up to date)
+        std::vector <Registrar> clients;
+
+        /// List of connected synchros (the things this backend should synchronise with)
+        std::vector <Backend::Synchro::Client> synchros;
+
+        /// Synchro callbacks
+        kj::Own <RegistrarImpl> connectCallback (Backend::Synchro::Client synchro, Backend::Registrar::Client remoteRegistrar);
+
+        /// RegisterShip callback
+        kj::Own <ShipSinkImpl> registerShip (Spaceship const & ship, Backend::ShipHandle::Client);
+        kj::Promise <void> broadcastSpaceship (Spaceship const & ship);
+        kj::Promise <void> distributeSpaceship (Spaceship const & ship, Registrar & receiver);
+
+        /// ShipSink callbacks
+        kj::Promise <void> doneCallback (std::string const & username);
+        kj::Promise <void> sendItemCallback (std::string const & username, Direction const & direction);
+        kj::Promise <void> sendItemToClient (std::string const & username, Direction const & direction, Registrar& receiver);
+
+        /// Log function of this implementation
         void log (std::string const & msg);
 
     public:
         explicit BackendImpl (std::size_t seed);
 
-        /// RPC function calls
-        ::kj::Promise <void> ping (PingContext context) override;
-        ::kj::Promise <void> seed (SeedContext context) override;
-        ::kj::Promise <void> registerClient (RegisterClientContext context) override;
+        /** RPC function calls **/
+        ::kj::Promise <void> ping    (PingContext context) override;
+        ::kj::Promise <void> seed    (SeedContext context) override;
         ::kj::Promise <void> connect (ConnectContext context) override;
-        ::kj::Promise <void> requestConnect (RequestConnectContext context) override;
+        ::kj::Promise <void> join    (JoinContext context) override;
     };
 } // cg
 

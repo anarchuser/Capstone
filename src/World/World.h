@@ -10,7 +10,6 @@
 #include "src/Collision/CollisionListener.h"
 
 #include "Network/Backend.h"
-#include "Network/ShipRegistrar/ShipRegistrar.h"
 
 #include "Data/Spaceship.h"
 
