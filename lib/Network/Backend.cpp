@@ -145,18 +145,23 @@ namespace cg {
         auto & sender = ship.username;
         if (receiver.sinks.contains (sender)) return kj::READY_NOW;
 
-        auto & ships = receiver.ships;
-        KJ_REQUIRE (ships.contains (sender));
+        for (auto & client : clients) {
+            // Figure out which client is the owner of this spaceship (NOTE: std::find could not handle this properly)
+            // TODO: Don't use a loop for this
+            auto & ships = client.second.ships;
+            if (ships.contains (sender)) continue;
 
-        auto request = receiver.registrar.registerShipRequest();
-        ship.initialise (request.initShip());
-        request.setHandle (ships.at (sender));
-        auto promise = request.send();
-        return promise.then ([this, sender, & receiver] (capnp::Response <Backend::Registrar::RegisterShipResults> results) {
-            // Check again if nothing's changed
-            if (receiver.sinks.contains (sender)) return;
-            receiver.sinks.insert_or_assign (sender, results.getSink());
-        });
+            auto request = receiver.registrar.registerShipRequest ();
+            ship.initialise (request.initShip ());
+            request.setHandle (ships.at (sender));
+            auto promise = request.send ();
+            return promise.then (
+                    [this, sender, & receiver] (capnp::Response<Backend::Registrar::RegisterShipResults> results) {
+                        // Check again if nothing's changed
+                        if (receiver.sinks.contains (sender)) return;
+                        receiver.sinks.insert_or_assign (sender, results.getSink ());
+                    });
+        }
     }
     kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
         log ("Disconnecting " + username);
