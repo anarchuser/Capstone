@@ -135,8 +135,9 @@ namespace cg {
 
     kj::Promise <void> BackendImpl::broadcastSpaceship (Spaceship const & ship) {
         std::size_t i = 0;
+        log ("Broadcast ship to " + std::to_string (clients.size()) + " clients");
         for (auto & client : clients) {
-            log ("Broadcast ship " + ship.username + + " to client [" + std::to_string (++i) + "/" + std::to_string (clients.size()) + "]");
+            log ("Broadcast ship " + ship.username + " to client " + client.first);
             detach (distributeSpaceship (ship, client.second));
         }
         return kj::READY_NOW;
@@ -149,7 +150,7 @@ namespace cg {
             // Figure out which client is the owner of this spaceship (NOTE: std::find could not handle this properly)
             // TODO: Don't use a loop for this
             auto & ships = client.second.ships;
-            if (ships.contains (sender)) continue;
+            if (!ships.contains (sender)) continue;
 
             auto request = receiver.registrar.registerShipRequest ();
             ship.initialise (request.initShip ());
@@ -162,6 +163,8 @@ namespace cg {
                         receiver.sinks.insert_or_assign (sender, results.getSink ());
                     });
         }
+        KJ_FAIL_REQUIRE ("No handle for the given spaceship exists", ship.username);
+        return kj::READY_NOW;
     }
     kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
         log ("Disconnecting " + username);
