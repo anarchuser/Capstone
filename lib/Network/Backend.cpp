@@ -50,9 +50,9 @@ namespace cg {
         });
         results.setRegistrar (kj::mv (registrar));
 
-        auto synchro = kj::heap <SynchroImpl>();
-        synchro->setOnConnect ([this] (Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
-            return connectCallback (ID, synchro, registrar);
+        auto synchro = kj::heap <SynchroImpl>(ID);
+        synchro->setOnConnect ([this] (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
+            return connectCallback (id, synchro, registrar);
         });
         results.setSynchro (kj::mv (synchro));
 
@@ -66,9 +66,9 @@ namespace cg {
 
         auto results = context.getResults();
         results.setId (ID);
-        auto local = kj::heap <SynchroImpl> ();
-        local->setOnConnect ([this] (Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
-            return connectCallback (ID, synchro, registrar);
+        auto local = kj::heap <SynchroImpl> (ID);
+        local->setOnConnect ([this] (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
+            return connectCallback (id, synchro, registrar);
         });
         results.setLocal (kj::mv (local));
 
@@ -76,9 +76,9 @@ namespace cg {
         KJ_REQUIRE (params.hasRemote());
         auto connectRequest = params.getRemote().connectRequest();
         connectRequest.setId (ID);
-        auto synchro = kj::heap <SynchroImpl> ();
-        synchro->setOnConnect ([this] (Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
-            return connectCallback (ID, synchro, registrar);
+        auto synchro = kj::heap <SynchroImpl> (ID);
+        synchro->setOnConnect ([this] (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
+            return connectCallback (id, synchro, registrar);
         });
         connectRequest.setSynchro (kj::mv (synchro));
         auto registrar = kj::heap <RegistrarImpl> ();
