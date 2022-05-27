@@ -216,16 +216,17 @@ namespace cg {
             std::cout << "| Clients total: " << clients.size() << std::endl;
             for (auto & client : clients) {
                 std::cout << "|-- Client '" << client.first << std::endl;
-                std::cout << "|-- Sinks total: " << client.second.sinks.size() << std::endl;
+                std::cout << "|---- Sinks total: " << client.second.sinks.size() << std::endl;
                 for (auto & sink : client.second.sinks) {
-                    std::cout << "|---- Ship name: " << sink.first << std::endl;
+                    std::cout << "|------ Ship name: " << sink.first << std::endl;
                 }
-                std::cout << "\n|-- Ships total: " << client.second.ships.size() << std::endl;
+                std::cout << "|\n|---- Ships total: " << client.second.ships.size() << std::endl;
                 for (auto & ship : client.second.ships) {
-                    std::cout << "|---- Ship name: " << ship.first << std::endl;
+                    std::cout << "|------ Ship name: " << ship.first << std::endl;
                 }
+                std::cout << '|' << std::endl;
             }
-            std::cout << "\n=========================\n" << std::endl;
+            std::cout << "=========================\n" << std::endl;
 
             // TODO: figure out where to get the remote ShipHandle from
 //            KJ_REQUIRE (ships.contains (username));
