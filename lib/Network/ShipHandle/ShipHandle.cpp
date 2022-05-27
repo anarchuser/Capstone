@@ -8,6 +8,10 @@ namespace cg {
 //        std::cout << ss.str () << std::endl;
     }
 
+    ::kj::Promise <void> ShipHandleImpl::ping (PingContext context) {
+        return kj::READY_NOW;
+    }
+
     ::kj::Promise <void> ShipHandleImpl::getSink (GetSinkContext context) {
         log ("Sink requested");
         auto results = context.getResults();

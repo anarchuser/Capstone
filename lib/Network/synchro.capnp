@@ -36,6 +36,7 @@ interface Backend {
         getSink @0 () -> (sink :ShipSink);
         getShip @1 () -> (ship :Spaceship);
         setShip @2 (ship :Spaceship) -> ();
+        ping @3 ();
     }
 
     interface Registrar {

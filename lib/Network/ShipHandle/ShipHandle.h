@@ -28,6 +28,7 @@ namespace cg {
         ::kj::Promise <void> getSink (GetSinkContext context) override;
         ::kj::Promise <void> getShip (GetShipContext context) override;
         ::kj::Promise <void> setShip (SetShipContext context) override;
+        ::kj::Promise <void> ping (PingContext context) override;
     };
 
 } // cg
