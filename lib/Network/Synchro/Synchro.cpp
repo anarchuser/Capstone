@@ -4,8 +4,8 @@ namespace cg {
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Synchro @" << this << ": '" << msg << "'";
-                KJ_DLOG (INFO, ss.str());
-        std::cout << ss.str() << std::endl;
+        KJ_DLOG (INFO, ss.str());
+        debug_stdout (ss.str());
     }
 
     ::kj::Promise<void> SynchroImpl::connect (ConnectContext context) {

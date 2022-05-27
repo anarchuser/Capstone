@@ -8,6 +8,8 @@
 #include <capnp/ez-rpc.h>
 #include <capnp/message.h>
 
+#include "helper.h"
+
 #include <string>
 #include <iostream>
 #include <sstream>

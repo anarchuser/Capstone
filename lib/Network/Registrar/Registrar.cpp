@@ -5,7 +5,7 @@ namespace cg {
         std::stringstream ss;
         ss << "Registrar @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
-//        std::cout << ss.str() << std::endl;
+        debug_stdout (ss.str());
     }
 
     ::kj::Promise <void> RegistrarImpl::registerShip (RegisterShipContext context) {

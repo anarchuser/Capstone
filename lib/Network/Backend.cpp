@@ -8,14 +8,13 @@ namespace cg {
     BackendImpl::Registrar::Registrar (Backend::Registrar::Client registrar): registrar {registrar} {}
 
     void BackendImpl::log (std::string const & msg) {
-        std::stringstream ss;
+        std::ostringstream ss;
         ss << "Backend @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
-//        std::cout << ss.str() << std::endl;
+        debug_stdout (ss.str());
     }
 
     ::kj::Promise <void> BackendImpl::ping (PingContext context) {
-        log ("Ping");
         return kj::READY_NOW;
     }
 
