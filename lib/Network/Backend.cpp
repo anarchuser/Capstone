@@ -228,6 +228,8 @@ namespace cg {
             }
             std::cout << "=========================\n" << std::endl;
 
+            return kj::READY_NOW;
+
             // TODO: figure out where to get the remote ShipHandle from
 //            KJ_REQUIRE (ships.contains (username));
 //            return ships.at (username).getShipRequest().send()
