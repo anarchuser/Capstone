@@ -228,16 +228,19 @@ namespace cg {
             }
             std::cout << "=========================\n" << std::endl;
 
-            return kj::READY_NOW;
+            for (auto & client : clients) {
+                // Find the client that owns the ship in question
+                auto & ships = client.second.ships;
+                if (!ships.contains (username)) continue;
 
-            // TODO: figure out where to get the remote ShipHandle from
-//            KJ_REQUIRE (ships.contains (username));
-//            return ships.at (username).getShipRequest().send()
-//                    .then ([&] (capnp::Response <Backend::ShipHandle::GetShipResults> results) {
-//                        Spaceship ship (results.getShip());
-//                        KJ_ASSERT (ship.username == username);
-//                        return distributeSpaceship (ship, receiver);
-//                    });
+                // The current client owns the ship; proceed
+                return ships.at (username).getShipRequest().send()
+                        .then ([&] (capnp::Response <Backend::ShipHandle::GetShipResults> results) {
+                            Spaceship ship (results.getShip());
+                            KJ_DASSERT (ship.username == username);  // TODO: username should not be mandatory here
+                            return distributeSpaceship (ship, receiver);
+                        });
+            }
         }
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
