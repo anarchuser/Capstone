@@ -70,19 +70,21 @@ namespace kt {
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
         auto registrar = kj::heap <cg::RegistrarImpl> ();
-        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client const &) {
+        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client handle) {
             spWorld world = safeSpCast <World> (getLastChild());
 
             if (auto ship = KeyboardSpaceship::instance) {
                 if (ship->getName() == data.username) {
                     auto * ship = KeyboardSpaceship::instance;
                     ship->setData (data);
+                    ship->setHandle (kj::heap <Spaceship::Remote> (handle, waitscope));
                     return ship->getSink();
                 }
             }
 
             spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, data.username);
             ship->setData (data);
+            ship->setHandle (kj::heap <Spaceship::Remote> (handle, waitscope));
             return ship->getSink();
         });
         return registrar;
@@ -156,8 +158,8 @@ namespace kt {
     }
 
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
-        remoteClients.emplace_back (std::make_unique <capnp::EzRpcClient> (ip, port));
-        auto & remote = * remoteClients.back();
+        auto [iterator, success] = remoteClients.emplace (ip, kj::heap <capnp::EzRpcClient> (ip, port));
+        auto & remote = * iterator->second;
         auto request = remote.getMain <::Backend>().joinRequest();
         request.setRemote (handle.synchro);
         request.send().wait (remote.getWaitScope());

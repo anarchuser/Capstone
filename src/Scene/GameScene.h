@@ -32,7 +32,7 @@ namespace kt {
     class GameScene : public Scene {
     private:
         Backend backend;
-        std::vector <std::unique_ptr <capnp::EzRpcClient>> remoteClients;
+        std::unordered_map <std::string, kj::Own <capnp::EzRpcClient>> remoteClients;
         capnp::EzRpcClient client;
         kj::WaitScope & waitscope;
 

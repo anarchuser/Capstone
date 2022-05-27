@@ -59,7 +59,7 @@ namespace kt {
         body->CreateFixture (& rearFixture);
 
         scoreboard = new Text (res ? res->getResFont ("kt-liberation") : nullptr);
-        scoreboard->setPosition (0.80 * getParent()->getSize().x, 10 + id * 40);
+        scoreboard->setPosition (0.70 * getParent()->getSize().x, 10 + id * 40);
         getParent()->addChild (scoreboard);
         updateScoreboard();
 
@@ -89,9 +89,16 @@ namespace kt {
         detach ();
     }
 
-    void Spaceship::updateScoreboard (std::string msg) {
-        if (msg.empty()) msg = std::to_string (health) + " hp";
-        scoreboard->setText (getName() + ": " + msg);
+    void Spaceship::updateScoreboard (std::string const & msg) {
+        if (!msg.empty()) scoreboard->setText (getName() + ": " + msg);
+        else {
+            auto text = std::to_string (health) + " hp";
+            if (remote) {
+                auto us = std::chrono::duration_cast<std::chrono::microseconds> (getPing());
+                text += " (" + std::to_string (us.count()) + ")";
+            }
+            updateScoreboard (text);
+        }
     }
 
     void Spaceship::setAwake (bool awake) {
@@ -104,7 +111,7 @@ namespace kt {
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
-        updateScoreboard ();
+        if (us.time % 17 == 0) updateScoreboard ();
 
         // Update ship velocity
         if (direction.decelerate && !direction.accelerate) {
@@ -195,6 +202,20 @@ namespace kt {
         handle->setOnGetShip ([this] () { return getData(); });
         handle->setOnSetShip ([this] (cg::Spaceship const & ship) { setData (ship); });
         return handle;
+    }
+
+    Spaceship::Remote::Remote (::Backend::ShipHandle::Client handle, kj::WaitScope & waitScope)
+            : handle {handle}
+            , waitscope {waitScope}
+    {}
+
+    std::chrono::nanoseconds Spaceship::getPing () {
+        if (!remote) return std::chrono::nanoseconds (-1);
+        auto pingRequest = remote->handle.getShipRequest();
+        auto start = std::chrono::high_resolution_clock::now();
+        pingRequest.send().wait (remote->waitscope);
+        auto end = std::chrono::high_resolution_clock::now();
+        return end - start;
     }
 }
 
