@@ -15,6 +15,7 @@ namespace kt {
             , waitscope {client.getWaitScope()}
             , handle {[this] () {
                 auto request = client.getMain <::Backend>().connectRequest();
+                request.setId (USERNAME);
                 request.setRegistrar (getRegistrarImpl());
                 auto result = request.send().wait (waitscope);
                 KJ_REQUIRE (result.hasSynchro());
@@ -167,6 +168,7 @@ namespace kt {
         auto [iterator, success] = remoteClients.emplace (ip, kj::heap <capnp::EzRpcClient> (ip, port));
         auto & remote = * iterator->second;
         auto request = remote.getMain <::Backend>().joinRequest();
+        request.setId (USERNAME);
         request.setRemote (handle.synchro);
         request.send().wait (remote.getWaitScope());
     }

@@ -34,11 +34,11 @@ namespace cg {
     }
 
     ::kj::Promise <void> BackendImpl::connect (ConnectContext context) {
-        log ("Connect request received");
-
         auto params = context.getParams();
-        KJ_REQUIRE (params.hasRegistrar());
         KJ_REQUIRE (params.hasId());
+        log ("Connect request received from client " + std::string (params.getId()));
+
+        KJ_REQUIRE (params.hasRegistrar());
         clients.emplace (params.getId(), params.getRegistrar());
         log ("Number of clients connected: "s += std::to_string (clients.size()));
 
@@ -60,7 +60,9 @@ namespace cg {
     }
 
     ::kj::Promise <void> BackendImpl::join (JoinContext context) {
-        log ("Join request received");
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasId());
+        log ("Join request received from " + std::string (params.getId()));
 
         auto results = context.getResults();
         results.setId (ID);
@@ -71,7 +73,7 @@ namespace cg {
         results.setLocal (kj::mv (local));
 
         /// Connect back to received synchro
-        auto params = context.getParams();
+        KJ_REQUIRE (params.hasRemote());
         auto connectRequest = params.getRemote().connectRequest();
         connectRequest.setId (ID);
         auto synchro = kj::heap <SynchroImpl> ();
@@ -93,6 +95,7 @@ namespace cg {
     }
 
     ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client remoteRegistrar) {
+        log ("Received Synchro::connect request from " + id);
         clients.emplace (id, Client (std::move (remoteRegistrar), std::move (synchro)));
         log ("Number of clients connected: "s += std::to_string (clients.size()));
 
@@ -109,7 +112,7 @@ namespace cg {
         auto & ships = clients.at (id).ships;
         KJ_REQUIRE (!ships.contains (username), id, username, "Client 'id' already contains a ship named 'username'");
 
-        log ("Registering ship " + username);
+        log ("Registering ship " + username + " from client " + id);
         log ("Position: / "  + std::to_string (ship.position[0]) + " | " + std::to_string (ship.position[1]) + " \\");
         log ("Velocity: \\ " + std::to_string (ship.velocity[0]) + " | " + std::to_string (ship.velocity[1]) + " /");
         log ("Health: " + std::to_string (ship.health));
