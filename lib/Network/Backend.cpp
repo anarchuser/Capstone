@@ -178,14 +178,14 @@ namespace cg {
     kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
         log ("Disconnecting " + username);
         for (auto & client : clients) {
-            auto & ships = client.second.ships;
-            if (!ships.contains (username)) continue;
-            ships.erase (username);
-
             auto & sinks = client.second.sinks;
             if (!sinks.contains (username)) continue;
-            sinks.at (username).doneRequest().send().ignoreResult().detach ([](...){});  // Ignore errors on done
+            sinks.at (username).doneRequest().send().detach ([](...){});  // Ignore errors on done
             sinks.erase (username);
+
+            auto & ships = client.second.ships;
+            ships.erase (username);
+            if (ships.empty()) clients.erase (client.first);
         }
         return kj::READY_NOW;
     }
@@ -202,10 +202,7 @@ namespace cg {
                  */
 
                 sendItemToClient (username, direction, client.second).detach (
-                        [this, id = client.first, username = username] (kj::Exception && e) {
-                            KJ_DLOG (WARNING, id, username, e.getDescription ());
-                            if (clients.contains (id)) clients.at (id).sinks.erase (username);
-                        });
+                        [this, id = client.first] (kj::Exception && e) { disconnect (id); });
             }
         }
         /// Case 2: Item got sent from a remote client -> Distribute to our own ship only
@@ -249,10 +246,20 @@ namespace cg {
         return request.send().ignoreResult()
             .catch_ ([this, & sinks, & username] (kj::Exception && e) {
             log ("Connection lost to " + username);
-            log (e.getDescription());
             sinks.erase (username);
         })
         ;
+    }
+
+    void BackendImpl::disconnect (std::string const & id) {
+        if (!clients.contains (id)) return;
+        log ("Disconnecting client " + id);
+
+        auto & client = clients.at (id);
+        for (auto & sink : client.sinks) {
+            sink.second.doneRequest().send().detach ([](...){});
+        }
+        clients.erase (id);
     }
 }
 

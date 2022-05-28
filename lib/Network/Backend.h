@@ -73,6 +73,9 @@ namespace cg {
         kj::Promise <void> sendItemCallback (std::string const & username, Direction const & direction, std::string const & id);
         kj::Promise <void> sendItemToClient (std::string const & username, Direction const & direction, Client & receiver);
 
+        /// Disconnect the client with this id
+        void disconnect (std::string const & id);
+
         /// Log function of this implementation
         void log (std::string const & msg);
 
