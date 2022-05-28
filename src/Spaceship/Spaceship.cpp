@@ -208,7 +208,7 @@ namespace kt {
         auto start = std::chrono::high_resolution_clock::now();
         remote->pingRequest().send().ignoreResult().then ([this, start] () {
             auto end = std::chrono::high_resolution_clock::now();
-            auto latency = (end - start).count();
+            auto latency = (std::chrono::duration_cast<std::chrono::milliseconds> (end - start)).count();
             updateScoreboard ("", latency);
         }).detach ([this] (kj::Exception && e) {
             logs::warning (e.getDescription().cStr());
