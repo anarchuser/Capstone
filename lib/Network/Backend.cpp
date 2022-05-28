@@ -169,23 +169,7 @@ namespace cg {
                         // Check again if nothing's changed
                         if (receiver.sinks.contains (sender)) return;
 
-                        log ("Establishing sink from ship " + sender + " to client " + client);
                         receiver.sinks.insert_or_assign (sender, results.getSink ());
-
-                        std::cout << "| Clients total: " << clients.size() << std::endl;
-                        for (auto & client : clients) {
-                            std::cout << "|-- Client '" << client.first << std::endl;
-                            std::cout << "|---- Sinks total: " << client.second.sinks.size() << std::endl;
-                            for (auto & sink : client.second.sinks) {
-                                std::cout << "|------ Ship name: " << sink.first << std::endl;
-                            }
-                            std::cout << "|\n|---- Ships total: " << client.second.ships.size() << std::endl;
-                            for (auto & ship : client.second.ships) {
-                                std::cout << "|------ Ship name: " << ship.first << std::endl;
-                            }
-                            std::cout << '|' << std::endl;
-                        }
-                        std::cout << "=========================\n" << std::endl;
                     });
         }
         KJ_FAIL_REQUIRE ("No handle for the given spaceship exists", ship.username);
