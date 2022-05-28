@@ -4,19 +4,22 @@ namespace cg {
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Synchro @" << this << ": '" << msg << "'";
-                KJ_DLOG (INFO, ss.str());
-        std::cout << ss.str() << std::endl;
+        KJ_DLOG (INFO, ss.str());
+        debug_stdout (ss.str());
     }
 
     ::kj::Promise<void> SynchroImpl::connect (ConnectContext context) {
-        log ("Connection request received");
         auto params = context.getParams();
+        KJ_REQUIRE (params.hasId());
+        log ("Connection request received from client " + std::string (params.getId()));
+
         KJ_REQUIRE (params.hasSynchro());
         KJ_REQUIRE (params.hasRegistrar());
         auto results = context.getResults();
 
         try {
-            results.setRegistrar (onConnect (params.getSynchro(), params.getRegistrar()));
+            results.setRegistrar (onConnect (params.getId(), params.getSynchro(), params.getRegistrar()));
+            results.setId (ID);
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "Synchro::connect called without valid callback registered");
         }

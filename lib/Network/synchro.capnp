@@ -44,7 +44,7 @@ interface Backend {
     }
 
     interface Synchro {
-        connect @0 (synchro :Synchro, registrar :Registrar) -> (registrar :Registrar);
+        connect @0 (id :Text, synchro :Synchro, registrar :Registrar) -> (id :Text, registrar :Registrar);
     }
 
     ping @0 ();
@@ -53,9 +53,9 @@ interface Backend {
     seed @1 () -> (seed :UInt64);
     # Request RNG seed server is running for
 
-    connect @2 (registrar :Registrar) -> (registrar :Registrar, synchro :Synchro);
+    connect @2 (id :Text, registrar :Registrar) -> (id :Text, registrar :Registrar, synchro :Synchro);
     # Subscribe to Backend, get a local synchro instance
 
-    join @3 (remote :Synchro) -> (local :Synchro);
+    join @3 (id :Text, remote :Synchro) -> (id :Text, local :Synchro);
     # Tell a remote backend of our local synchro
 }

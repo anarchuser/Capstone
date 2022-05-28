@@ -35,9 +35,12 @@ SCENARIO ("A backend returns the seed it was initialised with") {
         }
         WHEN ("I register as client") {
             auto registerClientRequest = main.connectRequest();
+            registerClientRequest.setId (USERNAME);
 
-            auto registrar = kj::heap <cg::RegistrarImpl> ();
-            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, Backend::ShipHandle::Client handle) {
+            auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
+            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, std::string const & id, Backend::ShipHandle::Client handle) {
+                CHECK (id == USERNAME);
+
                 CHECK (ship.health == HEALTH_VALUE);
 
                 auto sink = kj::heap <cg::ShipSinkImpl> ();
@@ -58,6 +61,7 @@ SCENARIO ("A backend returns the seed it was initialised with") {
 
                 REQUIRE (registerClientResult.hasSynchro());
                 auto synchro = registerClientResult.getSynchro();
+                // TODO: test connection to synchro
 
                 REQUIRE (registerClientResult.hasRegistrar());
                 auto registrar = registerClientResult.getRegistrar();
