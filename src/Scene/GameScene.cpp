@@ -70,8 +70,8 @@ namespace kt {
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
-        auto registrar = kj::heap <cg::RegistrarImpl> ();
-        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, ::Backend::ShipHandle::Client handle) -> kj::Own <cg::ShipSinkImpl> {
+        auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
+        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, std::string const & id, ::Backend::ShipHandle::Client handle) -> kj::Own <cg::ShipSinkImpl> {
             try {
                 spWorld world = safeSpCast<World> (getFirstChild ());
 

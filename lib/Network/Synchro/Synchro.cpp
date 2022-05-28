@@ -1,8 +1,6 @@
 #include "Synchro.h"
 
 namespace cg {
-    SynchroImpl::SynchroImpl (std::string id): ID {id} {}
-
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Synchro @" << this << ": '" << msg << "'";

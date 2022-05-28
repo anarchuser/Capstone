@@ -21,7 +21,7 @@ namespace cg {
         std::string const ID;
 
     public:
-        explicit SynchroImpl (std::string id);
+        inline explicit SynchroImpl (std::string id): ID {id} {}
 
         inline void setOnConnect (ConnectCallback && callback) { onConnect = callback; }
 

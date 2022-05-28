@@ -28,7 +28,6 @@
 
 namespace cg {
     using namespace std::string_literals;
-    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, Backend::ShipHandle::Client)>;
 
     class BackendImpl final: public Backend::Server {
     private:

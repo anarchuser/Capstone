@@ -6,9 +6,10 @@
 #include "Network/ShipHandle/ShipHandle.h"
 
 #include <functional>
+#include <string>
 
 namespace cg {
-    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, Backend::ShipHandle::Client)>;
+    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, std::string const &, Backend::ShipHandle::Client)>;
 
     class RegistrarImpl final: public Backend::Registrar::Server {
     private:
@@ -17,7 +18,11 @@ namespace cg {
 
         RegisterShipCallback onRegisterShip;
 
+        std::string const ID;
+
     public:
+        inline explicit RegistrarImpl (std::string id): ID {id} {}
+
         inline void setOnRegisterShip (RegisterShipCallback && callback) { onRegisterShip = callback; }
 
         ::kj::Promise <void> registerShip (RegisterShipContext context) override;

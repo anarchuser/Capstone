@@ -18,7 +18,7 @@ namespace cg {
 
     void BackendImpl::log (std::string const & msg) {
         std::ostringstream ss;
-        ss << "Backend @" << this << ": '" << msg << "'";
+        ss << "Backend " << ID << " @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
         debug_stdout (ss.str());
     }
@@ -36,6 +36,8 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::connect (ConnectContext context) {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasId());
+        std::string const & remoteID = params.getId();
+        KJ_REQUIRE (!clients.contains (remoteID), remoteID, "Client is already registered!");
         log ("Connect request received from client " + std::string (params.getId()));
 
         KJ_REQUIRE (params.hasRegistrar());
@@ -44,13 +46,13 @@ namespace cg {
 
         auto results = context.getResults();
         results.setId (ID);
-        auto registrar = kj::heap <RegistrarImpl>();
-        registrar->setOnRegisterShip ([this, id = params.getId()] (Spaceship ship, Backend::ShipHandle::Client handle) {
+        auto registrar = kj::heap <RegistrarImpl>(remoteID);
+        registrar->setOnRegisterShip ([this] (Spaceship const & ship, std::string const & id, Backend::ShipHandle::Client handle) {
             return registerShip (ship, id, handle);
         });
         results.setRegistrar (kj::mv (registrar));
 
-        auto synchro = kj::heap <SynchroImpl>(ID);
+        auto synchro = kj::heap <SynchroImpl>(remoteID);
         synchro->setOnConnect ([this] (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
             return connectCallback (id, synchro, registrar);
         });
@@ -62,11 +64,12 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::join (JoinContext context) {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasId());
-        log ("Join request received from " + std::string (params.getId()));
+        std::string const & remoteID = params.getId();
+        log ("Join request received from " + remoteID);
 
         auto results = context.getResults();
         results.setId (ID);
-        auto local = kj::heap <SynchroImpl> (ID);
+        auto local = kj::heap <SynchroImpl> (remoteID);
         local->setOnConnect ([this] (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
             return connectCallback (id, synchro, registrar);
         });
@@ -76,20 +79,25 @@ namespace cg {
         KJ_REQUIRE (params.hasRemote());
         auto connectRequest = params.getRemote().connectRequest();
         connectRequest.setId (ID);
-        auto synchro = kj::heap <SynchroImpl> (ID);
+
+        KJ_REQUIRE (results.hasId());
+        auto synchro = kj::heap <SynchroImpl> (remoteID);
         synchro->setOnConnect ([this] (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
             return connectCallback (id, synchro, registrar);
         });
         connectRequest.setSynchro (kj::mv (synchro));
-        auto registrar = kj::heap <RegistrarImpl> ();
-        registrar->setOnRegisterShip ([this] (Spaceship ship, Backend::ShipHandle::Client handle) {
-            return registerShip (ship, ID, handle);
+
+        auto registrar = kj::heap <RegistrarImpl> (remoteID);
+        registrar->setOnRegisterShip ([this] (Spaceship ship, std::string const & id, Backend::ShipHandle::Client handle) {
+            return registerShip (ship, id, handle);
         });
         connectRequest.setRegistrar (kj::mv (registrar));
-        return connectRequest.send().then ([this, synchro = params.getRemote()] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
+
+        return connectRequest.send().then ([this, synchro = params.getRemote(), id = remoteID] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
             KJ_REQUIRE (results.hasRegistrar());
-            KJ_REQUIRE (results.hasId());
-            clients.emplace (results.getId(), Client (results.getRegistrar(), synchro));
+            KJ_REQUIRE (results.getId() == id);
+            KJ_REQUIRE (!clients.contains (id));
+            clients.emplace (id, Client (results.getRegistrar(), synchro));
             log ("Number of clients connected: "s += std::to_string (clients.size()));
         });
     }
@@ -99,8 +107,8 @@ namespace cg {
         clients.emplace (id, Client (std::move (remoteRegistrar), std::move (synchro)));
         log ("Number of clients connected: "s += std::to_string (clients.size()));
 
-        auto registrar = kj::heap <RegistrarImpl>();
-        registrar->setOnRegisterShip ([this, id] (Spaceship ship, Backend::ShipHandle::Client handle) {
+        auto registrar = kj::heap <RegistrarImpl>(id);
+        registrar->setOnRegisterShip ([this] (Spaceship const & ship, std::string const & id, Backend::ShipHandle::Client handle) {
             return registerShip (ship, id, handle);
         });
         return registrar;
@@ -156,11 +164,28 @@ namespace cg {
             ship.initialise (request.initShip ());
             request.setHandle (ships.at (sender));
             auto promise = request.send ();
-            return promise.then (
-                    [this, sender, & receiver] (capnp::Response<Backend::Registrar::RegisterShipResults> results) {
+            return promise.then ([this, sender, & receiver, client = client.first]
+                    (capnp::Response<Backend::Registrar::RegisterShipResults> results) {
                         // Check again if nothing's changed
                         if (receiver.sinks.contains (sender)) return;
+
+                        log ("Establishing sink from ship " + sender + " to client " + client);
                         receiver.sinks.insert_or_assign (sender, results.getSink ());
+
+                        std::cout << "| Clients total: " << clients.size() << std::endl;
+                        for (auto & client : clients) {
+                            std::cout << "|-- Client '" << client.first << std::endl;
+                            std::cout << "|---- Sinks total: " << client.second.sinks.size() << std::endl;
+                            for (auto & sink : client.second.sinks) {
+                                std::cout << "|------ Ship name: " << sink.first << std::endl;
+                            }
+                            std::cout << "|\n|---- Ships total: " << client.second.ships.size() << std::endl;
+                            for (auto & ship : client.second.ships) {
+                                std::cout << "|------ Ship name: " << ship.first << std::endl;
+                            }
+                            std::cout << '|' << std::endl;
+                        }
+                        std::cout << "=========================\n" << std::endl;
                     });
         }
         KJ_FAIL_REQUIRE ("No handle for the given spaceship exists", ship.username);
@@ -220,21 +245,6 @@ namespace cg {
 
         if (!sinks.contains (username)) {
             log ("Missing sink to ship " + username);
-
-            std::cout << "| Clients total: " << clients.size() << std::endl;
-            for (auto & client : clients) {
-                std::cout << "|-- Client '" << client.first << std::endl;
-                std::cout << "|---- Sinks total: " << client.second.sinks.size() << std::endl;
-                for (auto & sink : client.second.sinks) {
-                    std::cout << "|------ Ship name: " << sink.first << std::endl;
-                }
-                std::cout << "|\n|---- Ships total: " << client.second.ships.size() << std::endl;
-                for (auto & ship : client.second.ships) {
-                    std::cout << "|------ Ship name: " << ship.first << std::endl;
-                }
-                std::cout << '|' << std::endl;
-            }
-            std::cout << "=========================\n" << std::endl;
 
             for (auto & client : clients) {
                 // Find the client that owns the ship in question
