@@ -89,16 +89,14 @@ namespace kt {
         detach ();
     }
 
-    void Spaceship::updateScoreboard (std::string const & msg) {
-        if (!msg.empty()) scoreboard->setText (getName() + ": " + msg);
+    void Spaceship::updateScoreboard (std::string const & msg, long ping) {
+        auto text = getName() + ": ";
+        if (!msg.empty()) text += msg;
         else {
-            auto text = std::to_string (health) + " hp";
-            if (remote) {
-                auto us = std::chrono::duration_cast<std::chrono::milliseconds> (getPing());
-                text += " (" + std::to_string (us.count()) + ")";
-            }
-            updateScoreboard (text);
+            text += std::to_string (health) + " hp";
+            text += "(" + std::to_string (ping) + ")";
         }
+        scoreboard->setText (text);
     }
 
     void Spaceship::setAwake (bool awake) {
@@ -111,7 +109,7 @@ namespace kt {
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
-        if (us.time % int (1000 / FPS) == 0) updateScoreboard ();
+        if (us.time % int (1000 / FPS) == 0) updatePing ();
 
         // Update ship velocity
         if (direction.decelerate && !direction.accelerate) {
@@ -204,23 +202,18 @@ namespace kt {
         return handle;
     }
 
-    Spaceship::Remote::Remote (::Backend::ShipHandle::Client handle, kj::WaitScope & waitScope)
-            : handle {handle}
-            , waitscope {waitScope}
-    {}
+    void Spaceship::updatePing () {
+        if (!remote) return updateScoreboard ();
 
-    std::chrono::nanoseconds Spaceship::getPing () {
-        if (!remote) return std::chrono::nanoseconds (-1);
-        auto pingRequest = remote->handle.pingRequest();
         auto start = std::chrono::high_resolution_clock::now();
-        try {
-            pingRequest.send().wait (remote->waitscope);
-        } catch (std::exception & e) {
-            logs::warning (e.what());
-            return std::chrono::nanoseconds (-1);
-        }
-        auto end = std::chrono::high_resolution_clock::now();
-        return end - start;
+        remote->pingRequest().send().ignoreResult().then ([this, start] () {
+            auto end = std::chrono::high_resolution_clock::now();
+            auto latency = (end - start).count();
+            updateScoreboard ("", latency);
+        }).detach ([this] (kj::Exception && e) {
+            logs::warning (e.getDescription().cStr());
+            detach();
+        });
     }
 }
 

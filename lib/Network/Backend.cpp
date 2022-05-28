@@ -247,6 +247,9 @@ namespace cg {
             .catch_ ([this, & sinks, & username] (kj::Exception && e) {
             log ("Connection lost to " + username);
             sinks.erase (username);
+            for (auto & client : clients) {
+                if (client.second.type == Client::LOCAL) client.second.ships.erase (username);
+            }
         })
         ;
     }

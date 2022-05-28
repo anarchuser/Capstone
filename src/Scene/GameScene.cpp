@@ -79,14 +79,14 @@ namespace kt {
                     if (ship->getName () == data.username) {
                         auto * ship = KeyboardSpaceship::instance;
                         ship->setData (data);
-                        ship->setHandle (kj::heap<Spaceship::Remote> (handle, waitscope));
+                        ship->setHandle (kj::heap <::Backend::ShipHandle::Client> (handle));
                         return ship->getSink ();
                     }
                 }
 
                 spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, data.username);
                 ship->setData (data);
-                ship->setHandle (kj::heap<Spaceship::Remote> (handle, waitscope));
+                ship->setHandle (kj::heap <::Backend::ShipHandle::Client> (handle));
                 return ship->getSink ();
             } catch (std::exception & e) {
                 logs::warning ("Error on registering new spaceship");
