@@ -74,26 +74,21 @@ namespace kt {
         auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
             try {
-                OX_ASSERT (data.username != "Planet");
+                auto & username = data.username;
+                OX_ASSERT (username != "Planet");
 
                 if (auto ship = actors.localShip) {
-                    if (ship->getName () == data.username) {
+                    if (ship->getName () == username) {
                         ship->setData (data);
                         ship->setHandle (kj::heap<cg::ShipHandle_t> (handle));
                         return ship->getSink ();
                     }
                 }
-                for (auto remote = actors.remoteShips.begin(); remote != actors.remoteShips.end(); ++remote) {
-                    // If ship with this name exists already, replace it
-                    if (spRemoteSpaceship ship = * remote) {
-                        if (ship->getName() == data.username) {
-                            ship->detach();
-                            actors.remoteShips.erase (remote);
-                        }
-                    }
-                }
+                std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship const & ship) {
+                    return ship && ship->getName() == username;
+                });
 
-                spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, data.username);
+                spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
                 actors.remoteShips.push_back (ship);
                 ship->setData (data);
                 ship->setHandle (kj::heap <cg::ShipHandle_t> (handle));

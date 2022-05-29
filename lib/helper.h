@@ -5,7 +5,7 @@
 
 #define ONCE(expr) static bool __once__ = [this]() { ((expr)); return true; }()
 
-//#define DEBUG_MINOR
+#define DEBUG_MINOR
 
 inline void debug_stdout (std::string const & message) {
 #ifdef DEBUG
