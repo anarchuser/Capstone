@@ -14,7 +14,7 @@ namespace kt {
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
         bodyDef.position = world_pos;
-        bodyDef.userData.pointer = reinterpret_cast<uintptr_t>(this);
+        bodyDef.userData.pointer = (uintptr_t) this;
 
         auto * body = world.world.CreateBody (& bodyDef);
         setUserData (body);

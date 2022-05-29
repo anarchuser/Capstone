@@ -7,18 +7,15 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "src/World/World.h"
 #include "Spaceship.h"
+#include "World/World.h"
 
-#include "Network/Backend.h"
 #include "Data/Spaceship.h"
 
 #define KEYBOARD_SPACESHIP_COLOR {0, 0, 255}
 
 namespace kt {
     using namespace oxygine;
-
-    DECLARE_SMART(KeyboardSpaceship, spKeyboardSpaceship);
 
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
@@ -43,11 +40,9 @@ namespace kt {
         void destroy () override;
 
         kj::Own <cg::ShipSinkImpl> getSink() override;
-
-        /// Current keyboard controlled spaceship instance
-        static KeyboardSpaceship * instance;
     };
 
+    DECLARE_SMART(KeyboardSpaceship, spKeyboardSpaceship);
 }
 
 #endif //CAPSTONE_KB_SPACESHIP_H

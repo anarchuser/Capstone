@@ -15,6 +15,17 @@
 #include <iostream>
 #include <sstream>
 
+namespace cg {
+    typedef std::string ClientID;
+    typedef std::string ShipName;
+
+    using Backend_t    = ::Backend::Client;
+    using Synchro_t    = ::Backend::Synchro::Client;
+    using Registrar_t  = ::Backend::Registrar::Client;
+    using ShipHandle_t = ::Backend::ShipHandle::Client;
+    using ShipSink_t   = ::Backend::ShipSink::Client;
+}
+
 #endif //CAPSTONE_NETWORK_CONFIG_H
 
 /* Copyright © 2022 Aaron Alef */

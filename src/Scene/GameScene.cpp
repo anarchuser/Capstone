@@ -29,32 +29,33 @@ namespace kt {
         // Load all required game assets
         gameResources.loadXML (GAME_RESOURCES);
 
-        spWorld world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
+        auto & world = actors.world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
         addChild (world);
 
         // Generate a couple of planets, number based on world size
         auto planetAnimation = gameResources.getResAnim ("venus");
         for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
-            new Planet (* world, planetAnimation, {
+            actors.planets.emplace_back (new Planet (* world, planetAnimation, {
                     float (rng.random ({100, world->getSize().x - 100})),
                     float (rng.random ({100, world->getSize().y - 100}))
-            }, float (rng.random ({0.3, 0.7})));
+            }, float (rng.random ({0.3, 0.7}))));
         }
 
         Spaceship::resetCounter();
-        spKeyboardSpaceship ship = new KeyboardSpaceship (* world, & gameResources, USERNAME);
+        auto & ship = actors.localShip = new KeyboardSpaceship (* world, & gameResources, USERNAME);
+
 
         auto request = handle.registrar.registerShipRequest();
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
-        handle.keyboard_sink = std::make_unique <::Backend::ShipSink::Client> (request.send().wait (waitscope).getSink());
-        ship->setOnUpdate ([this, ship] (cg::Direction const & direction) {
+        handle.keyboard_sink = std::make_unique <cg::ShipSink_t> (request.send().wait (waitscope).getSink());
+        ship->setOnUpdate ([this] (cg::Direction const & direction) {
             auto request = handle.keyboard_sink->sendItemRequest ();
             direction.initialise (request.initItem ().initDirection ());
             request.send ().wait (waitscope);
         });
         ship->setOnDone ([this] () {
-            logs::messageln ("Executing onDone callback");
+            actors.localShip = nullptr;
             handle.keyboard_sink->doneRequest().send().wait (waitscope);
         });
 
@@ -71,22 +72,26 @@ namespace kt {
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
         auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
-        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, std::string const & id, ::Backend::ShipHandle::Client handle) -> kj::Own <cg::ShipSinkImpl> {
+        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
             try {
-                spWorld world = safeSpCast<World> (getFirstChild ());
+                auto & username = data.username;
+                OX_ASSERT (username != "Planet");
 
-                if (auto ship = KeyboardSpaceship::instance) {
-                    if (ship->getName () == data.username) {
-                        auto * ship = KeyboardSpaceship::instance;
+                if (auto ship = actors.localShip) {
+                    if (ship->getName () == username) {
                         ship->setData (data);
-                        ship->setHandle (kj::heap<Spaceship::Remote> (handle, waitscope));
+                        ship->setHandle (kj::heap<cg::ShipHandle_t> (handle));
                         return ship->getSink ();
                     }
                 }
+                std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship const & ship) {
+                    return ship && ship->getName() == username;
+                });
 
-                spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, data.username);
+                spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
+                actors.remoteShips.push_back (ship);
                 ship->setData (data);
-                ship->setHandle (kj::heap<Spaceship::Remote> (handle, waitscope));
+                ship->setHandle (kj::heap <cg::ShipHandle_t> (handle));
                 return ship->getSink ();
             } catch (std::exception & e) {
                 logs::warning ("Error on registering new spaceship");
@@ -96,16 +101,16 @@ namespace kt {
         return registrar;
     }
 
-    GameScene::~GameScene() noexcept {
-        // Free all game assets
-        gameResources.free();
-        if (auto * ship = KeyboardSpaceship::instance) ship->destroy();
-    }
-
     void GameScene::update (UpdateState const & us) {
-        if (!KeyboardSpaceship::instance) {
-            ONCE (onMenu (nullptr));
+        static bool gameOver = false;
+        if (!gameOver) {
+            if (!actors.localShip) {
+                gameOver = true;
+                onMenu (nullptr);
+            }
         }
+
+        if (!actors.localShip && actors.remoteShips.empty()) onDisconnect (nullptr);
 
         Actor::update (us);
     }
@@ -122,39 +127,41 @@ namespace kt {
             return dialog;
         }();
 
-        if (getLastChild() == dialog) {
-            removeChild (dialog);
-        } else {
-            addChild (dialog);
-        }
+        if (getLastChild() == dialog) removeChild (dialog);
+        else addChild (dialog);
+    }
+
+    GameScene::~GameScene() noexcept {
+        // Free all game assets
+        gameResources.free();
+
+        detach();
+        getStage()->removeAllEventListeners();
+
+        if (auto & ship = actors.localShip) ship->destroy();
+        actors.localShip = nullptr;
+
+        for (auto & ship : actors.remoteShips) ship->destroy();
+        actors.remoteShips.clear();
     }
 
     void GameScene::onRestart (Event * event) {
-        detach();
-        getStage()->removeAllEventListeners();
-        this->~GameScene();
-        while (get_pointer (getStage()->getLastChild()) == this);
+        GameScene::~GameScene();
         new GameScene (rng.seed);
     }
 
     void GameScene::onNewGame (Event * event) {
-        detach();
-        getStage()->removeAllEventListeners();
-        this->~GameScene();
-        while (get_pointer (getStage()->getLastChild()) == this);
+        GameScene::~GameScene();
         new GameScene (RANDOM_SEED);
     }
 
     void GameScene::onDisconnect (Event * event) {
-        KeyboardSpaceship::instance->destroy();
-        detach();
-        getStage()->removeAllEventListeners();
-        this->~GameScene();
-        while (get_pointer (getStage()->getLastChild()) == this);
+        GameScene::~GameScene();
         new MenuScene();
     }
 
     void GameScene::onQuit (Event * event) {
+        GameScene::~GameScene();
         core::requestQuit();
     }
 

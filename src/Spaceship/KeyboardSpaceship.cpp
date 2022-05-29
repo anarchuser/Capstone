@@ -1,13 +1,9 @@
 #include "KeyboardSpaceship.h"
 
 namespace kt {
-
-    KeyboardSpaceship * KeyboardSpaceship::instance = nullptr;
-
     KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, std::string const & username)
             : Spaceship (world, res, username)
             {
-                instance = this;
                 setAddColor (KEYBOARD_SPACESHIP_COLOR);
 
                 listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [this](Event * event) {
@@ -67,7 +63,6 @@ namespace kt {
             logs::warning ("KeyboardSpaceship::onDone not configured");
         }
         Spaceship::destroy ();
-        instance = nullptr;
     }
 
     kj::Own <cg::ShipSinkImpl> KeyboardSpaceship::getSink () {

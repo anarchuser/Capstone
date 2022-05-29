@@ -10,6 +10,9 @@
 #include "src/World/World.h"
 #include "src/Collision/CollisionEvent.h"
 #include "src/UI/Text.h"
+
+#include "Network/config.h"
+#include "Network/Backend.h"
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
 
@@ -35,7 +38,6 @@ namespace kt {
 
     /// Spaceship intended to be controlled by (human) players. No control mechanism included; subclass to do so
     class Spaceship: public Sprite {
-    public: struct Remote;
     private:
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
         static std::size_t ship_counter;
@@ -49,7 +51,7 @@ namespace kt {
         /// Current issued direction:
         cg::Direction direction;
 
-        kj::Own <Remote> remote;
+        kj::Own <cg::ShipHandle_t> remote;
 
     protected:
         std::vector <int> listeners;
@@ -61,16 +63,9 @@ namespace kt {
         b2Body * body = nullptr;
 
         /// Update personal scoreboard based on current health
-        void updateScoreboard (const std::string& msg = "");
+        void updateScoreboard (const std::string& msg = "", long ping = -1);
 
     public:
-        struct Remote {
-            ::Backend::ShipHandle::Client handle;
-            kj::WaitScope & waitscope;
-
-            Remote (::Backend::ShipHandle::Client handle, kj::WaitScope & waitScope);
-        };
-
         /// Construct a new ship in the current world, at given position (usually centred)
         Spaceship (World & world, Resources * res, std::string const & username);
         ~Spaceship() noexcept override = default;
@@ -97,8 +92,8 @@ namespace kt {
 
         virtual kj::Own <cg::ShipSinkImpl> getSink();
         virtual kj::Own <cg::ShipHandleImpl> getHandle();
-        inline void setHandle (kj::Own <Remote> && remote) { this->remote = kj::mv (remote); }
-        std::chrono::nanoseconds getPing();
+        inline void setHandle (kj::Own <cg::ShipHandle_t> && remote) { this->remote = kj::mv (remote); }
+        void updatePing();
 
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
         static void resetCounter();

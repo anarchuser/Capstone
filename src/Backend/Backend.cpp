@@ -10,9 +10,9 @@ namespace kt {
             }
     
     Backend::~Backend () noexcept {
-        logs::messageln ("Shutting down backend");
+        if (!stop) logs::messageln ("Shutting down backend");
         stop = true;
-        server_thread.join();
+        if (server_thread.joinable()) server_thread.join();
     }
     
     void Backend::serve () {
@@ -55,6 +55,7 @@ namespace kt {
             if (exception.find ("disconnected: connect(): Connection refused") < 0) {
                 throw e;
             }
+            logs::warning ("Ping '%s:%d': Connection refused", ip.c_str(), port + 65536);
         }
         return false;
     }

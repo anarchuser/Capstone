@@ -9,10 +9,6 @@
 
 #include "Spaceship.h"
 
-#include "Network/Backend.h"
-
-#include <functional>
-
 #define REMOTE_SPACESHIP_COLOR {255, 0, 0}
 
 namespace kt {

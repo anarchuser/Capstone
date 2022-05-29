@@ -10,10 +10,11 @@
 #include <thread>
 #include <memory>
 
-#include "src/UI/Dialog.h"
-#include "src/Planet/Planet.h"
-#include "src/Spaceship/RemoteSpaceship.h"
-#include "src/World/World.h"
+#include "UI/Dialog.h"
+#include "Planet/Planet.h"
+#include "Spaceship/RemoteSpaceship.h"
+#include "Spaceship/KeyboardSpaceship.h"
+#include "World/World.h"
 #include "Scene.h"
 #include "MenuScene.h"
 #include "Backend/Backend.h"
@@ -31,21 +32,30 @@ namespace kt {
     /// Handles the actual game. Responsible for initialising the World with its objects and providing an options menu
     class GameScene : public Scene {
     private:
+        /// Resources used throughout the game (font, background, sprites)
+        Resources gameResources;
+        /// Random number generator based on the seed given. Ensures every random number used depends on this seed
+        HashedRNG rng;
+
+        /* All objects related to the connection to the backend */
         Backend backend;
         std::unordered_map <std::string, kj::Own <capnp::EzRpcClient>> remoteClients;
         capnp::EzRpcClient client;
         kj::WaitScope & waitscope;
 
         struct Handle {
-            ::Backend::Registrar::Client registrar;
-            ::Backend::Synchro::Client synchro;
-            std::unique_ptr <::Backend::ShipSink::Client> keyboard_sink = nullptr;
+            cg::Registrar_t registrar;
+            cg::Synchro_t synchro;
+            std::unique_ptr <cg::ShipSink_t> keyboard_sink = nullptr;
         } handle;
 
-        /// Resources used throughout the game (font, background, sprites)
-        Resources gameResources;
-        /// Random number generator based on the seed given. Ensures every random number used depends on this seed
-        HashedRNG rng;
+        /* References to all objects stored in the world */
+        struct Actors {
+            spWorld world;
+            spKeyboardSpaceship localShip;
+            std::vector <spRemoteSpaceship> remoteShips;
+            std::vector <spPlanet> planets;
+        } actors;
 
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         void joinGame (std::string const & ip, unsigned short port);

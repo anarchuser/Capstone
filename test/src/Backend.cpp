@@ -30,7 +30,9 @@ SCENARIO ("A backend returns the seed it was initialised with") {
             auto request = main.seedRequest ();
 
             THEN ("I get back the expected seed without fail") {
+                logs::messageln ("Before seed request");
                 REQUIRE (request.send ().wait (waitScope).getSeed () == seed);
+                logs::messageln ("After seed request");
             }
         }
         WHEN ("I register as client") {
@@ -38,7 +40,7 @@ SCENARIO ("A backend returns the seed it was initialised with") {
             registerClientRequest.setId (USERNAME);
 
             auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
-            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, std::string const & id, Backend::ShipHandle::Client handle) {
+            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, cg::ClientID const & id, cg::ShipHandle_t const & handle) {
                 CHECK (id == USERNAME);
 
                 CHECK (ship.health == HEALTH_VALUE);
