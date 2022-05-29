@@ -137,7 +137,10 @@ namespace kt {
         detach();
         getStage()->removeAllEventListeners();
 
+        if (auto & ship = actors.localShip) ship->destroy();
         actors.localShip = nullptr;
+
+        for (auto & ship : actors.remoteShips) ship->destroy();
         actors.remoteShips.clear();
     }
 

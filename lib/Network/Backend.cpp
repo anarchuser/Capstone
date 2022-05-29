@@ -195,7 +195,11 @@ namespace cg {
     kj::Promise <void> BackendImpl::sendItemCallback (ShipName const & username, Direction const & direction, ClientID const & id) {
         KJ_REQUIRE (clients.contains (id), id, username, "Received item from unregistered client");
         auto & sender = clients.at (id);
-        KJ_REQUIRE (sender.ships.contains (username), id, username, "Client does not own ship 'username'");
+        if (sender.ships.empty()) {
+            disconnect (id);
+            return kj::READY_NOW;
+        }
+        KJ_ASSERT (sender.ships.contains (username), id, username, "Client does not own ship 'username'");
 
         /// Case 1: Item got sent from a local client -> Distribute to everyone
         if (sender.type == Client::LOCAL) {
@@ -250,9 +254,6 @@ namespace cg {
             .catch_ ([this, & sinks, & username] (kj::Exception && e) {
             log ("Connection lost to " + username);
             sinks.erase (username);
-            for (auto & client : clients) {
-                if (client.second.type == Client::LOCAL) client.second.ships.erase (username);
-            }
         })
         ;
     }
