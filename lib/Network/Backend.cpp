@@ -176,16 +176,19 @@ namespace cg {
         return kj::READY_NOW;
     }
     kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
-        log ("Disconnecting " + username);
+        log ("Ship " + username + " is done");
         for (auto & client : clients) {
-            auto & sinks = client.second.sinks;
-            if (!sinks.contains (username)) continue;
-            sinks.at (username).doneRequest().send().detach ([](...){});  // Ignore errors on done
-            sinks.erase (username);
 
-            auto & ships = client.second.ships;
-            ships.erase (username);
-            if (ships.empty()) clients.erase (client.first);
+            auto & sinks = client.second.sinks;
+            auto promise = sinks.contains (username)
+                    ? sinks.at (username).doneRequest().send().ignoreResult()
+                    : kj::READY_NOW;
+            promise.then ([this, id = client.first, username] () {
+                auto & client = clients.at (id);
+                client.sinks.erase (username);
+                client.ships.erase (username);
+                if (client.ships.empty()) disconnect (id);
+            }).detach ([] (...) {});  // Ignore errors on done
         }
         return kj::READY_NOW;
     }
@@ -258,8 +261,7 @@ namespace cg {
         if (!clients.contains (id)) return;
         log ("Disconnecting client " + id);
 
-        auto & client = clients.at (id);
-        for (auto & sink : client.sinks) {
+        for (auto & sink : clients.at (id).sinks) {
             sink.second.doneRequest().send().detach ([](...){});
         }
         clients.erase (id);

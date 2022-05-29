@@ -96,12 +96,6 @@ namespace kt {
         return registrar;
     }
 
-    GameScene::~GameScene() noexcept {
-        // Free all game assets
-        gameResources.free();
-        if (auto * ship = KeyboardSpaceship::instance) ship->destroy();
-    }
-
     void GameScene::update (UpdateState const & us) {
         if (!KeyboardSpaceship::instance) {
             ONCE (onMenu (nullptr));
@@ -129,32 +123,35 @@ namespace kt {
         }
     }
 
-    void GameScene::onRestart (Event * event) {
+    GameScene::~GameScene() noexcept {
+        // Free all game assets
+        gameResources.free();
+
         detach();
         getStage()->removeAllEventListeners();
-        this->~GameScene();
-        while (get_pointer (getStage()->getLastChild()) == this);
+
+        if (auto * ship = KeyboardSpaceship::instance) ship->destroy();
+        while (KeyboardSpaceship::instance) std::this_thread::yield();
+        while (get_pointer (getStage()->getLastChild()) == this) std::this_thread::yield();
+    }
+
+    void GameScene::onRestart (Event * event) {
+        GameScene::~GameScene();
         new GameScene (rng.seed);
     }
 
     void GameScene::onNewGame (Event * event) {
-        detach();
-        getStage()->removeAllEventListeners();
-        this->~GameScene();
-        while (get_pointer (getStage()->getLastChild()) == this);
+        GameScene::~GameScene();
         new GameScene (RANDOM_SEED);
     }
 
     void GameScene::onDisconnect (Event * event) {
-        KeyboardSpaceship::instance->destroy();
-        detach();
-        getStage()->removeAllEventListeners();
-        this->~GameScene();
-        while (get_pointer (getStage()->getLastChild()) == this);
+        GameScene::~GameScene();
         new MenuScene();
     }
 
     void GameScene::onQuit (Event * event) {
+        GameScene::~GameScene();
         core::requestQuit();
     }
 
