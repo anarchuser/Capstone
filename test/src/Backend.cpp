@@ -40,7 +40,7 @@ SCENARIO ("A backend returns the seed it was initialised with") {
             registerClientRequest.setId (USERNAME);
 
             auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
-            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, std::string const & id, Backend::ShipHandle::Client handle) {
+            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, cg::ClientID const & id, cg::ShipHandle_t const & handle) {
                 CHECK (id == USERNAME);
 
                 CHECK (ship.health == HEALTH_VALUE);
