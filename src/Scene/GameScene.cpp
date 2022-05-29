@@ -47,7 +47,7 @@ namespace kt {
         auto request = handle.registrar.registerShipRequest();
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
-        handle.keyboard_sink = std::make_unique <::Backend::ShipSink::Client> (request.send().wait (waitscope).getSink());
+        handle.keyboard_sink = std::make_unique <cg::ShipSink_t> (request.send().wait (waitscope).getSink());
         ship->setOnUpdate ([this, ship] (cg::Direction const & direction) {
             auto request = handle.keyboard_sink->sendItemRequest ();
             direction.initialise (request.initItem ().initDirection ());
@@ -71,22 +71,26 @@ namespace kt {
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
         auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
-        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, std::string const & id, ::Backend::ShipHandle::Client handle) -> kj::Own <cg::ShipSinkImpl> {
+        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
             try {
-                spWorld world = safeSpCast<World> (getFirstChild ());
+                OX_ASSERT (data.username != "Planet");
 
-                if (auto ship = KeyboardSpaceship::instance) {
+                if (auto * ship = KeyboardSpaceship::instance) {
                     if (ship->getName () == data.username) {
-                        auto * ship = KeyboardSpaceship::instance;
                         ship->setData (data);
-                        ship->setHandle (kj::heap <::Backend::ShipHandle::Client> (handle));
+                        ship->setHandle (kj::heap<cg::ShipHandle_t> (handle));
                         return ship->getSink ();
                     }
+                }
+                spWorld world = safeSpCast<World> (getFirstChild ());
+                if (auto ship = safeSpCast <Spaceship> (world->getChild (data.username, oxygine::ep_ignore_error))) {
+                    // If ship with this name exists already, replace it
+                    ship->destroy();
                 }
 
                 spRemoteSpaceship ship = new RemoteSpaceship (* world, & gameResources, data.username);
                 ship->setData (data);
-                ship->setHandle (kj::heap <::Backend::ShipHandle::Client> (handle));
+                ship->setHandle (kj::heap <cg::ShipHandle_t> (handle));
                 return ship->getSink ();
             } catch (std::exception & e) {
                 logs::warning ("Error on registering new spaceship");
@@ -116,11 +120,8 @@ namespace kt {
             return dialog;
         }();
 
-        if (getLastChild() == dialog) {
-            removeChild (dialog);
-        } else {
-            addChild (dialog);
-        }
+        if (getLastChild() == dialog) removeChild (dialog);
+        else addChild (dialog);
     }
 
     GameScene::~GameScene() noexcept {

@@ -1,7 +1,6 @@
 #include "RemoteSpaceship.h"
 
 namespace kt {
-    // TODO: ping to one specific server instance?
     RemoteSpaceship::RemoteSpaceship (World & world, Resources * res, std::string const & username)
             : Spaceship (world, res, username)
             {

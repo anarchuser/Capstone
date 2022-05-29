@@ -5,8 +5,6 @@
 
 #include "oxygine-framework.h"
 
-#include <functional>
-
 namespace kt {
     using namespace oxygine;
 

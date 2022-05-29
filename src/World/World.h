@@ -9,10 +9,6 @@
 #include "src/debug/Box2DDebugDraw.h"
 #include "src/Collision/CollisionListener.h"
 
-#include "Network/Backend.h"
-
-#include "Data/Spaceship.h"
-
 /// Size of the physical world. Determines x/y ratio and size of objects contained
 #define WORLD_SIZE {10, 10}
 

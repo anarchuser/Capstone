@@ -10,6 +10,9 @@
 #include "src/World/World.h"
 #include "src/Collision/CollisionEvent.h"
 #include "src/UI/Text.h"
+
+#include "Network/config.h"
+#include "Network/Backend.h"
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
 
@@ -48,7 +51,7 @@ namespace kt {
         /// Current issued direction:
         cg::Direction direction;
 
-        kj::Own <::Backend::ShipHandle::Client> remote;
+        kj::Own <cg::ShipHandle_t> remote;
 
     protected:
         std::vector <int> listeners;
@@ -89,7 +92,7 @@ namespace kt {
 
         virtual kj::Own <cg::ShipSinkImpl> getSink();
         virtual kj::Own <cg::ShipHandleImpl> getHandle();
-        inline void setHandle (kj::Own <::Backend::ShipHandle::Client> && remote) { this->remote = kj::mv (remote); }
+        inline void setHandle (kj::Own <cg::ShipHandle_t> && remote) { this->remote = kj::mv (remote); }
         void updatePing();
 
         /// Counter incrementing IDs. Reset on creating a new GameScene instance

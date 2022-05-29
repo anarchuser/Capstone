@@ -20,12 +20,14 @@ namespace kt {
         /// Inject a new Main Menu scene instance into the stage
         MenuScene ();
 
+        ~MenuScene ();
+
         /// Callback for when starting a new game is requested
         void onNewGame (Event * event);
         /// Callback for when joining an existing game is requested
         void onJoinGame (Event * event);
         /// Callback for when quitting the application is requested
-        void onRequestExit (Event * event);
+        static void onRequestExit (Event * event);
 
         void joinGame (std::string const & address);
     };

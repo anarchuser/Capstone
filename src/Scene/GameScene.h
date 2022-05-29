@@ -37,9 +37,9 @@ namespace kt {
         kj::WaitScope & waitscope;
 
         struct Handle {
-            ::Backend::Registrar::Client registrar;
-            ::Backend::Synchro::Client synchro;
-            std::unique_ptr <::Backend::ShipSink::Client> keyboard_sink = nullptr;
+            cg::Registrar_t registrar;
+            cg::Synchro_t synchro;
+            std::unique_ptr <cg::ShipSink_t> keyboard_sink = nullptr;
         } handle;
 
         /// Resources used throughout the game (font, background, sprites)

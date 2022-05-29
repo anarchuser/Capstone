@@ -7,10 +7,9 @@
 #include "oxygine-framework.h"
 #include "box2d.h"
 
-#include "src/World/World.h"
 #include "Spaceship.h"
+#include "World/World.h"
 
-#include "Network/Backend.h"
 #include "Data/Spaceship.h"
 
 #define KEYBOARD_SPACESHIP_COLOR {0, 0, 255}
