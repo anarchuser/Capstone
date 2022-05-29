@@ -5,7 +5,9 @@ namespace cg {
         std::stringstream ss;
         ss << "ShipHandle @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str ());
+#ifdef DEBUG_MINOR
         debug_stdout (ss.str());
+#endif
     }
 
     ::kj::Promise <void> ShipHandleImpl::ping (PingContext context) {

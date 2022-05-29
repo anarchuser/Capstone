@@ -232,8 +232,6 @@ namespace cg {
         auto & sinks = receiver.sinks;
 
         if (!sinks.contains (username)) {
-            log ("Missing sink to ship " + username);
-
             for (auto & client : clients) {
                 // Find the client that owns the ship in question
                 auto & ships = client.second.ships;
@@ -251,11 +249,9 @@ namespace cg {
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult()
-            .catch_ ([this, & sinks, & username] (kj::Exception && e) {
-            log ("Connection lost to " + username);
-            sinks.erase (username);
-        })
-        ;
+                .catch_ ([this, & sinks, & username] (kj::Exception && e) {
+                    sinks.erase (username);
+                });
     }
 
     void BackendImpl::disconnect (ClientID const & id) {

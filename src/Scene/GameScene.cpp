@@ -111,10 +111,11 @@ namespace kt {
         if (!gameOver) {
             if (!actors.localShip) {
                 gameOver = true;
-                backend.~Backend ();
                 onMenu (nullptr);
             }
         }
+
+        if (!actors.localShip && actors.remoteShips.empty()) onDisconnect (nullptr);
 
         Actor::update (us);
     }
