@@ -1,19 +1,19 @@
 #include "Backend.h"
 
 namespace cg {
-    BackendImpl::BackendImpl (std::size_t seed, std::string id)
+    BackendImpl::BackendImpl (std::size_t seed, ClientID id)
             : rng_seed {seed}
             , ID {id}
             {}
 
-    BackendImpl::Client::Client (Backend::Registrar::Client && registrar, kj::Maybe <Backend::Synchro::Client> && synchro, Type type)
+    BackendImpl::Client::Client (Registrar_t && registrar, kj::Maybe <Synchro_t> && synchro, Type type)
             : registrar {registrar}
             , synchro {synchro}
             , type {type}
             {}
 
-    BackendImpl::Client::Client (Backend::Registrar::Client && registrar)
-            : Client (std::forward <Backend::Registrar::Client> (registrar), {}, LOCAL)
+    BackendImpl::Client::Client (Registrar_t && registrar)
+            : Client (std::forward <Registrar_t> (registrar), {}, LOCAL)
             {}
 
     void BackendImpl::log (std::string const & msg) {
@@ -36,9 +36,9 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::connect (ConnectContext context) {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasId());
-        std::string const & remoteID = params.getId();
+        ClientID const & remoteID = params.getId();
         KJ_REQUIRE (!clients.contains (remoteID), remoteID, "Client is already registered!");
-        log ("Connect request received from client " + std::string (params.getId()));
+        log ("Connect request received from client " + ClientID (params.getId()));
 
         KJ_REQUIRE (params.hasRegistrar());
         clients.emplace (params.getId(), params.getRegistrar());
@@ -47,13 +47,13 @@ namespace cg {
         auto results = context.getResults();
         results.setId (ID);
         auto registrar = kj::heap <RegistrarImpl>(remoteID);
-        registrar->setOnRegisterShip ([this] (Spaceship const & ship, std::string const & id, Backend::ShipHandle::Client handle) {
+        registrar->setOnRegisterShip ([this] (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
             return registerShip (ship, id, handle);
         });
         results.setRegistrar (kj::mv (registrar));
 
         auto synchro = kj::heap <SynchroImpl>(remoteID);
-        synchro->setOnConnect ([this] (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
+        synchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
             return connectCallback (id, synchro, registrar);
         });
         results.setSynchro (kj::mv (synchro));
@@ -64,13 +64,13 @@ namespace cg {
     ::kj::Promise <void> BackendImpl::join (JoinContext context) {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasId());
-        std::string const & remoteID = params.getId();
+        ClientID const & remoteID = params.getId();
         log ("Join request received from " + remoteID);
 
         auto results = context.getResults();
         results.setId (ID);
         auto local = kj::heap <SynchroImpl> (remoteID);
-        local->setOnConnect ([this] (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
+        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
             return connectCallback (id, synchro, registrar);
         });
         results.setLocal (kj::mv (local));
@@ -82,13 +82,13 @@ namespace cg {
 
         KJ_REQUIRE (results.hasId());
         auto synchro = kj::heap <SynchroImpl> (remoteID);
-        synchro->setOnConnect ([this] (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client registrar) {
+        synchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
             return connectCallback (id, synchro, registrar);
         });
         connectRequest.setSynchro (kj::mv (synchro));
 
         auto registrar = kj::heap <RegistrarImpl> (remoteID);
-        registrar->setOnRegisterShip ([this] (Spaceship ship, std::string const & id, Backend::ShipHandle::Client handle) {
+        registrar->setOnRegisterShip ([this] (Spaceship ship, ClientID const & id, ShipHandle_t handle) {
             return registerShip (ship, id, handle);
         });
         connectRequest.setRegistrar (kj::mv (registrar));
@@ -97,24 +97,24 @@ namespace cg {
             KJ_REQUIRE (results.hasRegistrar());
             KJ_REQUIRE (results.getId() == id);
             KJ_REQUIRE (!clients.contains (id));
-            clients.emplace (id, Client (results.getRegistrar(), synchro));
+            clients.emplace (id, Client (results.getRegistrar (), synchro));
             log ("Number of clients connected: "s += std::to_string (clients.size()));
         });
     }
 
-    ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client remoteRegistrar) {
+    ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
         log ("Received Synchro::connect request from " + id);
         clients.emplace (id, Client (std::move (remoteRegistrar), std::move (synchro)));
         log ("Number of clients connected: "s += std::to_string (clients.size()));
 
         auto registrar = kj::heap <RegistrarImpl>(id);
-        registrar->setOnRegisterShip ([this] (Spaceship const & ship, std::string const & id, Backend::ShipHandle::Client handle) {
+        registrar->setOnRegisterShip ([this] (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
             return registerShip (ship, id, handle);
         });
         return registrar;
     }
 
-    kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, std::string const & id, Backend::ShipHandle::Client handle) {
+    kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
         auto username = ship.username;
         KJ_REQUIRE (clients.contains (id), id, "Ship owner is not registered");
         auto & ships = clients.at (id).ships;
@@ -175,7 +175,7 @@ namespace cg {
         KJ_FAIL_REQUIRE ("No handle for the given spaceship exists", ship.username);
         return kj::READY_NOW;
     }
-    kj::Promise <void> BackendImpl::doneCallback (std::string const & username) {
+    kj::Promise <void> BackendImpl::doneCallback (ShipName const & username) {
         log ("Ship " + username + " is done");
         for (auto & client : clients) {
 
@@ -192,7 +192,7 @@ namespace cg {
         }
         return kj::READY_NOW;
     }
-    kj::Promise <void> BackendImpl::sendItemCallback (std::string const & username, Direction const & direction, std::string const & id) {
+    kj::Promise <void> BackendImpl::sendItemCallback (ShipName const & username, Direction const & direction, ClientID const & id) {
         KJ_REQUIRE (clients.contains (id), id, username, "Received item from unregistered client");
         auto & sender = clients.at (id);
         KJ_REQUIRE (sender.ships.contains (username), id, username, "Client does not own ship 'username'");
@@ -224,7 +224,7 @@ namespace cg {
         }
         return kj::READY_NOW;
     }
-    kj::Promise <void> BackendImpl::sendItemToClient (std::string const & username, Direction const & direction, Client & receiver) {
+    kj::Promise <void> BackendImpl::sendItemToClient (ShipName const & username, Direction const & direction, Client & receiver) {
         auto & sinks = receiver.sinks;
 
         if (!sinks.contains (username)) {
@@ -257,12 +257,12 @@ namespace cg {
         ;
     }
 
-    void BackendImpl::disconnect (std::string const & id) {
+    void BackendImpl::disconnect (ClientID const & id) {
         if (!clients.contains (id)) return;
         log ("Disconnecting client " + id);
 
         for (auto & sink : clients.at (id).sinks) {
-            sink.second.doneRequest().send().detach ([](...){});
+            sink.second.doneRequest().send().detach ([](...){});  // Ignore errors on done
         }
         clients.erase (id);
     }

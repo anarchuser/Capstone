@@ -9,7 +9,7 @@
 #include <string>
 
 namespace cg {
-    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, std::string const &, Backend::ShipHandle::Client)>;
+    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, ClientID const &, ShipHandle_t)>;
 
     class RegistrarImpl final: public Backend::Registrar::Server {
     private:
@@ -18,10 +18,10 @@ namespace cg {
 
         RegisterShipCallback onRegisterShip;
 
-        std::string const ID;
+        ClientID const ID;
 
     public:
-        inline explicit RegistrarImpl (std::string id): ID {id} {}
+        inline explicit RegistrarImpl (ClientID id): ID {id} {}
 
         inline void setOnRegisterShip (RegisterShipCallback && callback) { onRegisterShip = callback; }
 

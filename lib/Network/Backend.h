@@ -35,7 +35,7 @@ namespace cg {
         std::size_t const rng_seed;
 
         /// Own identifier
-        std::string const ID;
+        ClientID const ID;
 
         /// Struct holding all kinds of information about things connected
         struct Client {
@@ -43,44 +43,44 @@ namespace cg {
             enum Type { LOCAL, REMOTE } type;
 
             /// Thing used to update the client (e.g., new ship spawned)
-            Backend::Registrar::Client registrar;
+            Registrar_t registrar;
 
             /// If the client is a remote backend use this to interact with it
-            kj::Maybe <Backend::Synchro::Client> synchro;
+            kj::Maybe <Synchro_t> synchro;
 
             /// List of handles to all ships in possession registered by this client
-            std::unordered_map <std::string, Backend::ShipHandle::Client> ships;
+            std::unordered_map <ShipName, ShipHandle_t> ships;
 
             /// List of all ship sinks this client needs to distribute incoming events to
-            std::unordered_map <std::string, Backend::ShipSink::Client> sinks;
+            std::unordered_map <ShipName, ShipSink_t> sinks;
 
-            Client (Backend::Registrar::Client && registrar, kj::Maybe <Backend::Synchro::Client> && synchro, Type type = REMOTE);
-            explicit Client (Backend::Registrar::Client && registrar);
+            Client (Registrar_t && registrar, kj::Maybe <Synchro_t> && synchro, Type type = REMOTE);
+            explicit Client (Registrar_t && registrar);
         };
         /// List of all clients connected
-        std::unordered_map <std::string, Client> clients;
+        std::unordered_map <ClientID, Client> clients;
 
         /// Synchro callbacks
-        kj::Own <RegistrarImpl> connectCallback (std::string const & id, Backend::Synchro::Client synchro, Backend::Registrar::Client remoteRegistrar);
+        kj::Own <RegistrarImpl> connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar);
 
         /// RegisterShip callback
-        kj::Own <ShipSinkImpl> registerShip    (Spaceship const & ship, std::string const & id, Backend::ShipHandle::Client);
+        kj::Own <ShipSinkImpl> registerShip    (Spaceship const & ship, ClientID const & id, ShipHandle_t);
         kj::Promise <void> broadcastSpaceship  (Spaceship const & ship);
         kj::Promise <void> distributeSpaceship (Spaceship const & ship, Client & receiver);
 
         /// ShipSink callbacks
-        kj::Promise <void> doneCallback     (std::string const & username);
-        kj::Promise <void> sendItemCallback (std::string const & username, Direction const & direction, std::string const & id);
-        kj::Promise <void> sendItemToClient (std::string const & username, Direction const & direction, Client & receiver);
+        kj::Promise <void> doneCallback     (ShipName const & username);
+        kj::Promise <void> sendItemCallback (ShipName const & username, Direction const & direction, ClientID const & id);
+        kj::Promise <void> sendItemToClient (ShipName const & username, Direction const & direction, Client & receiver);
 
         /// Disconnect the client with this id
-        void disconnect (std::string const & id);
+        void disconnect (ClientID const & id);
 
         /// Log function of this implementation
         void log (std::string const & msg);
 
     public:
-        explicit BackendImpl (std::size_t seed, std::string id);
+        explicit BackendImpl (std::size_t seed, ClientID id);
 
         /** RPC function calls **/
         ::kj::Promise <void> ping    (PingContext    context) override;
