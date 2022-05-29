@@ -84,6 +84,8 @@ namespace kt {
         void onDisconnect (Event * event);
         /// Quit game and close application
         void onQuit (Event * event);
+        /// Join existing game
+        void onJoinGame (Event * event);
     };
 
     DECLARE_SMART(GameScene, spGameScene);

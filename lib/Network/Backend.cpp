@@ -209,7 +209,7 @@ namespace cg {
                  */
 
                 sendItemToClient (username, direction, client.second).detach (
-                        [this, id = client.first] (kj::Exception && e) { disconnect (id); });
+                        [this, id = client.first] (...) { disconnect (id); });
             }
         }
         /// Case 2: Item got sent from a remote client -> Distribute to our own ship only
