@@ -17,8 +17,6 @@
 namespace kt {
     using namespace oxygine;
 
-    DECLARE_SMART(KeyboardSpaceship, spKeyboardSpaceship);
-
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     private:
@@ -42,11 +40,9 @@ namespace kt {
         void destroy () override;
 
         kj::Own <cg::ShipSinkImpl> getSink() override;
-
-        /// Current keyboard controlled spaceship instance
-        static KeyboardSpaceship * instance;
     };
 
+    DECLARE_SMART(KeyboardSpaceship, spKeyboardSpaceship);
 }
 
 #endif //CAPSTONE_KB_SPACESHIP_H

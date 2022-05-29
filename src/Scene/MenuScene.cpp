@@ -19,7 +19,6 @@ namespace kt {
     MenuScene::~MenuScene () {
         detach();
         getStage()->removeAllEventListeners();
-        while (get_pointer(getStage()->getLastChild()) == this);
     }
 
     void MenuScene::onNewGame (Event * event) {

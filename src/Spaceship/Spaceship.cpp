@@ -67,7 +67,7 @@ namespace kt {
             if (!body->IsAwake()) return;
 //            spSprite other = safeCast <CollisionEvent *> (event)->other;
             --health;
-            updateScoreboard();
+            updatePing();
             if (health <= 0) {
                 logs::messageln ("Spaceship of '%s' crashed...", getName().c_str());
                 destroy();
@@ -94,7 +94,7 @@ namespace kt {
         if (!msg.empty()) text += msg;
         else {
             text += std::to_string (health) + " hp";
-            text += "(" + std::to_string (ping) + ")";
+            text += " (" + std::to_string (ping) + ")";
         }
         scoreboard->setText (text);
     }
