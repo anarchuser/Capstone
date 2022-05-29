@@ -55,6 +55,7 @@ namespace kt {
             if (exception.find ("disconnected: connect(): Connection refused") < 0) {
                 throw e;
             }
+            logs::warning ("Ping '%s:%d': Connection refused", ip.c_str(), port + 65536);
         }
         return false;
     }

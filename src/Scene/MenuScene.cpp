@@ -29,11 +29,7 @@ namespace kt {
         static auto size = getSize ();
         static spDialog dialog = [this] () {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to ping to:");
-            dialog->addInput (REMOTE_ADDRESS, [this] (std::string msg) {
-                if (Backend::ping (msg, SERVER_PORT)) {
-                    joinGame (msg);
-                }
-            });
+            dialog->addInput (REMOTE_ADDRESS, [this] (std::string msg) { joinGame (msg); });
             dialog->addButton ("Cancel", CLOSURE (this, & MenuScene::onJoinGame));
             return dialog;
         } ();
@@ -43,8 +39,10 @@ namespace kt {
         else removeChild (dialog);
     }
     void MenuScene::joinGame (std::string const & address) {
-        MenuScene::~MenuScene();
-        new GameScene (address, SERVER_PORT);
+        if (Backend::ping (address, SERVER_PORT)) {
+            MenuScene::~MenuScene();
+            new GameScene (address, SERVER_PORT);
+        }
     }
     void MenuScene::onRequestExit (Event * event) {
         core::requestQuit();

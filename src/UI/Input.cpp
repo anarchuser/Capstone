@@ -26,7 +26,6 @@ namespace kt {
             static bool first = true;
             auto msg = message->getText ();
             if (keysym.scancode == SDL_SCANCODE_KP_ENTER || keysym.scancode == SDL_SCANCODE_RETURN) {
-                logs::messageln ("Enter pressed");
                 onEnter (msg);
             } else {
                 switch (keysym.scancode) {
