@@ -30,7 +30,9 @@ SCENARIO ("A backend returns the seed it was initialised with") {
             auto request = main.seedRequest ();
 
             THEN ("I get back the expected seed without fail") {
+                logs::messageln ("Before seed request");
                 REQUIRE (request.send ().wait (waitScope).getSeed () == seed);
+                logs::messageln ("After seed request");
             }
         }
         WHEN ("I register as client") {

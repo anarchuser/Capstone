@@ -107,8 +107,13 @@ namespace kt {
     }
 
     void GameScene::update (UpdateState const & us) {
-        if (!actors.localShip) {
-            ONCE (onMenu (nullptr));
+        static bool gameOver = false;
+        if (!gameOver) {
+            if (!actors.localShip) {
+                gameOver = true;
+                backend.~Backend ();
+                onMenu (nullptr);
+            }
         }
 
         Actor::update (us);

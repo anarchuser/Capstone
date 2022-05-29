@@ -10,9 +10,9 @@ namespace kt {
             }
     
     Backend::~Backend () noexcept {
-        logs::messageln ("Shutting down backend");
+        if (!stop) logs::messageln ("Shutting down backend");
         stop = true;
-        server_thread.join();
+        if (server_thread.joinable()) server_thread.join();
     }
     
     void Backend::serve () {
