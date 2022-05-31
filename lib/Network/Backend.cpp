@@ -152,9 +152,12 @@ namespace cg {
     }
 
     ::kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
+        log ("Register ship callback");
         auto username = ship.username;
+        if (!clients.contains (id)) log ("Ship owner of " + username + ", client " + id + ", is not registered!");
         KJ_REQUIRE (clients.contains (id), id, "Ship owner is not registered");
         auto & ships = clients.at (id).ships;
+        if (ships.contains (username)) log ("Client " + id + " already contains a ship named " + username);
         KJ_REQUIRE (!ships.contains (username), id, username, "Client 'id' already contains a ship named 'username'");
 
         log ("Registering ship " + username + " from client " + id);
@@ -276,7 +279,6 @@ namespace cg {
     kj::Promise <void> BackendImpl::sendItemToClient (ShipName const & username, Direction const & direction, Client & receiver) {
         auto & sinks = receiver.sinks;
 
-        log ("Distribute item from ship " + username);
         if (!sinks.contains (username)) {
             log ("Receiver does not hold a sink to the ship yet");
             for (auto & client : clients) {
