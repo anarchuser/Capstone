@@ -3,7 +3,7 @@
 namespace cg {
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
-        ss << "Synchro @" << this << ": '" << msg << "'";
+        ss << "Synchro " << ID << " @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
 #ifdef DEBUG_MINOR
         debug_stdout (ss.str());
@@ -33,7 +33,7 @@ namespace cg {
         KJ_REQUIRE (params.hasId());
         KJ_REQUIRE (params.hasSynchro());
 
-        log ("Shared connection received");
+        log ("Shared connection received from " + std::string (params.getId()));
 
         try {
             onShare (params.getId(), params.getSynchro());
