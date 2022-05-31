@@ -17,7 +17,7 @@ setup:	FORCE	CMakeLists.txt
 	cmake -H. -B$(BUILD_DIR) -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" > /dev/zero
 
 # Build the project (lib and src)
-build:	setup
+build:	FORCE	setup
 	cmake --build $(BUILD_DIR) --target Capstone
 
 # Build the benchmarking tool
