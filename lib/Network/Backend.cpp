@@ -58,8 +58,8 @@ namespace cg {
             return connectCallback (id, synchro, registrar);
         });
         synchro->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
-            log ("==== OnShare callback ====");
-            log ("Sharing from " + ID + " to " + id);
+            log ("==== OnShare callback (connect) ====");
+            log ("Received synchro to client " + id);
             return connectTo (id, synchro);
         });
         results.setSynchro (kj::mv (synchro));
@@ -75,32 +75,7 @@ namespace cg {
 
         // Share our own synchro callback to new connection
         KJ_REQUIRE (params.hasRemote());
-        auto remote = params.getRemote();
-        log ("Share " + remoteID + " our own synchro");
-        auto shareRequest = remote.shareRequest();
-        shareRequest.setId (ID);
-        auto local = kj::heap <SynchroImpl> (remoteID);
-        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
-            return connectCallback (id, synchro, registrar);
-        });
-        local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
-            return connectTo (id, synchro);
-        });
-        shareRequest.setSynchro (kj::mv (local));
-        detach (shareRequest.send().ignoreResult());
-
-        // Share all other synchro callbacks
-        for (auto & client : clients) {
-            if (client.second.type == Client::REMOTE) {
-                auto * clientSynchro = kj::_::readMaybe (client.second.synchro);
-                KJ_ASSERT_NONNULL (clientSynchro);
-                auto shareRequest = remote.shareRequest ();
-                shareRequest.setId (client.first);
-                shareRequest.setSynchro (* clientSynchro);
-                log ("Share " + remoteID + " the synchro of " + client.first);
-                detach (shareRequest.send().ignoreResult());
-            }
-        }
+        shareConnections (remoteID, params.getRemote());
 
         /// Connect back to received synchro
         return connectTo (remoteID, params.getRemote());
@@ -108,9 +83,10 @@ namespace cg {
 
     ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
         log ("Received Synchro::connect request from " + id);
-        clients.emplace (id, Client (std::move (remoteRegistrar), std::move (synchro)));
+        clients.emplace (id, Client (std::move (remoteRegistrar), synchro));
         log ("Number of clients connected: "s += std::to_string (clients.size()));
         for (auto & client : clients) log ("Connected client: " + client.first);
+        shareConnections (id, synchro);
 
         auto registrar = kj::heap <RegistrarImpl>(id);
         registrar->setOnRegisterShip ([this] (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
@@ -142,7 +118,7 @@ namespace cg {
         return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
             log ("Connect Results received - checking register requirements");
             if (results.getId() != id) log ("Expected result id " + std::string (results.getId()) + " to equal synchro id " + id);
-            KJ_REQUIRE (results.getId() == id, id);
+//            KJ_REQUIRE (results.getId() == id);
             if (clients.contains (id)) {
                 log ("Client with id " + id + " exists already. Abort");
                 return;
@@ -153,6 +129,36 @@ namespace cg {
             log ("Number of clients connected: "s += std::to_string (clients.size()));
             for (auto & client : clients) log ("Connected client: " + client.first);
         });
+    }
+
+    void BackendImpl::shareConnections (ClientID const & id, Synchro_t synchro) {
+        log ("Share " + id + " our own synchro");
+        auto shareRequest = synchro.shareRequest();
+        shareRequest.setId (ID);
+        auto local = kj::heap <SynchroImpl> (id);
+        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
+            return connectCallback (id, synchro, registrar);
+        });
+        local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+            log ("==== OnShare callback (join) ====");
+            log ("Received synchro to client " + id);
+            return connectTo (id, synchro);
+        });
+        shareRequest.setSynchro (kj::mv (local));
+        detach (shareRequest.send().ignoreResult());
+
+        // Share all other synchro callbacks
+        for (auto & client : clients) {
+            if (client.second.type == Client::REMOTE) {
+                auto * clientSynchro = kj::_::readMaybe (client.second.synchro);
+                        KJ_ASSERT_NONNULL (clientSynchro);
+                auto shareRequest = synchro.shareRequest ();
+                shareRequest.setId (client.first);
+                shareRequest.setSynchro (* clientSynchro);
+                log ("Share " + id + " the synchro of " + client.first);
+                detach (shareRequest.send().ignoreResult());
+            }
+        }
     }
 
     ::kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {

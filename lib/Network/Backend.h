@@ -65,6 +65,7 @@ namespace cg {
         /// Synchro callbacks
         kj::Own <RegistrarImpl> connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar);
         kj::Promise <void> connectTo (ClientID const & id, Synchro_t synchro);
+        void shareConnections (ClientID const & id, Synchro_t synchro);
 
         /// RegisterShip callback
         kj::Own <ShipSinkImpl> registerShip    (Spaceship const & ship, ClientID const & id, ShipHandle_t);
