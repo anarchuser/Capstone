@@ -29,7 +29,7 @@ namespace kt {
     }
 
     void World::update (UpdateState const & updateState) {
-        world.Step (1.0 / FPS, 1, 1);
+        world.Step (1e-3 * updateState.dt, 1, 1);
 
         b2Body * current_body = world.GetBodyList();
         std::vector <b2Body *> to_delete;
