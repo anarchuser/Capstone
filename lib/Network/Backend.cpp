@@ -133,6 +133,12 @@ namespace cg {
 
     void BackendImpl::shareConnections (ClientID const & id, Synchro_t synchro) {
         log ("Share " + id + " our own synchro");
+
+        if (clients.contains (id)) {
+            log ("Exists already, aborting");
+            return;
+        }
+
         auto shareRequest = synchro.shareRequest();
         shareRequest.setId (ID);
         auto local = kj::heap <SynchroImpl> (id);
@@ -149,9 +155,9 @@ namespace cg {
 
         // Share all other synchro callbacks
         for (auto & client : clients) {
-            if (client.second.type == Client::REMOTE) {
+            if (client.second.type == Client::REMOTE && client.first != id) {
                 auto * clientSynchro = kj::_::readMaybe (client.second.synchro);
-                        KJ_ASSERT_NONNULL (clientSynchro);
+                KJ_ASSERT_NONNULL (clientSynchro);
                 auto shareRequest = synchro.shareRequest ();
                 shareRequest.setId (client.first);
                 shareRequest.setSynchro (* clientSynchro);
