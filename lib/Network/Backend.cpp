@@ -57,6 +57,8 @@ namespace cg {
             return connectCallback (id, synchro, registrar);
         });
         synchro->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+            log ("==== OnShare callback ====");
+            log ("Sharing from " + ID + " to " + id);
             return connectTo (id, synchro);
         });
         results.setSynchro (kj::mv (synchro));
@@ -73,18 +75,18 @@ namespace cg {
         // Share our own synchro callback to new connection
         KJ_REQUIRE (params.hasRemote());
         auto remote = params.getRemote();
-        auto shareRequest = remote.shareRequest();
-        shareRequest.setId (ID);
-        auto local = kj::heap <SynchroImpl> (remoteID);
-        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
-            return connectCallback (id, synchro, registrar);
-        });
-        local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
-            return connectTo (id, synchro);
-        });
-        shareRequest.setSynchro (kj::mv (local));
-        log ("Share " + remoteID + " our own synchro");
-        detach (shareRequest.send().ignoreResult());
+//        log ("Share " + remoteID + " our own synchro");
+//        auto shareRequest = remote.shareRequest();
+//        shareRequest.setId (ID);
+//        auto local = kj::heap <SynchroImpl> (remoteID);
+//        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
+//            return connectCallback (id, synchro, registrar);
+//        });
+//        local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+//            return connectTo (id, synchro);
+//        });
+//        shareRequest.setSynchro (kj::mv (local));
+//        detach (shareRequest.send().ignoreResult());
 
         // Share all other synchro callbacks
         for (auto & client : clients) {
@@ -134,6 +136,7 @@ namespace cg {
         });
         connectRequest.setRegistrar (kj::mv (registrar));
 
+        log ("Send connect request from " + ID + " to " + id);
         return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
             KJ_REQUIRE (results.getId() == id);
             if (!clients.contains (id)) return;
