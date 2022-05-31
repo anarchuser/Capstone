@@ -75,18 +75,18 @@ namespace cg {
         // Share our own synchro callback to new connection
         KJ_REQUIRE (params.hasRemote());
         auto remote = params.getRemote();
-//        log ("Share " + remoteID + " our own synchro");
-//        auto shareRequest = remote.shareRequest();
-//        shareRequest.setId (ID);
-//        auto local = kj::heap <SynchroImpl> (remoteID);
-//        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
-//            return connectCallback (id, synchro, registrar);
-//        });
-//        local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
-//            return connectTo (id, synchro);
-//        });
-//        shareRequest.setSynchro (kj::mv (local));
-//        detach (shareRequest.send().ignoreResult());
+        log ("Share " + remoteID + " our own synchro");
+        auto shareRequest = remote.shareRequest();
+        shareRequest.setId (ID);
+        auto local = kj::heap <SynchroImpl> (remoteID);
+        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
+            return connectCallback (id, synchro, registrar);
+        });
+        local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+            return connectTo (id, synchro);
+        });
+        shareRequest.setSynchro (kj::mv (local));
+        detach (shareRequest.send().ignoreResult());
 
         // Share all other synchro callbacks
         for (auto & client : clients) {
@@ -138,9 +138,14 @@ namespace cg {
 
         log ("Send connect request from " + ID + " to " + id);
         return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
-            KJ_REQUIRE (results.getId() == id);
-            if (!clients.contains (id)) return;
+            log ("Connect Results received - checking register requirements");
+            KJ_REQUIRE (results.getId() == id, id);
+            if (clients.contains (id)) {
+                log ("Client with id " + id + " exists already. Abort");
+                return;
+            }
             KJ_REQUIRE (results.hasRegistrar());
+            log ("Called by connect to - finally emplacing client");
             clients.emplace (id, Client (results.getRegistrar (), synchro));
             log ("Number of clients connected: "s += std::to_string (clients.size()));
         });
