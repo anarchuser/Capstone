@@ -22,6 +22,8 @@
 #include <ranges>
 #include <iterator>
 
+#define LAMBDA(func) [this] (auto ...args) { return func (args...); }
+
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
  */

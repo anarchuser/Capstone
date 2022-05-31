@@ -33,11 +33,14 @@ namespace cg {
         KJ_REQUIRE (params.hasId());
         KJ_REQUIRE (params.hasSynchro());
 
+        log ("Shared connection received");
+
         try {
             onShare (params.getId(), params.getSynchro());
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "Synchro::share called without valid callback registered");
         }
+        return kj::READY_NOW;
     }
 }
 

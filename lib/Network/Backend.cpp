@@ -70,8 +70,11 @@ namespace cg {
         ClientID const & remoteID = params.getId();
         log ("Join request received from " + remoteID);
 
-        auto results = context.getResults();
-        results.setId (ID);
+        // Share our own synchro callback to new connection
+        KJ_REQUIRE (params.hasRemote());
+        auto remote = params.getRemote();
+        auto shareRequest = remote.shareRequest();
+        shareRequest.setId (ID);
         auto local = kj::heap <SynchroImpl> (remoteID);
         local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
             return connectCallback (id, synchro, registrar);
@@ -79,22 +82,26 @@ namespace cg {
         local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
             return connectTo (id, synchro);
         });
-        results.setLocal (kj::mv (local));
+        shareRequest.setSynchro (kj::mv (local));
+        detach (shareRequest.send().ignoreResult());
 
-        /// Connect back to received synchro
-        KJ_REQUIRE (params.hasRemote());
-        return connectTo (remoteID, params.getRemote());
-    }
-
-    ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
+        // Share all other synchro callbacks
         for (auto & client : clients) {
             if (client.second.type == Client::REMOTE) {
                 auto * remote = kj::_::readMaybe (client.second.synchro);
                 KJ_ASSERT_NONNULL (remote);
-                detach (connectTo (client.first, * remote));
+                auto shareRequest = remote->shareRequest ();
+                shareRequest.setId (ID);
+                shareRequest.setSynchro (* remote);
+                detach (shareRequest.send().ignoreResult());
             }
         }
 
+        /// Connect back to received synchro
+        return connectTo (remoteID, params.getRemote());
+    }
+
+    ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
         log ("Received Synchro::connect request from " + id);
         clients.emplace (id, Client (std::move (remoteRegistrar), std::move (synchro)));
         log ("Number of clients connected: "s += std::to_string (clients.size()));
@@ -126,9 +133,9 @@ namespace cg {
         connectRequest.setRegistrar (kj::mv (registrar));
 
         return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
-            KJ_REQUIRE (results.hasRegistrar());
             KJ_REQUIRE (results.getId() == id);
-            KJ_REQUIRE (!clients.contains (id));
+            if (!clients.contains (id)) return;
+            KJ_REQUIRE (results.hasRegistrar());
             clients.emplace (id, Client (results.getRegistrar (), synchro));
             log ("Number of clients connected: "s += std::to_string (clients.size()));
         });
@@ -162,7 +169,6 @@ namespace cg {
     }
 
     void BackendImpl::broadcastSpaceship (Spaceship const & ship, ClientID const & id) {
-        std::size_t i = 0;
         log ("Number of clients: " + std::to_string (clients.size()));
         auto senderType = clients.at (id).type;
         for (auto & client : clients) {

@@ -57,6 +57,6 @@ interface Backend {
     connect @2 (id :Text, registrar :Registrar) -> (id :Text, registrar :Registrar, synchro :Synchro);
     # Subscribe to Backend, get a local synchro instance
 
-    join @3 (id :Text, remote :Synchro) -> (id :Text, local :Synchro);
+    join @3 (id :Text, remote :Synchro);
     # Tell a remote backend of our local synchro
 }
