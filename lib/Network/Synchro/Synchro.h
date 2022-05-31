@@ -10,7 +10,7 @@
 namespace cg {
     class RegistrarImpl;
     using ConnectCallback = std::function <kj::Own <RegistrarImpl> (ClientID const &, Synchro_t, Registrar_t)>;
-    using ShareCallback   = std::function <void (ClientID const &, Synchro_t)>;
+    using ShareCallback   = std::function <kj::Promise <void> (ClientID const &, Synchro_t)>;
 
     class SynchroImpl final: public Backend::Synchro::Server {
     private:

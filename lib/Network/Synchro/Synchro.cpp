@@ -36,7 +36,7 @@ namespace cg {
         log ("Shared connection received from " + std::string (params.getId()));
 
         try {
-            onShare (params.getId(), params.getSynchro());
+            return onShare (params.getId(), params.getSynchro());
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "Synchro::share called without valid callback registered");
         }

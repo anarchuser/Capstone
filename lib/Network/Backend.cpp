@@ -304,7 +304,8 @@ namespace cg {
         return request.send().ignoreResult()
                 .catch_ ([this, & sinks, & username] (kj::Exception && e) {
                     log ("Error on sendItem - erasing sink " + username);
-                    sinks.erase (username);
+                    log (e.getDescription().cStr());
+//                    sinks.erase (username);
                 });
     }
 
