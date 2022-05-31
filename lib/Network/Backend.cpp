@@ -43,6 +43,7 @@ namespace cg {
         KJ_REQUIRE (params.hasRegistrar());
         clients.emplace (params.getId(), params.getRegistrar());
         log ("Number of clients connected: "s += std::to_string (clients.size()));
+        for (auto & client : clients) log ("Connected client: " + client.first);
 
         auto results = context.getResults();
         results.setId (ID);
@@ -109,6 +110,7 @@ namespace cg {
         log ("Received Synchro::connect request from " + id);
         clients.emplace (id, Client (std::move (remoteRegistrar), std::move (synchro)));
         log ("Number of clients connected: "s += std::to_string (clients.size()));
+        for (auto & client : clients) log ("Connected client: " + client.first);
 
         auto registrar = kj::heap <RegistrarImpl>(id);
         registrar->setOnRegisterShip ([this] (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
@@ -148,6 +150,7 @@ namespace cg {
             log ("Called by connect to - finally emplacing client");
             clients.emplace (id, Client (results.getRegistrar (), synchro));
             log ("Number of clients connected: "s += std::to_string (clients.size()));
+            for (auto & client : clients) log ("Connected client: " + client.first);
         });
     }
 
