@@ -182,7 +182,11 @@ namespace cg {
     }
     kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, Client & receiver) {
         auto & sender = ship.username;
-        if (receiver.sinks.contains (sender)) return kj::READY_NOW;
+        log ("Distributing ship " + ship.username);
+        if (receiver.sinks.contains (sender)) {
+            log ("Receiver already holds a sink!");
+            return kj::READY_NOW;
+        }
 
         for (auto & client : clients) {
             // Figure out which client is the owner of this spaceship (NOTE: std::find could not handle this properly)
@@ -190,15 +194,21 @@ namespace cg {
             auto & ships = client.second.ships;
             if (!ships.contains (sender)) continue;
 
+            log ("Owner of ship: " + client.first);
+
             auto request = receiver.registrar.registerShipRequest ();
             ship.initialise (request.initShip ());
             request.setHandle (ships.at (sender));
             auto promise = request.send ();
+            log ("Sending register ship request");
             return promise.then ([this, sender, & receiver, client = client.first]
                     (capnp::Response<Backend::Registrar::RegisterShipResults> results) {
                         // Check again if nothing's changed
-                        if (receiver.sinks.contains (sender)) return;
-
+                        if (receiver.sinks.contains (sender)) {
+                            log ("DOUBLE CHECK - Receiver already holds a sink!");
+                            return;
+                        }
+                        log ("Inserting sink of ship " + sender + " to client " + client);
                         receiver.sinks.insert_or_assign (sender, results.getSink ());
                     });
         }
@@ -223,7 +233,6 @@ namespace cg {
         return kj::READY_NOW;
     }
     kj::Promise <void> BackendImpl::sendItemCallback (ShipName const & username, Direction const & direction, ClientID const & id) {
-        log ("Send Item Callback");
         KJ_REQUIRE (clients.contains (id), id, username, "Received item from unregistered client");
         auto & sender = clients.at (id);
         if (sender.ships.empty()) {
@@ -234,34 +243,24 @@ namespace cg {
 
         /// Case 1: Item got sent from a local client -> Distribute to everyone
         if (sender.type == Client::LOCAL) {
-            log ("Send Item callback from local game client");
+//            log ("Send Item callback from local game client");
             for (auto & client : clients) {
-                log ("Distribute item to " + client.first);
                 /* Send Item from local ship to sink of same name of every client.
                  * If that client does not have a sink with that name yet, create it
                  */
 
-                sendItemToClient (username, direction, client.second).detach (
-                        [this, id = client.first] (...) { disconnect (id); });
+                detach (sendItemToClient (username, direction, client.second));
             }
         }
         /// Case 2: Item got sent from a remote client -> Distribute to our own ship only
         else {
-            log ("Send Item callback from remote synchro client");
+//            log ("Send Item callback from remote synchro client");
             for (auto & client : clients) {
                 // Do not send the item to remote clients, as they've received the item directly already
-                if (client.second.type == Client::REMOTE) {
-                    log ("DO NOT distribute item to " + client.first);
-                    continue;
-                }
-                log ("Distribute item to " + client.first);
+                if (client.second.type == Client::REMOTE) continue;
 
                 // Send the item to the corresponding spaceship of our own local clients, or create it if needed
-                sendItemToClient (username, direction, client.second).detach (
-                        [this, id = client.first, username = username] (kj::Exception && e) {
-                            KJ_DLOG (WARNING, id, username, e.getDescription ());
-                            if (clients.contains (id)) clients.at (id).sinks.erase (username);
-                        });
+                detach (sendItemToClient (username, direction, client.second));
             }
         }
         return kj::READY_NOW;
@@ -269,11 +268,14 @@ namespace cg {
     kj::Promise <void> BackendImpl::sendItemToClient (ShipName const & username, Direction const & direction, Client & receiver) {
         auto & sinks = receiver.sinks;
 
+        log ("Distribute item from ship " + username);
         if (!sinks.contains (username)) {
+            log ("Receiver does not hold a sink to the ship yet");
             for (auto & client : clients) {
                 // Find the client that owns the ship in question
                 auto & ships = client.second.ships;
                 if (!ships.contains (username)) continue;
+                log ("Owner of ship: " + client.first);
 
                 // The current client owns the ship; proceed
                 return ships.at (username).getShipRequest().send()
@@ -288,6 +290,7 @@ namespace cg {
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult()
                 .catch_ ([this, & sinks, & username] (kj::Exception && e) {
+                    log ("Error on sendItem - erasing sink " + username);
                     sinks.erase (username);
                 });
     }
