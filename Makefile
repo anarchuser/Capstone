@@ -1,7 +1,7 @@
 # Simple Makefile providing an interface for cmake. Oh, sweet irony
 
-BUILD_DIR  ?= build
 BUILD_TYPE ?= Release
+BUILD_DIR   = $(BUILD_TYPE)
 
 .PHONY = all build clean debug default FORCE run setup test
 
