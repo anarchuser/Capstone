@@ -92,7 +92,7 @@ namespace cg {
                 auto * clientSynchro = kj::_::readMaybe (client.second.synchro);
                 KJ_ASSERT_NONNULL (clientSynchro);
                 auto shareRequest = remote.shareRequest ();
-                shareRequest.setId (ID);
+                shareRequest.setId (client.first);
                 shareRequest.setSynchro (* clientSynchro);
                 log ("Share " + remoteID + " the synchro of " + client.first);
                 detach (shareRequest.send().ignoreResult());
@@ -223,6 +223,7 @@ namespace cg {
         return kj::READY_NOW;
     }
     kj::Promise <void> BackendImpl::sendItemCallback (ShipName const & username, Direction const & direction, ClientID const & id) {
+        log ("Send Item Callback");
         KJ_REQUIRE (clients.contains (id), id, username, "Received item from unregistered client");
         auto & sender = clients.at (id);
         if (sender.ships.empty()) {
@@ -233,7 +234,9 @@ namespace cg {
 
         /// Case 1: Item got sent from a local client -> Distribute to everyone
         if (sender.type == Client::LOCAL) {
+            log ("Send Item callback from local game client");
             for (auto & client : clients) {
+                log ("Distribute item to " + client.first);
                 /* Send Item from local ship to sink of same name of every client.
                  * If that client does not have a sink with that name yet, create it
                  */
@@ -244,9 +247,14 @@ namespace cg {
         }
         /// Case 2: Item got sent from a remote client -> Distribute to our own ship only
         else {
+            log ("Send Item callback from remote synchro client");
             for (auto & client : clients) {
                 // Do not send the item to remote clients, as they've received the item directly already
-                if (client.second.type == Client::REMOTE) continue;
+                if (client.second.type == Client::REMOTE) {
+                    log ("DO NOT distribute item to " + client.first);
+                    continue;
+                }
+                log ("Distribute item to " + client.first);
 
                 // Send the item to the corresponding spaceship of our own local clients, or create it if needed
                 sendItemToClient (username, direction, client.second).detach (
