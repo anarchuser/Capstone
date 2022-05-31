@@ -77,32 +77,18 @@ namespace cg {
 
         /// Connect back to received synchro
         KJ_REQUIRE (params.hasRemote());
-        auto connectRequest = params.getRemote().connectRequest();
-        connectRequest.setId (ID);
-
-        KJ_REQUIRE (results.hasId());
-        auto synchro = kj::heap <SynchroImpl> (remoteID);
-        synchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
-            return connectCallback (id, synchro, registrar);
-        });
-        connectRequest.setSynchro (kj::mv (synchro));
-
-        auto registrar = kj::heap <RegistrarImpl> (remoteID);
-        registrar->setOnRegisterShip ([this] (Spaceship ship, ClientID const & id, ShipHandle_t handle) {
-            return registerShip (ship, id, handle);
-        });
-        connectRequest.setRegistrar (kj::mv (registrar));
-
-        return connectRequest.send().then ([this, synchro = params.getRemote(), id = remoteID] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
-            KJ_REQUIRE (results.hasRegistrar());
-            KJ_REQUIRE (results.getId() == id);
-            KJ_REQUIRE (!clients.contains (id));
-            clients.emplace (id, Client (results.getRegistrar (), synchro));
-            log ("Number of clients connected: "s += std::to_string (clients.size()));
-        });
+        return connectTo (remoteID, params.getRemote());
     }
 
     ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
+        for (auto & client : clients) {
+            if (client.second.type == Client::REMOTE) {
+                auto * remote = kj::_::readMaybe (client.second.synchro);
+                KJ_ASSERT_NONNULL (remote);
+                detach (connectTo (client.first, * remote));
+            }
+        }
+
         log ("Received Synchro::connect request from " + id);
         clients.emplace (id, Client (std::move (remoteRegistrar), std::move (synchro)));
         log ("Number of clients connected: "s += std::to_string (clients.size()));
@@ -114,7 +100,32 @@ namespace cg {
         return registrar;
     }
 
-    kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
+    ::kj::Promise <void> BackendImpl::connectTo (ClientID const & id, Synchro_t synchro) {
+        auto connectRequest = synchro.connectRequest();
+        connectRequest.setId (ID);
+
+        auto localSynchro = kj::heap <SynchroImpl> (id);
+        localSynchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
+            return connectCallback (id, synchro, registrar);
+        });
+        connectRequest.setSynchro (kj::mv (localSynchro));
+
+        auto registrar = kj::heap <RegistrarImpl> (id);
+        registrar->setOnRegisterShip ([this] (Spaceship ship, ClientID const & id, ShipHandle_t handle) {
+            return registerShip (ship, id, handle);
+        });
+        connectRequest.setRegistrar (kj::mv (registrar));
+
+        return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
+            KJ_REQUIRE (results.hasRegistrar());
+            KJ_REQUIRE (results.getId() == id);
+            KJ_REQUIRE (!clients.contains (id));
+            clients.emplace (id, Client (results.getRegistrar (), synchro));
+            log ("Number of clients connected: "s += std::to_string (clients.size()));
+        });
+    }
+
+    ::kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
         auto username = ship.username;
         KJ_REQUIRE (clients.contains (id), id, "Ship owner is not registered");
         auto & ships = clients.at (id).ships;
