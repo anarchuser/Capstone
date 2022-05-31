@@ -83,6 +83,7 @@ namespace cg {
             return connectTo (id, synchro);
         });
         shareRequest.setSynchro (kj::mv (local));
+        log ("Share " + remoteID + " our own synchro");
         detach (shareRequest.send().ignoreResult());
 
         // Share all other synchro callbacks
@@ -93,6 +94,7 @@ namespace cg {
                 auto shareRequest = remote->shareRequest ();
                 shareRequest.setId (ID);
                 shareRequest.setSynchro (* remote);
+                log ("Share " + remoteID + " the synchro of " + client.first);
                 detach (shareRequest.send().ignoreResult());
             }
         }
