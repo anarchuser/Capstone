@@ -141,6 +141,7 @@ namespace cg {
         log ("Send connect request from " + ID + " to " + id);
         return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
             log ("Connect Results received - checking register requirements");
+            if (results.getId() != id) log ("Expected result id " + std::string (results.getId()) + " to equal synchro id " + id);
             KJ_REQUIRE (results.getId() == id, id);
             if (clients.contains (id)) {
                 log ("Client with id " + id + " exists already. Abort");
