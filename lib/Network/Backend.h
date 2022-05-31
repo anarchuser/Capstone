@@ -66,7 +66,7 @@ namespace cg {
 
         /// RegisterShip callback
         kj::Own <ShipSinkImpl> registerShip    (Spaceship const & ship, ClientID const & id, ShipHandle_t);
-        kj::Promise <void> broadcastSpaceship  (Spaceship const & ship);
+        void broadcastSpaceship  (Spaceship const & ship, ClientID const & id);
         kj::Promise <void> distributeSpaceship (Spaceship const & ship, Client & receiver);
 
         /// ShipSink callbacks

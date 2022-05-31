@@ -45,6 +45,7 @@ interface Backend {
 
     interface Synchro {
         connect @0 (id :Text, synchro :Synchro, registrar :Registrar) -> (id :Text, registrar :Registrar);
+        share   @1 (id :Text, synchro :Synchro);
     }
 
     ping @0 ();

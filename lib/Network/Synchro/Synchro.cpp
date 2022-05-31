@@ -27,6 +27,18 @@ namespace cg {
         }
         return kj::READY_NOW;
     }
+
+    ::kj::Promise <void> SynchroImpl::share (ShareContext context) {
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasId());
+        KJ_REQUIRE (params.hasSynchro());
+
+        try {
+            onShare (params.getId(), params.getSynchro());
+        } catch (std::bad_function_call & e) {
+            KJ_DLOG (WARNING, "Synchro::share called without valid callback registered");
+        }
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

@@ -56,6 +56,9 @@ namespace cg {
         synchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
             return connectCallback (id, synchro, registrar);
         });
+        synchro->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+            return connectTo (id, synchro);
+        });
         results.setSynchro (kj::mv (synchro));
 
         return kj::READY_NOW;
@@ -72,6 +75,9 @@ namespace cg {
         auto local = kj::heap <SynchroImpl> (remoteID);
         local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
             return connectCallback (id, synchro, registrar);
+        });
+        local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+            return connectTo (id, synchro);
         });
         results.setLocal (kj::mv (local));
 
@@ -108,6 +114,9 @@ namespace cg {
         localSynchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
             return connectCallback (id, synchro, registrar);
         });
+        localSynchro->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+            return connectTo (id, synchro);
+        });
         connectRequest.setSynchro (kj::mv (localSynchro));
 
         auto registrar = kj::heap <RegistrarImpl> (id);
@@ -139,7 +148,7 @@ namespace cg {
         auto [iterator, success] = ships.emplace (username, handle);
         KJ_ASSERT (success);
 
-        detach (broadcastSpaceship (ship));
+        broadcastSpaceship (ship, id);
 
         // Prepare ShipSink
         auto sink = kj::heap <ShipSinkImpl>();
@@ -152,14 +161,16 @@ namespace cg {
         return sink;
     }
 
-    kj::Promise <void> BackendImpl::broadcastSpaceship (Spaceship const & ship) {
+    void BackendImpl::broadcastSpaceship (Spaceship const & ship, ClientID const & id) {
         std::size_t i = 0;
         log ("Number of clients: " + std::to_string (clients.size()));
+        auto senderType = clients.at (id).type;
         for (auto & client : clients) {
+            if (senderType == Client::REMOTE && client.second.type == Client::REMOTE) continue;
+
             log ("Broadcast ship " + ship.username + " to client " + client.first);
             detach (distributeSpaceship (ship, client.second));
         }
-        return kj::READY_NOW;
     }
     kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, Client & receiver) {
         auto & sender = ship.username;
