@@ -42,8 +42,6 @@ namespace cg {
 
         KJ_REQUIRE (params.hasRegistrar());
         clients.emplace (params.getId(), params.getRegistrar());
-        log ("Number of clients connected: "s += std::to_string (clients.size()));
-        for (auto & client : clients) log ("Connected client: " + client.first);
 
         auto results = context.getResults();
         results.setId (ID);
@@ -58,8 +56,6 @@ namespace cg {
             return connectCallback (id, synchro, registrar);
         });
         synchro->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
-            log ("==== OnShare callback (connect) ====");
-            log ("Received synchro to client " + id);
             return connectTo (id, synchro);
         });
         results.setSynchro (kj::mv (synchro));
@@ -84,8 +80,6 @@ namespace cg {
     ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
         log ("Received Synchro::connect request from " + id);
         clients.emplace (id, Client (std::move (remoteRegistrar), synchro));
-        log ("Number of clients connected: "s += std::to_string (clients.size()));
-        for (auto & client : clients) log ("Connected client: " + client.first);
         shareConnections (id, synchro);
 
         auto registrar = kj::heap <RegistrarImpl>(id);
@@ -114,30 +108,16 @@ namespace cg {
         });
         connectRequest.setRegistrar (kj::mv (registrar));
 
-        log ("Send connect request from " + ID + " to " + id);
         return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
-            log ("Connect Results received - checking register requirements");
-            if (results.getId() != id) log ("Expected result id " + std::string (results.getId()) + " to equal synchro id " + id);
-//            KJ_REQUIRE (results.getId() == id);
-            if (clients.contains (id)) {
-                log ("Client with id " + id + " exists already. Abort");
-                return;
-            }
             KJ_REQUIRE (results.hasRegistrar());
-            log ("Called by connect to - finally emplacing client");
             clients.emplace (id, Client (results.getRegistrar (), synchro));
             log ("Number of clients connected: "s += std::to_string (clients.size()));
-            for (auto & client : clients) log ("Connected client: " + client.first);
         });
     }
 
     void BackendImpl::shareConnections (ClientID const & id, Synchro_t synchro) {
+        if (clients.contains (id)) return;
         log ("Share " + id + " our own synchro");
-
-        if (clients.contains (id)) {
-            log ("Exists already, aborting");
-            return;
-        }
 
         auto shareRequest = synchro.shareRequest();
         shareRequest.setId (ID);
@@ -146,8 +126,6 @@ namespace cg {
             return connectCallback (id, synchro, registrar);
         });
         local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
-            log ("==== OnShare callback (join) ====");
-            log ("Received synchro to client " + id);
             return connectTo (id, synchro);
         });
         shareRequest.setSynchro (kj::mv (local));
@@ -161,19 +139,15 @@ namespace cg {
                 auto shareRequest = synchro.shareRequest ();
                 shareRequest.setId (client.first);
                 shareRequest.setSynchro (* clientSynchro);
-                log ("Share " + id + " the synchro of " + client.first);
                 detach (shareRequest.send().ignoreResult());
             }
         }
     }
 
     ::kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
-        log ("Register ship callback");
-        auto username = ship.username;
-        if (!clients.contains (id)) log ("Ship owner of " + username + ", client " + id + ", is not registered!");
         KJ_REQUIRE (clients.contains (id), id, "Ship owner is not registered");
         auto & ships = clients.at (id).ships;
-        if (ships.contains (username)) log ("Client " + id + " already contains a ship named " + username);
+        auto username = ship.username;
         KJ_REQUIRE (!ships.contains (username), id, username, "Client 'id' already contains a ship named 'username'");
 
         log ("Registering ship " + username + " from client " + id);
@@ -209,11 +183,7 @@ namespace cg {
     }
     kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, Client & receiver) {
         auto & sender = ship.username;
-        log ("Distributing ship " + ship.username);
-        if (receiver.sinks.contains (sender)) {
-            log ("Receiver already holds a sink!");
-            return kj::READY_NOW;
-        }
+        if (receiver.sinks.contains (sender)) return kj::READY_NOW;
 
         for (auto & client : clients) {
             // Figure out which client is the owner of this spaceship (NOTE: std::find could not handle this properly)
@@ -221,21 +191,14 @@ namespace cg {
             auto & ships = client.second.ships;
             if (!ships.contains (sender)) continue;
 
-            log ("Owner of ship: " + client.first);
-
             auto request = receiver.registrar.registerShipRequest ();
             ship.initialise (request.initShip ());
             request.setHandle (ships.at (sender));
             auto promise = request.send ();
-            log ("Sending register ship request");
             return promise.then ([this, sender, & receiver, client = client.first]
                     (capnp::Response<Backend::Registrar::RegisterShipResults> results) {
                         // Check again if nothing's changed
-                        if (receiver.sinks.contains (sender)) {
-                            log ("DOUBLE CHECK - Receiver already holds a sink!");
-                            return;
-                        }
-                        log ("Inserting sink of ship " + sender + " to client " + client);
+                        if (receiver.sinks.contains (sender)) return;
                         receiver.sinks.insert_or_assign (sender, results.getSink ());
                     });
         }
@@ -296,12 +259,10 @@ namespace cg {
         auto & sinks = receiver.sinks;
 
         if (!sinks.contains (username)) {
-            log ("Receiver does not hold a sink to the ship yet");
             for (auto & client : clients) {
                 // Find the client that owns the ship in question
                 auto & ships = client.second.ships;
                 if (!ships.contains (username)) continue;
-                log ("Owner of ship: " + client.first);
 
                 // The current client owns the ship; proceed
                 return ships.at (username).getShipRequest().send()
@@ -317,8 +278,7 @@ namespace cg {
         return request.send().ignoreResult()
                 .catch_ ([this, & sinks, & username] (kj::Exception && e) {
                     log ("Error on sendItem - erasing sink " + username);
-                    log (e.getDescription().cStr());
-//                    sinks.erase (username);
+                    sinks.erase (username);
                 });
     }
 

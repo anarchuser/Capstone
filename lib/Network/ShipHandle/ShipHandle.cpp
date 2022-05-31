@@ -26,7 +26,6 @@ namespace cg {
     }
 
     ::kj::Promise <void> ShipHandleImpl::getShip (GetShipContext context) {
-//        log ("Ship requested");
         auto results = context.getResults();
         try {
             onGetShip().initialise (results.getShip());
