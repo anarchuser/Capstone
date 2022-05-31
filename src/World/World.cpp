@@ -29,7 +29,8 @@ namespace kt {
     }
 
     void World::update (UpdateState const & updateState) {
-        world.Step (1e-3 * updateState.dt, 1, 1);
+        world.Step (1e-3f * updateState.dt, 1, 1);
+        if (updateState.time % 17 != 0) logs::messageln ("Current time: %d", updateState.time);
 
         b2Body * current_body = world.GetBodyList();
         std::vector <b2Body *> to_delete;

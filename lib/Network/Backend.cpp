@@ -239,7 +239,8 @@ namespace cg {
                  * If that client does not have a sink with that name yet, create it
                  */
 
-                detach (sendItemToClient (username, direction, client.second));
+                sendItemToClient (username, direction, client.second).detach (
+                        [this, id = client.first] (kj::Exception && e) { disconnect (id); });
             }
         }
         /// Case 2: Item got sent from a remote client -> Distribute to our own ship only
@@ -250,7 +251,8 @@ namespace cg {
                 if (client.second.type == Client::REMOTE) continue;
 
                 // Send the item to the corresponding spaceship of our own local clients, or create it if needed
-                detach (sendItemToClient (username, direction, client.second));
+                sendItemToClient (username, direction, client.second).detach (
+                        [this, id = client.first] (kj::Exception && e) { disconnect (id); });
             }
         }
         return kj::READY_NOW;
@@ -276,10 +278,7 @@ namespace cg {
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult()
-                .catch_ ([this, & sinks, & username] (kj::Exception && e) {
-                    log ("Error on sendItem - erasing sink " + username);
-                    sinks.erase (username);
-                });
+                .catch_ ([this, & sinks, & username] (kj::Exception && e) { sinks.erase (username); });
     }
 
     void BackendImpl::disconnect (ClientID const & id) {
