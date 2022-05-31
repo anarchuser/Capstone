@@ -89,11 +89,11 @@ namespace cg {
         // Share all other synchro callbacks
         for (auto & client : clients) {
             if (client.second.type == Client::REMOTE) {
-                auto * remote = kj::_::readMaybe (client.second.synchro);
-                KJ_ASSERT_NONNULL (remote);
-                auto shareRequest = remote->shareRequest ();
+                auto * clientSynchro = kj::_::readMaybe (client.second.synchro);
+                KJ_ASSERT_NONNULL (clientSynchro);
+                auto shareRequest = remote.shareRequest ();
                 shareRequest.setId (ID);
-                shareRequest.setSynchro (* remote);
+                shareRequest.setSynchro (* clientSynchro);
                 log ("Share " + remoteID + " the synchro of " + client.first);
                 detach (shareRequest.send().ignoreResult());
             }
