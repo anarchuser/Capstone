@@ -15,7 +15,7 @@
 #define PLANET_DENSITY      1e3
 
 /// Scales down gravitational pull to an acceptable value
-#define PLANET_GRAVITY      2e-7
+#define PLANET_GRAVITY      4e-8
 
 /// Flag determining whether gravity wakes up spaceships
 #define PLANET_WAKES_SHIP   false
@@ -25,12 +25,20 @@ namespace kt {
 
     /// Round object with heavy mass. Exerts gravitational pull on non-planet objects
     class Planet : public Sprite {
+    private:
+        double const mass;
+
     public:
         /// Create a new planet with given sprite in the given world at the given position with the given size.
         Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale = 1);
 
         /// Exert gravitational force on non-planet objects based on mass and distance
         void update (UpdateState const & us) override;
+
+        /// Mass formula as workaround since static bodies do not have mass
+        static inline double getMass (double radius) {
+            return 0.5 * M_PI * radius * radius * PLANET_DENSITY;
+        }
     };
 
     DECLARE_SMART(Planet, spPlanet);
