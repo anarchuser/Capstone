@@ -124,8 +124,8 @@ namespace cg {
         sink->setOnDone ([this, username] () {
             return doneCallback (username);
         });
-        sink->setOnSendItem ([this, username, id] (Direction const & direction) {
-            return sendItemCallback (username, direction, id);
+        sink->setOnSendItem ([this, id] (Direction const & direction, Spaceship const & data) {
+            return sendItemCallback (direction, data, id);
         });
         return sink;
     }
@@ -156,45 +156,42 @@ namespace cg {
                     receiver.sinks.insert_or_assign (username, results.getSink ());
                 });
     }
-    kj::Promise <void> BackendImpl::doneCallback (ShipName const & username) {
+    void BackendImpl::doneCallback (ShipName const & username) {
         log ("Ship " + username + " is done");
-        // TODO: tie each promise in the loop to the returned promise
         for (auto & client : remote) {
             detach (client.second.erase (username).then ([this, id = client.first] () {
                 if (remote.contains (id)) disconnect (id);
                 if (local.contains (id)) disconnect (id);
             }));
         }
-        return kj::READY_NOW;
     }
-    kj::Promise <void> BackendImpl::sendItemCallback (ShipName const & username, Direction const & direction, ClientID const & id) {
+    void BackendImpl::sendItemCallback (Direction const & direction, Spaceship const & data, ClientID const & id) {
         auto * sender = findClient (id);
+        auto & username = data.username;
         KJ_REQUIRE_NONNULL (sender, id, username, "Received item from unregistered client");
         if (sender->ships.empty()) {
             disconnect (id);
-            return kj::READY_NOW;
+            return;
         }
         KJ_ASSERT (sender->ships.contains (username), id, username, "Client does not own ship 'username'");
         auto & handle = sender->ships.at (username);
 
         // If item came from local client -> distribute it to all remote clients
         if (local.contains (id)) {
-            // TODO: tie each promise in the loop to the returned promise
             for (auto & client : remote) {
-                sendItemToClient (username, direction, handle, client.second).detach (
+                sendItemToClient (direction, data, handle, client.second).detach (
                         [this, id = client.first] (kj::Exception && e) { disconnect (id); });
             }
         }
-        // TODO: tie each promise in the loop to the returned promise
         // Distribute item to all local clients
         for (auto & client : local) {
-            sendItemToClient (username, direction, handle, client.second).detach (
+            sendItemToClient (direction, data, handle, client.second).detach (
                     [this, id = client.first] (kj::Exception && e) { disconnect (id); });
         }
-        return kj::READY_NOW;
     }
-    kj::Promise <void> BackendImpl::sendItemToClient (ShipName const & username, Direction const & direction, ShipHandle_t handle, Client & receiver) {
+    kj::Promise <void> BackendImpl::sendItemToClient (Direction const & direction, Spaceship const & data, ShipHandle_t handle, Client & receiver) {
         auto & sinks = receiver.sinks;
+        auto & username = data.username;
 
         if (!sinks.contains (username)) {
             return handle.getShipRequest().send()
@@ -204,6 +201,7 @@ namespace cg {
         }
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
+        data.initialise (request.getItem().initSpaceship());
         return request.send().ignoreResult()
                 .catch_ ([this, & sinks, & username] (kj::Exception && e) { sinks.erase (username); });
     }

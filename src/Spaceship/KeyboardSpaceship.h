@@ -20,8 +20,8 @@ namespace kt {
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     private:
-        std::function <void (cg::Direction)> onUpdate;
-        std::function <void ()> onDone;
+        cg::SendItemCallback onUpdate;
+        cg::DoneCallback onDone;
 
         cg::Direction queried;
 
@@ -33,10 +33,10 @@ namespace kt {
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
 
-        void setOnUpdate (std::function <void (cg::Direction)> && onUpdate);
+        void setOnUpdate (cg::SendItemCallback && onUpdate);
         void update (UpdateState const & us) override;
 
-        void setOnDone (std::function <void ()> && onDone);
+        void setOnDone (cg::DoneCallback && onDone);
         void destroy () override;
 
         kj::Own <cg::ShipSinkImpl> getSink() override;

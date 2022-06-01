@@ -187,8 +187,9 @@ namespace kt {
             destroy();
             return kj::READY_NOW;
         });
-        sink->setOnSendItem ([this] (cg::Direction direction) {
+        sink->setOnSendItem ([this] (cg::Direction const & direction, cg::Spaceship const & data) {
             updateDirection (direction);
+            setData (data);
             return kj::READY_NOW;
         });
         return sink;

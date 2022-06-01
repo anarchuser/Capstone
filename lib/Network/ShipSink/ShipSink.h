@@ -7,8 +7,8 @@
 #include <functional>
 
 namespace cg {
-    using DoneCallback = std::function <kj::Promise <void> ()>;
-    using SendItemCallback = std::function <kj::Promise <void> (Direction)>;
+    using DoneCallback = std::function <void ()>;
+    using SendItemCallback = std::function <void (Direction const &, Spaceship const &)>;
 
     class ShipSinkImpl final: public Backend::ShipSink::Server {
     private:

@@ -56,11 +56,11 @@ namespace cg {
 
         /* ShipSink callback functions */
         /// Callback on closing sink; propagate to sink of all clients
-        kj::Promise <void> doneCallback     (ShipName const & username);
+        void doneCallback     (ShipName const & username);
         /// Callback on item received; propagate to sink of all clients
-        kj::Promise <void> sendItemCallback (ShipName const & username, Direction const & direction, ClientID const & id);
+        void sendItemCallback (Direction const & direction, Spaceship const & data, ClientID const & id);
         /// Helper to propagate item to sink of one specific client
-        kj::Promise <void> sendItemToClient (ShipName const & username, Direction const & direction, ShipHandle_t handle, Client & receiver);
+        kj::Promise <void> sendItemToClient (Direction const & direction, Spaceship const & data, ShipHandle_t handle, Client & receiver);
 
         /* Impl builder functions */
         /// Build a new Registrar with registerShip as callback

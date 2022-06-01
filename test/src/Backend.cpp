@@ -47,11 +47,14 @@ SCENARIO ("A backend handles basic requests") {
 
                 auto sink = kj::heap <cg::ShipSinkImpl> ();
                 sink->setOnDone ([](){ return kj::READY_NOW; });
-                sink->setOnSendItem ([] (cg::Direction const & dir) {
-                    REQUIRE (dir.accelerate  == -1);
-                    REQUIRE (dir.decelerate  ==  1);
-                    REQUIRE (dir.rotateLeft  == -1);
-                    REQUIRE (dir.rotateRight == -1);
+                sink->setOnSendItem ([] (cg::Direction const & dir, cg::Spaceship const & data) {
+                    CHECK (dir.accelerate  == -1);
+                    CHECK (dir.decelerate  ==  1);
+                    CHECK (dir.rotateLeft  == -1);
+                    CHECK (dir.rotateRight == -1);
+
+                    CHECK (data.username == USERNAME);
+
                     return kj::READY_NOW;
                 });
                 return kj::mv (sink);
@@ -71,6 +74,7 @@ SCENARIO ("A backend handles basic requests") {
                 WHEN ("I send a registerShip request back to the received registrar") {
                     auto registerShipRequest = registrar.registerShipRequest();
                     registerShipRequest.initShip().setHealth (HEALTH_VALUE);
+                    registerShipRequest.getShip().setUsername (USERNAME);
                     registerShipRequest.setHandle (kj::heap <::Backend::ShipHandle::Server>());
 
                     THEN ("It returns a valid ShipHandle") {
@@ -82,6 +86,7 @@ SCENARIO ("A backend handles basic requests") {
                         WHEN ("I send a sendItem request") {
                             auto sendItemRequest = sink.sendItemRequest ();
                             sendItemRequest.initItem().initDirection().setDecelerate (1);
+                            sendItemRequest.getItem().initSpaceship().setUsername (USERNAME);
 
                             THEN ("It solves without fail") {
                                 REQUIRE_NOTHROW (sendItemRequest.send().wait (waitScope));

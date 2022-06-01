@@ -14,10 +14,10 @@ namespace kt {
                 }));
             }
 
-    void KeyboardSpaceship::setOnUpdate (std::function<void (cg::Direction)> && onUpdate) {
+    void KeyboardSpaceship::setOnUpdate (cg::SendItemCallback && onUpdate) {
         this->onUpdate = onUpdate;
     }
-    void KeyboardSpaceship::setOnDone (std::function<void ()> && onDone) {
+    void KeyboardSpaceship::setOnDone (cg::DoneCallback && onDone) {
         this->onDone = onDone;
     }
 
@@ -49,7 +49,7 @@ namespace kt {
 
     void KeyboardSpaceship::update (UpdateState const & us) {
         try {
-            onUpdate(queried);
+            onUpdate(queried, getData());
         } catch (std::bad_function_call & e) {
             logs::warning ("KeyboardSpaceship::onUpdate not configured");
         }
