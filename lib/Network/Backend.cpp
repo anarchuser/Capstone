@@ -65,7 +65,7 @@ namespace cg {
         connectRequest.setRegistrar (newRegistrar (id));
         connectRequest.setSynchro   (newSynchro   (id));
 
-        return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
+        return connectRequest.send().then ([this, synchro, id] (auto results) mutable {
             KJ_REQUIRE (results.hasRegistrar());
             remote.emplace (id, RemoteClient (results.getRegistrar (), synchro));
             log ("Number of remote clients connected: "s += std::to_string (remote.size()));
