@@ -90,11 +90,13 @@ namespace kt {
     }
 
     void Spaceship::updateScoreboard (std::string const & msg, long ping) {
+        static long cached_ping = -1;
+        if (ping >= 0) cached_ping = ping;
         auto text = getName() + ": ";
         if (!msg.empty()) text += msg;
         else {
             text += std::to_string (health) + " hp";
-            text += " (" + std::to_string (ping) + ")";
+            text += " (" + std::to_string (cached_ping) + ")";
         }
         scoreboard->setText (text);
     }
