@@ -90,13 +90,11 @@ namespace kt {
     }
 
     void Spaceship::updateScoreboard (std::string const & msg, long ping) {
-        static long cached_ping = -1;
-        if (ping >= 0) cached_ping = ping;
         auto text = getName() + ": ";
         if (!msg.empty()) text += msg;
         else {
             text += std::to_string (health) + " hp";
-            text += " (" + std::to_string (cached_ping) + ")";
+            text += " (" + std::to_string (ping) + ")";
         }
         scoreboard->setText (text);
     }
@@ -178,8 +176,9 @@ namespace kt {
         setName (spaceship.username);
         setPhysicalTransform ({spaceship.position[0], spaceship.position[1]}, spaceship.angle);
         setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
+        auto tmp = health;
         health = spaceship.health;
-        updateScoreboard ();
+        if (health != tmp) updateScoreboard ();
     }
 
     kj::Own <cg::ShipSinkImpl> Spaceship::getSink () {
