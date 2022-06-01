@@ -1,11 +1,16 @@
 #include "Client.h"
 
 namespace cg {
-    Client::Client (Registrar_t && registrar, kj::Maybe<Synchro_t> && synchro, Type type)
-            : registrar {registrar}, synchro {synchro}, type {type} {}
+    kj::Promise <void> Client::erase (ShipName const & username) {
+        ships.erase (username);
 
-    Client::Client (Registrar_t && registrar)
-            : Client (std::forward<Registrar_t> (registrar), {}, LOCAL) {}
+        if (sinks.contains (username)) {
+            return sinks.at (username).doneRequest().send().ignoreResult().then ([&] () {
+                sinks.erase (username);
+            });
+        }
+        return kj::READY_NOW;
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

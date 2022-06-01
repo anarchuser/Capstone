@@ -9,7 +9,7 @@
 
 #define HEALTH_VALUE 42
 
-SCENARIO ("A backend returns the seed it was initialised with") {
+SCENARIO ("A backend handles basic requests") {
     GIVEN ("A backend running on a local port") {
         auto const seed = RANDOM_SEED;
         kt::Backend backend (seed, "*");

@@ -8,23 +8,29 @@
 namespace cg {
     /// Struct holding all kinds of information about things connected
     struct Client {
-        /// Whether it is a local game client or a remote synchro backend (redundant; same as maybe <synchro>)
-        enum Type { LOCAL, REMOTE } type;
+        inline explicit Client (Registrar_t registrar): registrar {registrar} {}
+
+        kj::Promise <void> erase (ShipName const & username);
 
         /// Thing used to update the client (e.g., new ship spawned)
         Registrar_t registrar;
-
-        /// If the client is a remote backend use this to interact with it
-        kj::Maybe <Synchro_t> synchro;
 
         /// List of handles to all ships in possession registered by this client
         std::unordered_map <ShipName, ShipHandle_t> ships;
 
         /// List of all ship sinks this client needs to distribute incoming events to
         std::unordered_map <ShipName, ShipSink_t> sinks;
+    };
 
-        Client (Registrar_t && registrar, kj::Maybe <Synchro_t> && synchro, Type type = REMOTE);
-        explicit Client (Registrar_t && registrar);
+    struct LocalClient : public Client {
+        inline explicit LocalClient(Registrar_t registrar): Client (registrar) {}
+    };
+
+    struct RemoteClient : public Client {
+        inline RemoteClient (Registrar_t registrar, Synchro_t synchro): Client (registrar), synchro {synchro} {}
+
+        /// If the client is a remote backend use this to interact with it
+        Synchro_t synchro;
     };
 
 } // cg
