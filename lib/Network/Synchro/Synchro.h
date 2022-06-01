@@ -1,8 +1,6 @@
 #ifndef CAPSTONE_NETWORK_SYNCHRO_H
 #define CAPSTONE_NETWORK_SYNCHRO_H
 
-#include "Network/Backend.h"
-
 #include "Network/Registrar/Registrar.h"
 
 #include <functional>

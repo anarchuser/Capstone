@@ -1,7 +1,6 @@
 #ifndef CAPSTONE_NETWORK_REGISTRAR_H
 #define CAPSTONE_NETWORK_REGISTRAR_H
 
-#include "Network/Backend.h"
 #include "Network/ShipSink/ShipSink.h"
 #include "Network/ShipHandle/ShipHandle.h"
 

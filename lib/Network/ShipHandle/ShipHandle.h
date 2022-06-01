@@ -1,7 +1,6 @@
 #ifndef CAPSTONE_NETWORK_SHIPHANDLE_H
 #define CAPSTONE_NETWORK_SHIPHANDLE_H
 
-#include "Network/Backend.h"
 #include "Network/ShipSink/ShipSink.h"
 
 #include <functional>
