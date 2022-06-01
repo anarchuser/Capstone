@@ -45,14 +45,8 @@ namespace cg {
 
         auto results = context.getResults();
         results.setId (ID);
-        auto registrar = kj::heap <RegistrarImpl>(remoteID);
-        registrar->setOnRegisterShip (LAMBDA (registerShip));
-        results.setRegistrar (kj::mv (registrar));
-
-        auto synchro = kj::heap <SynchroImpl>(remoteID);
-        synchro->setOnConnect (LAMBDA (connectCallback));
-        synchro->setOnShare (LAMBDA (connectTo));
-        results.setSynchro (kj::mv (synchro));
+        results.setRegistrar (newRegistrar (remoteID));
+        results.setSynchro   (newSynchro   (remoteID));
 
         return kj::READY_NOW;
     }
@@ -76,23 +70,14 @@ namespace cg {
         clients.emplace (id, Client (std::move (remoteRegistrar), synchro));
         shareConnections (id, synchro);
 
-        auto registrar = kj::heap <RegistrarImpl>(id);
-        registrar->setOnRegisterShip (LAMBDA (registerShip));
-        return registrar;
+        return newRegistrar (id);
     }
 
     ::kj::Promise <void> BackendImpl::connectTo (ClientID const & id, Synchro_t synchro) {
         auto connectRequest = synchro.connectRequest();
         connectRequest.setId (ID);
-
-        auto localSynchro = kj::heap <SynchroImpl> (id);
-        localSynchro->setOnConnect (LAMBDA (connectCallback));
-        localSynchro->setOnShare (LAMBDA (connectTo));
-        connectRequest.setSynchro (kj::mv (localSynchro));
-
-        auto registrar = kj::heap <RegistrarImpl> (id);
-        registrar->setOnRegisterShip (LAMBDA (registerShip));
-        connectRequest.setRegistrar (kj::mv (registrar));
+        connectRequest.setRegistrar (newRegistrar (id));
+        connectRequest.setSynchro   (newSynchro   (id));
 
         return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
             KJ_REQUIRE (results.hasRegistrar());
@@ -107,10 +92,7 @@ namespace cg {
 
         auto shareRequest = synchro.shareRequest();
         shareRequest.setId (ID);
-        auto local = kj::heap <SynchroImpl> (id);
-        local->setOnConnect (LAMBDA (connectCallback));
-        local->setOnShare (LAMBDA (connectTo));
-        shareRequest.setSynchro (kj::mv (local));
+        shareRequest.setSynchro (newSynchro (id));
         detach (shareRequest.send().ignoreResult());
 
         // Share all other synchro callbacks
@@ -124,6 +106,18 @@ namespace cg {
                 detach (shareRequest.send().ignoreResult());
             }
         }
+    }
+
+    ::kj::Own <RegistrarImpl> BackendImpl::newRegistrar (ClientID const & id) {
+        auto registrar = kj::heap <RegistrarImpl> (id);
+        registrar->setOnRegisterShip (LAMBDA (registerShip));
+        return registrar;
+    }
+    ::kj::Own <SynchroImpl> BackendImpl::newSynchro (ClientID const & id) {
+        auto localSynchro = kj::heap <SynchroImpl> (id);
+        localSynchro->setOnConnect (LAMBDA (connectCallback));
+        localSynchro->setOnShare (LAMBDA (connectTo));
+        return localSynchro;
     }
 
     ::kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {

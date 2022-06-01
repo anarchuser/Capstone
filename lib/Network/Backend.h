@@ -77,6 +77,10 @@ namespace cg {
         kj::Promise <void> sendItemCallback (ShipName const & username, Direction const & direction, ClientID const & id);
         kj::Promise <void> sendItemToClient (ShipName const & username, Direction const & direction, Client & receiver);
 
+        /// Callback builder functions
+        kj::Own <RegistrarImpl> newRegistrar (ClientID const & id);
+        kj::Own <SynchroImpl>   newSynchro   (ClientID const & id);
+
         /// Disconnect the client with this id
         void disconnect (ClientID const & id);
 
