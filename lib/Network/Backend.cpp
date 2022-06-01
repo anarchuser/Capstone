@@ -42,7 +42,6 @@ namespace cg {
 
         KJ_REQUIRE (params.hasRegistrar());
         clients.emplace (params.getId(), params.getRegistrar());
-        log ("Number of clients connected: "s += std::to_string (clients.size()));
 
         auto results = context.getResults();
         results.setId (ID);
@@ -56,6 +55,9 @@ namespace cg {
         synchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
             return connectCallback (id, synchro, registrar);
         });
+        synchro->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+            return connectTo (id, synchro);
+        });
         results.setSynchro (kj::mv (synchro));
 
         return kj::READY_NOW;
@@ -67,45 +69,18 @@ namespace cg {
         ClientID const & remoteID = params.getId();
         log ("Join request received from " + remoteID);
 
-        auto results = context.getResults();
-        results.setId (ID);
-        auto local = kj::heap <SynchroImpl> (remoteID);
-        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
-            return connectCallback (id, synchro, registrar);
-        });
-        results.setLocal (kj::mv (local));
+        // Share our own synchro callback to new connection
+        KJ_REQUIRE (params.hasRemote());
+        shareConnections (remoteID, params.getRemote());
 
         /// Connect back to received synchro
-        KJ_REQUIRE (params.hasRemote());
-        auto connectRequest = params.getRemote().connectRequest();
-        connectRequest.setId (ID);
-
-        KJ_REQUIRE (results.hasId());
-        auto synchro = kj::heap <SynchroImpl> (remoteID);
-        synchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
-            return connectCallback (id, synchro, registrar);
-        });
-        connectRequest.setSynchro (kj::mv (synchro));
-
-        auto registrar = kj::heap <RegistrarImpl> (remoteID);
-        registrar->setOnRegisterShip ([this] (Spaceship ship, ClientID const & id, ShipHandle_t handle) {
-            return registerShip (ship, id, handle);
-        });
-        connectRequest.setRegistrar (kj::mv (registrar));
-
-        return connectRequest.send().then ([this, synchro = params.getRemote(), id = remoteID] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
-            KJ_REQUIRE (results.hasRegistrar());
-            KJ_REQUIRE (results.getId() == id);
-            KJ_REQUIRE (!clients.contains (id));
-            clients.emplace (id, Client (results.getRegistrar (), synchro));
-            log ("Number of clients connected: "s += std::to_string (clients.size()));
-        });
+        return connectTo (remoteID, params.getRemote());
     }
 
     ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
         log ("Received Synchro::connect request from " + id);
-        clients.emplace (id, Client (std::move (remoteRegistrar), std::move (synchro)));
-        log ("Number of clients connected: "s += std::to_string (clients.size()));
+        clients.emplace (id, Client (std::move (remoteRegistrar), synchro));
+        shareConnections (id, synchro);
 
         auto registrar = kj::heap <RegistrarImpl>(id);
         registrar->setOnRegisterShip ([this] (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
@@ -114,10 +89,65 @@ namespace cg {
         return registrar;
     }
 
-    kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
-        auto username = ship.username;
+    ::kj::Promise <void> BackendImpl::connectTo (ClientID const & id, Synchro_t synchro) {
+        auto connectRequest = synchro.connectRequest();
+        connectRequest.setId (ID);
+
+        auto localSynchro = kj::heap <SynchroImpl> (id);
+        localSynchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
+            return connectCallback (id, synchro, registrar);
+        });
+        localSynchro->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+            return connectTo (id, synchro);
+        });
+        connectRequest.setSynchro (kj::mv (localSynchro));
+
+        auto registrar = kj::heap <RegistrarImpl> (id);
+        registrar->setOnRegisterShip ([this] (Spaceship ship, ClientID const & id, ShipHandle_t handle) {
+            return registerShip (ship, id, handle);
+        });
+        connectRequest.setRegistrar (kj::mv (registrar));
+
+        return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
+            KJ_REQUIRE (results.hasRegistrar());
+            clients.emplace (id, Client (results.getRegistrar (), synchro));
+            log ("Number of clients connected: "s += std::to_string (clients.size()));
+        });
+    }
+
+    void BackendImpl::shareConnections (ClientID const & id, Synchro_t synchro) {
+        if (clients.contains (id)) return;
+        log ("Share " + id + " our own synchro");
+
+        auto shareRequest = synchro.shareRequest();
+        shareRequest.setId (ID);
+        auto local = kj::heap <SynchroImpl> (id);
+        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
+            return connectCallback (id, synchro, registrar);
+        });
+        local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
+            return connectTo (id, synchro);
+        });
+        shareRequest.setSynchro (kj::mv (local));
+        detach (shareRequest.send().ignoreResult());
+
+        // Share all other synchro callbacks
+        for (auto & client : clients) {
+            if (client.second.type == Client::REMOTE && client.first != id) {
+                auto * clientSynchro = kj::_::readMaybe (client.second.synchro);
+                KJ_ASSERT_NONNULL (clientSynchro);
+                auto shareRequest = synchro.shareRequest ();
+                shareRequest.setId (client.first);
+                shareRequest.setSynchro (* clientSynchro);
+                detach (shareRequest.send().ignoreResult());
+            }
+        }
+    }
+
+    ::kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
         KJ_REQUIRE (clients.contains (id), id, "Ship owner is not registered");
         auto & ships = clients.at (id).ships;
+        auto username = ship.username;
         KJ_REQUIRE (!ships.contains (username), id, username, "Client 'id' already contains a ship named 'username'");
 
         log ("Registering ship " + username + " from client " + id);
@@ -128,7 +158,7 @@ namespace cg {
         auto [iterator, success] = ships.emplace (username, handle);
         KJ_ASSERT (success);
 
-        detach (broadcastSpaceship (ship));
+        broadcastSpaceship (ship, id);
 
         // Prepare ShipSink
         auto sink = kj::heap <ShipSinkImpl>();
@@ -141,14 +171,15 @@ namespace cg {
         return sink;
     }
 
-    kj::Promise <void> BackendImpl::broadcastSpaceship (Spaceship const & ship) {
-        std::size_t i = 0;
+    void BackendImpl::broadcastSpaceship (Spaceship const & ship, ClientID const & id) {
         log ("Number of clients: " + std::to_string (clients.size()));
+        auto senderType = clients.at (id).type;
         for (auto & client : clients) {
+            if (senderType == Client::REMOTE && client.second.type == Client::REMOTE) continue;
+
             log ("Broadcast ship " + ship.username + " to client " + client.first);
             detach (distributeSpaceship (ship, client.second));
         }
-        return kj::READY_NOW;
     }
     kj::Promise <void> BackendImpl::distributeSpaceship (Spaceship const & ship, Client & receiver) {
         auto & sender = ship.username;
@@ -168,7 +199,6 @@ namespace cg {
                     (capnp::Response<Backend::Registrar::RegisterShipResults> results) {
                         // Check again if nothing's changed
                         if (receiver.sinks.contains (sender)) return;
-
                         receiver.sinks.insert_or_assign (sender, results.getSink ());
                     });
         }
@@ -203,6 +233,7 @@ namespace cg {
 
         /// Case 1: Item got sent from a local client -> Distribute to everyone
         if (sender.type == Client::LOCAL) {
+//            log ("Send Item callback from local game client");
             for (auto & client : clients) {
                 /* Send Item from local ship to sink of same name of every client.
                  * If that client does not have a sink with that name yet, create it
@@ -214,16 +245,14 @@ namespace cg {
         }
         /// Case 2: Item got sent from a remote client -> Distribute to our own ship only
         else {
+//            log ("Send Item callback from remote synchro client");
             for (auto & client : clients) {
                 // Do not send the item to remote clients, as they've received the item directly already
                 if (client.second.type == Client::REMOTE) continue;
 
                 // Send the item to the corresponding spaceship of our own local clients, or create it if needed
                 sendItemToClient (username, direction, client.second).detach (
-                        [this, id = client.first, username = username] (kj::Exception && e) {
-                            KJ_DLOG (WARNING, id, username, e.getDescription ());
-                            if (clients.contains (id)) clients.at (id).sinks.erase (username);
-                        });
+                        [this, id = client.first] (kj::Exception && e) { disconnect (id); });
             }
         }
         return kj::READY_NOW;
@@ -249,9 +278,7 @@ namespace cg {
         auto request = sinks.at (username).sendItemRequest();
         direction.initialise (request.initItem().initDirection());
         return request.send().ignoreResult()
-                .catch_ ([this, & sinks, & username] (kj::Exception && e) {
-                    sinks.erase (username);
-                });
+                .catch_ ([this, & sinks, & username] (kj::Exception && e) { sinks.erase (username); });
     }
 
     void BackendImpl::disconnect (ClientID const & id) {

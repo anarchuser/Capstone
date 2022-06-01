@@ -22,6 +22,8 @@
 #include <ranges>
 #include <iterator>
 
+#define LAMBDA(func) [this] (auto ...args) { return func (args...); }
+
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
  */
@@ -62,10 +64,12 @@ namespace cg {
 
         /// Synchro callbacks
         kj::Own <RegistrarImpl> connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar);
+        kj::Promise <void> connectTo (ClientID const & id, Synchro_t synchro);
+        void shareConnections (ClientID const & id, Synchro_t synchro);
 
         /// RegisterShip callback
         kj::Own <ShipSinkImpl> registerShip    (Spaceship const & ship, ClientID const & id, ShipHandle_t);
-        kj::Promise <void> broadcastSpaceship  (Spaceship const & ship);
+        void broadcastSpaceship  (Spaceship const & ship, ClientID const & id);
         kj::Promise <void> distributeSpaceship (Spaceship const & ship, Client & receiver);
 
         /// ShipSink callbacks

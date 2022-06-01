@@ -1,7 +1,7 @@
 # Simple Makefile providing an interface for cmake. Oh, sweet irony
 
-BUILD_DIR  ?= build
 BUILD_TYPE ?= Release
+BUILD_DIR   = $(BUILD_TYPE)
 
 .PHONY = all build clean debug default FORCE run setup test
 
@@ -17,7 +17,7 @@ setup:	FORCE	CMakeLists.txt
 	cmake -H. -B$(BUILD_DIR) -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" > /dev/zero
 
 # Build the project (lib and src)
-build:	setup
+build:	FORCE	setup
 	cmake --build $(BUILD_DIR) --target Capstone
 
 # Build the benchmarking tool
@@ -28,11 +28,6 @@ run:	build
 test:	build
 	cmake --build $(BUILD_DIR) --target Test
 	./$(BUILD_DIR)/Test
-
-# Build test RPC client
-client:	build
-	cmake --build $(BUILD_DIR) --target Client
-	./$(BUILD_DIR)/Client
 
 # Clean all build files
 clean:

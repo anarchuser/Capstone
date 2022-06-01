@@ -40,7 +40,7 @@ namespace kt {
                         message->setText (msg += '0');
                     default:
                         if (keysym.scancode >= SDL_SCANCODE_A && keysym.scancode <= SDL_SCANCODE_Z) {
-                            message->setText (msg += keysym.scancode - SDL_SCANCODE_A + 'A');
+                            message->setText (msg += keysym.scancode - SDL_SCANCODE_A + 'a');
                         } else if (keysym.scancode >= SDL_SCANCODE_1 && keysym.scancode <= SDL_SCANCODE_9) {
                             message->setText (msg += keysym.scancode - SDL_SCANCODE_1 + '1');
                         }

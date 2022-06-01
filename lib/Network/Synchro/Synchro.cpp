@@ -3,7 +3,7 @@
 namespace cg {
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
-        ss << "Synchro @" << this << ": '" << msg << "'";
+        ss << "Synchro " << ID << " @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
 #ifdef DEBUG_MINOR
         debug_stdout (ss.str());
@@ -24,6 +24,21 @@ namespace cg {
             results.setId (ID);
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "Synchro::connect called without valid callback registered");
+        }
+        return kj::READY_NOW;
+    }
+
+    ::kj::Promise <void> SynchroImpl::share (ShareContext context) {
+        auto params = context.getParams();
+        KJ_REQUIRE (params.hasId());
+        KJ_REQUIRE (params.hasSynchro());
+
+        log ("Shared connection received from " + std::string (params.getId()));
+
+        try {
+            return onShare (params.getId(), params.getSynchro());
+        } catch (std::bad_function_call & e) {
+            KJ_DLOG (WARNING, "Synchro::share called without valid callback registered");
         }
         return kj::READY_NOW;
     }

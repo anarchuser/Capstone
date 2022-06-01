@@ -119,6 +119,7 @@ namespace kt {
         static auto size = getSize();
         static spDialog dialog = [this]() {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
+            dialog->addButton ("Join", CLOSURE (this, & GameScene::onJoinGame));
             dialog->addButton ("Restart", CLOSURE (this, & GameScene::onRestart));
             dialog->addButton ("New game", CLOSURE (this, & GameScene::onNewGame));
             dialog->addButton ("Disconnect", CLOSURE (this, & GameScene::onDisconnect));
@@ -141,7 +142,7 @@ namespace kt {
         if (auto & ship = actors.localShip) ship->destroy();
         actors.localShip = nullptr;
 
-        for (auto & ship : actors.remoteShips) ship->destroy();
+        for (auto & ship : actors.remoteShips) if (ship) ship->destroy();
         actors.remoteShips.clear();
     }
 
@@ -165,19 +166,32 @@ namespace kt {
         core::requestQuit();
     }
 
-    std::size_t GameScene::requestSeed (std::string const & ip, unsigned short port) {
-        auto client = capnp::EzRpcClient (ip, port);
-        auto promise = client.getMain <::Backend>().seedRequest().send();
-        return promise.wait (client.getWaitScope()).getSeed();
-    }
+    void GameScene::onJoinGame (Event * event) {
+        static auto size = getSize ();
+        static spDialog dialog = [this] () {
+            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to connect to:");
+            dialog->addInput (REMOTE_ADDRESS, [this] (std::string msg) { joinGame (msg, SERVER_PORT); });
+            dialog->addButton ("Cancel", CLOSURE (this, & GameScene::onJoinGame));
+            return dialog;
+        } ();
 
+        // TODO: check if *any* child is dialog
+        if (getLastChild () != dialog) addChild (dialog);
+        else removeChild (dialog);
+    }
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
+        if (!Backend::ping (ip, port)) return;
         auto [iterator, success] = remoteClients.emplace (ip, kj::heap <capnp::EzRpcClient> (ip, port));
         auto & remote = * iterator->second;
         auto request = remote.getMain <::Backend>().joinRequest();
         request.setId (USERNAME);
         request.setRemote (handle.synchro);
         request.send().wait (remote.getWaitScope());
+    }
+    std::size_t GameScene::requestSeed (std::string const & ip, unsigned short port) {
+        auto client = capnp::EzRpcClient (ip, port);
+        auto promise = client.getMain <::Backend>().seedRequest().send();
+        return promise.wait (client.getWaitScope()).getSeed();
     }
 }
 

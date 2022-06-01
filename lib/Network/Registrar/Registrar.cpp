@@ -3,7 +3,7 @@
 namespace cg {
     void RegistrarImpl::log (std::string const & msg) {
         std::stringstream ss;
-        ss << "Registrar @" << this << ": '" << msg << "'";
+        ss << "Registrar " << ID << " @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
 #ifdef DEBUG_MINOR
         debug_stdout (ss.str());
@@ -11,10 +11,10 @@ namespace cg {
     }
 
     ::kj::Promise <void> RegistrarImpl::registerShip (RegisterShipContext context) {
-        log ("Register ship requested");
         auto params = context.getParams();
         KJ_REQUIRE (params.hasShip());
         KJ_REQUIRE (params.hasHandle());
+        log ("Register ship requested: " + std::string (params.getShip().getUsername()));
 
         try {
             context.getResults().setSink (onRegisterShip (Spaceship (params.getShip()), ID, params.getHandle()));

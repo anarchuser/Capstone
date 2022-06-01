@@ -26,13 +26,13 @@ namespace cg {
     }
 
     ::kj::Promise <void> ShipHandleImpl::getShip (GetShipContext context) {
-        log ("Ship requested");
         auto results = context.getResults();
         try {
             onGetShip().initialise (results.getShip());
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipHandle::getShip called without valid callback registered");
         }
+        log ("Returning requested ship " + std::string (results.getShip().getUsername().asReader()));
         return kj::READY_NOW;
     }
 
