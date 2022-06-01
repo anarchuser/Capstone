@@ -3,8 +3,6 @@
 
 #include <iostream>
 
-#define ONCE(expr) static bool __once__ = [this]() { ((expr)); return true; }()
-
 #define DEBUG_MINOR
 
 inline void debug_stdout (std::string const & message) {
@@ -12,6 +10,10 @@ inline void debug_stdout (std::string const & message) {
     std::cout << message << std::endl;
 #endif
 }
+
+#define ONCE(expr) static bool __once__ = [this]() { ((expr)); return true; }()
+
+#define LAMBDA(func) [this] (auto ...args) { return func (args...); }
 
 #endif //CAPSTONE_HELPER_H
 

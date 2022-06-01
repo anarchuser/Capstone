@@ -10,6 +10,7 @@
 
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
+#include "Data/Client.h"
 
 #include <atomic>
 #include <functional>
@@ -21,8 +22,6 @@
 #include <numeric>
 #include <ranges>
 #include <iterator>
-
-#define LAMBDA(func) [this] (auto ...args) { return func (args...); }
 
 /* Following Cap'n Proto Server example:
  * https://github.com/capnproto/capnproto/blob/master/c%2B%2B/samples/calculator-server.c%2B%2B
@@ -39,26 +38,6 @@ namespace cg {
         /// Own identifier
         ClientID const ID;
 
-        /// Struct holding all kinds of information about things connected
-        struct Client {
-            /// Whether it is a local game client or a remote synchro backend (redundant; same as maybe <synchro>)
-            enum Type { LOCAL, REMOTE } type;
-
-            /// Thing used to update the client (e.g., new ship spawned)
-            Registrar_t registrar;
-
-            /// If the client is a remote backend use this to interact with it
-            kj::Maybe <Synchro_t> synchro;
-
-            /// List of handles to all ships in possession registered by this client
-            std::unordered_map <ShipName, ShipHandle_t> ships;
-
-            /// List of all ship sinks this client needs to distribute incoming events to
-            std::unordered_map <ShipName, ShipSink_t> sinks;
-
-            Client (Registrar_t && registrar, kj::Maybe <Synchro_t> && synchro, Type type = REMOTE);
-            explicit Client (Registrar_t && registrar);
-        };
         /// List of all clients connected
         std::unordered_map <ClientID, Client> clients;
 

@@ -6,16 +6,6 @@ namespace cg {
             , ID {id}
             {}
 
-    BackendImpl::Client::Client (Registrar_t && registrar, kj::Maybe <Synchro_t> && synchro, Type type)
-            : registrar {registrar}
-            , synchro {synchro}
-            , type {type}
-            {}
-
-    BackendImpl::Client::Client (Registrar_t && registrar)
-            : Client (std::forward <Registrar_t> (registrar), {}, LOCAL)
-            {}
-
     void BackendImpl::log (std::string const & msg) {
         std::ostringstream ss;
         ss << "Backend " << ID << " @" << this << ": '" << msg << "'";
