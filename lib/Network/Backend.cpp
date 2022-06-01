@@ -46,18 +46,12 @@ namespace cg {
         auto results = context.getResults();
         results.setId (ID);
         auto registrar = kj::heap <RegistrarImpl>(remoteID);
-        registrar->setOnRegisterShip ([this] (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
-            return registerShip (ship, id, handle);
-        });
+        registrar->setOnRegisterShip (LAMBDA (registerShip));
         results.setRegistrar (kj::mv (registrar));
 
         auto synchro = kj::heap <SynchroImpl>(remoteID);
-        synchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
-            return connectCallback (id, synchro, registrar);
-        });
-        synchro->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
-            return connectTo (id, synchro);
-        });
+        synchro->setOnConnect (LAMBDA (connectCallback));
+        synchro->setOnShare (LAMBDA (connectTo));
         results.setSynchro (kj::mv (synchro));
 
         return kj::READY_NOW;
@@ -83,9 +77,7 @@ namespace cg {
         shareConnections (id, synchro);
 
         auto registrar = kj::heap <RegistrarImpl>(id);
-        registrar->setOnRegisterShip ([this] (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
-            return registerShip (ship, id, handle);
-        });
+        registrar->setOnRegisterShip (LAMBDA (registerShip));
         return registrar;
     }
 
@@ -94,18 +86,12 @@ namespace cg {
         connectRequest.setId (ID);
 
         auto localSynchro = kj::heap <SynchroImpl> (id);
-        localSynchro->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
-            return connectCallback (id, synchro, registrar);
-        });
-        localSynchro->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
-            return connectTo (id, synchro);
-        });
+        localSynchro->setOnConnect (LAMBDA (connectCallback));
+        localSynchro->setOnShare (LAMBDA (connectTo));
         connectRequest.setSynchro (kj::mv (localSynchro));
 
         auto registrar = kj::heap <RegistrarImpl> (id);
-        registrar->setOnRegisterShip ([this] (Spaceship ship, ClientID const & id, ShipHandle_t handle) {
-            return registerShip (ship, id, handle);
-        });
+        registrar->setOnRegisterShip (LAMBDA (registerShip));
         connectRequest.setRegistrar (kj::mv (registrar));
 
         return connectRequest.send().then ([this, synchro = synchro, id = id] (capnp::Response <Backend::Synchro::ConnectResults> results) mutable {
@@ -122,12 +108,8 @@ namespace cg {
         auto shareRequest = synchro.shareRequest();
         shareRequest.setId (ID);
         auto local = kj::heap <SynchroImpl> (id);
-        local->setOnConnect ([this] (ClientID const & id, Synchro_t synchro, Registrar_t registrar) {
-            return connectCallback (id, synchro, registrar);
-        });
-        local->setOnShare ([this] (ClientID const & id, Synchro_t synchro) {
-            return connectTo (id, synchro);
-        });
+        local->setOnConnect (LAMBDA (connectCallback));
+        local->setOnShare (LAMBDA (connectTo));
         shareRequest.setSynchro (kj::mv (local));
         detach (shareRequest.send().ignoreResult());
 
