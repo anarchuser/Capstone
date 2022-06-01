@@ -12,6 +12,7 @@ interface Backend {
 
     struct Item {
         direction @0 :Direction;
+        spaceship @1 :Spaceship;
     }
 
     struct Spaceship {

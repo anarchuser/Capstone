@@ -8,8 +8,10 @@ namespace kt {
             }
 
     void RemoteSpaceship::destroy () {
-        Spaceship::destroy();
+        for (auto listener: listeners)
+            getStage ()->removeEventListener (listener);
         updateScoreboard ("ghost");
+        setAwake (false);
     }
 }
 

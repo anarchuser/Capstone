@@ -49,9 +49,10 @@ namespace kt {
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
         handle.keyboard_sink = std::make_unique <cg::ShipSink_t> (request.send().wait (waitscope).getSink());
-        ship->setOnUpdate ([this] (cg::Direction const & direction) {
+        ship->setOnUpdate ([this] (cg::Direction const & direction, cg::Spaceship const & data) {
             auto request = handle.keyboard_sink->sendItemRequest ();
             direction.initialise (request.initItem ().initDirection ());
+            data.initialise (request.getItem().initSpaceship());
             request.send ().wait (waitscope);
         });
         ship->setOnDone ([this] () {

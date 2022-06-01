@@ -1,7 +1,7 @@
 #include "Planet.h"
 
 namespace kt {
-    Planet::Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale) {
+    Planet::Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale): mass {getMass (0.5 * scale)} {
         setName ("Planet");
         attachTo (& world);
         auto world_pos = world.convert (pos);
@@ -12,7 +12,7 @@ namespace kt {
         setTouchChildrenEnabled (false);
 
         b2BodyDef bodyDef;
-        bodyDef.type = b2_dynamicBody;
+        bodyDef.type = b2_staticBody;
         bodyDef.position = world_pos;
         bodyDef.userData.pointer = (uintptr_t) this;
 
@@ -55,7 +55,7 @@ namespace kt {
                     direction.y += space.y;
                 }
 
-                auto force = body->GetMass() * PLANET_GRAVITY / direction.Normalize ();
+                auto force = mass * PLANET_GRAVITY * us.dt / direction.Normalize ();
                 actor_body->ApplyLinearImpulseToCenter (force * direction, PLANET_WAKES_SHIP);
             }
 

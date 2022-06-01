@@ -176,8 +176,9 @@ namespace kt {
         setName (spaceship.username);
         setPhysicalTransform ({spaceship.position[0], spaceship.position[1]}, spaceship.angle);
         setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
+        auto tmp = health;
         health = spaceship.health;
-        updateScoreboard ();
+        if (health != tmp) updateScoreboard ();
     }
 
     kj::Own <cg::ShipSinkImpl> Spaceship::getSink () {
@@ -187,8 +188,9 @@ namespace kt {
             destroy();
             return kj::READY_NOW;
         });
-        sink->setOnSendItem ([this] (cg::Direction direction) {
+        sink->setOnSendItem ([this] (cg::Direction const & direction, cg::Spaceship const & data) {
             updateDirection (direction);
+            setData (data);
             return kj::READY_NOW;
         });
         return sink;
