@@ -60,16 +60,6 @@ namespace cg {
         return connectTo (remoteID, params.getRemote());
     }
 
-    ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
-        log ("Received Synchro::connect request from " + id);
-        KJ_REQUIRE (id != ID, id, "Remote client cannot have our own identifier");
-
-        remote.emplace (id, RemoteClient (remoteRegistrar, synchro));
-        shareConnections (id, synchro);
-
-        return newRegistrar (id);
-    }
-
     ::kj::Promise <void> BackendImpl::connectTo (ClientID const & id, Synchro_t synchro) {
         KJ_DASSERT (id != ID, id, "Cannot connect to client with our own identifier");
 
@@ -111,10 +101,7 @@ namespace cg {
         return registrar;
     }
     ::kj::Own <SynchroImpl> BackendImpl::newSynchro (ClientID const & id) {
-        auto localSynchro = kj::heap <SynchroImpl> (synchro);
-        localSynchro->setOnConnect (LAMBDA (connectCallback));
-        localSynchro->setOnShare (LAMBDA (connectTo));
-        return localSynchro;
+        return kj::heap <SynchroImpl> (synchro);
     }
 
     ::kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {

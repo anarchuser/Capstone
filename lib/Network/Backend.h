@@ -40,8 +40,6 @@ namespace cg {
         Client * findClient (ClientID const & id);
 
         /* Client connection functions */
-        /// Callback for calls to Synchro::connect
-        kj::Own <RegistrarImpl> connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar);
         /// Share all our remote clients with the given synchro
         void shareConnections (ClientID const & id, Synchro_t synchro);
         /// Connect to a synchro and store the resulting new client

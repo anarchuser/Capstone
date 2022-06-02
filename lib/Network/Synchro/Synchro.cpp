@@ -27,7 +27,7 @@ namespace cg {
         auto results = context.getResults();
 
         try {
-            results.setRegistrar (onConnect (params.getId(), params.getSynchro(), params.getRegistrar()));
+            results.setRegistrar (connectCallback (params.getId(), params.getSynchro(), params.getRegistrar()));
             results.setId (ID);
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "Synchro::connect called without valid callback registered");
@@ -43,7 +43,7 @@ namespace cg {
         log ("Shared connection received from " + std::string (params.getId()));
 
         try {
-            return onShare (params.getId(), params.getSynchro());
+            return connectTo (params.getId(), params.getSynchro());
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "Synchro::share called without valid callback registered");
         }
@@ -101,10 +101,7 @@ namespace cg {
         return registrar;
     }
     ::kj::Own <SynchroImpl> SynchroImpl::newSynchro (ClientID const & id) {
-        auto localSynchro = kj::heap <SynchroImpl> (* this);
-        localSynchro->setOnConnect (LAMBDA (connectCallback));
-        localSynchro->setOnShare (LAMBDA (connectTo));
-        return localSynchro;
+        return kj::heap <SynchroImpl> (* this);
     }
 
     ::kj::Own <ShipSinkImpl> SynchroImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
