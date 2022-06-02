@@ -46,7 +46,7 @@ namespace kt {
         struct Handle {
             cg::Registrar_t registrar;
             cg::Synchro_t synchro;
-            std::unique_ptr <cg::ShipSink_t> keyboard_sink = nullptr;
+            std::optional <cg::ShipSink_t> keyboard_sink;
         } handle;
 
         /* References to all objects stored in the world */

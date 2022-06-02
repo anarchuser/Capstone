@@ -7,6 +7,7 @@
 #define GAME_RESOURCES  (PROJECT_ROOT "/src/data/res.xml")
 
 #define USERNAME        "lucifer"
+#define CLIENT_ID       USERNAME
 #define SERVER_ADDRESS  "*"
 #define REMOTE_ADDRESS  "azazel"
 #define SERVER_PORT     44444

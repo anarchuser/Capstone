@@ -2,30 +2,64 @@
 #define CAPSTONE_NETWORK_SYNCHRO_H
 
 #include "Network/Registrar/Registrar.h"
+#include "Network/ShipSink/ShipSink.h"
+#include "Network/ShipHandle/ShipHandle.h"
+
+#include "Data/Client.h"
 
 #include <functional>
+#include <optional>
 
 namespace cg {
-    class RegistrarImpl;
-    using ConnectCallback = std::function <kj::Own <RegistrarImpl> (ClientID const &, Synchro_t, Registrar_t)>;
-    using ShareCallback   = std::function <kj::Promise <void> (ClientID const &, Synchro_t)>;
+    using namespace std::string_literals;
 
     class SynchroImpl final: public Backend::Synchro::Server {
     private:
         /// Log function of this implementation
         void log (std::string const & msg);
 
-        ConnectCallback onConnect;
-        ShareCallback onShare;
-
         ClientID const ID;
 
+        std::optional <LocalClient> & local;                   /// The one allowed *local* client connected
+        std::unordered_map <ClientID, RemoteClient> & remotes; /// List of all *remotes* clients connected
+
+        /// Return raw pointer to Client if id was in remote or local. Nullptr otherwise
+        Client * findClient (ClientID const & id);
+
+        /* Ship registration functions */
+        /// Configure the newly registered spaceship and return a sink to it. Registrar callback
+        kj::Own <ShipSinkImpl> registerShip    (Spaceship const & ship, ClientID const & id, ShipHandle_t);
+        /// Distribute spaceship to every client
+        void broadcastSpaceship  (Spaceship const & ship, ShipHandle_t handle, bool isRemote);
+        /// Hand out spaceship to the specified client
+        kj::Promise <void> distributeSpaceship (Spaceship const & ship, ShipHandle_t handle, Client & receiver);
+
+        /* ShipSink callback functions */
+        /// Callback on closing sink; propagate to sink of all clients
+        void doneCallback     (ShipName const & username);
+        /// Callback on item received; propagate to sink of all clients
+        void sendItemCallback (Direction const & direction, Spaceship const & data, ClientID const & id);
+        /// Helper to propagate item to sink of one specific client
+        kj::Promise <void> sendItemToClient (Direction const & direction, Spaceship const & data, ShipHandle_t handle, Client & receiver);
+
+        /// Disconnect the client with this id, if exists
+        kj::Promise <void> disconnect (ClientID const & id);
+
     public:
-        inline explicit SynchroImpl (ClientID id): ID {id} {}
+        SynchroImpl (ClientID id, std::optional <LocalClient> & local, std::unordered_map <ClientID, RemoteClient> & remotes);
 
-        inline void setOnConnect (ConnectCallback && callback) { onConnect = callback; }
-        inline void setOnShare   (ShareCallback   && callback) { onShare   = callback; }
+        /* Impl builder functions */
+        /// Build a new Registrar with registerShip as callback
+        kj::Own <RegistrarImpl> newRegistrar (ClientID const & id);
+        /// Build a new Synchro with corresponding callbacks
+        kj::Own <SynchroImpl>   newSynchro   (ClientID id);
 
+        /* Client connection functions */
+        /// Share all our remote clients with the given remote
+        void shareConnections (ClientID const & id, Synchro_t remote);
+        /// Connect to a remote and store the resulting new client
+
+        kj::Promise <void> connectTo (ClientID const & id, Synchro_t remote);
         ::kj::Promise <void> connect (ConnectContext context) override;
         ::kj::Promise <void> share (ShareContext context) override;
     };

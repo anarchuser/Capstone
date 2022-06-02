@@ -15,7 +15,7 @@ namespace kt {
             , waitscope {client.getWaitScope()}
             , handle {[this] () {
                 auto request = client.getMain <::Backend>().connectRequest();
-                request.setId (USERNAME);
+                request.setId (CLIENT_ID);
                 request.setRegistrar (getRegistrarImpl());
                 auto result = request.send().wait (waitscope);
                 KJ_REQUIRE (result.hasSynchro());
@@ -48,8 +48,9 @@ namespace kt {
         auto request = handle.registrar.registerShipRequest();
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
-        handle.keyboard_sink = std::make_unique <cg::ShipSink_t> (request.send().wait (waitscope).getSink());
+        handle.keyboard_sink.emplace (request.send().wait (waitscope).getSink());
         ship->setOnUpdate ([this] (cg::Direction const & direction, cg::Spaceship const & data) {
+            if (!handle.keyboard_sink.has_value()) return;
             auto request = handle.keyboard_sink->sendItemRequest ();
             direction.initialise (request.initItem ().initDirection ());
             data.initialise (request.getItem().initSpaceship());
@@ -57,6 +58,7 @@ namespace kt {
         });
         ship->setOnDone ([this] () {
             actors.localShip = nullptr;
+            if (!handle.keyboard_sink.has_value()) return;
             handle.keyboard_sink->doneRequest().send().wait (waitscope);
         });
 
@@ -72,7 +74,7 @@ namespace kt {
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
-        auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
+        auto registrar = kj::heap <cg::RegistrarImpl> (CLIENT_ID);
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
             try {
                 auto & username = data.username;
@@ -183,9 +185,10 @@ namespace kt {
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
         if (!Backend::ping (ip, port)) return;
         auto [iterator, success] = remoteClients.emplace (ip, kj::heap <capnp::EzRpcClient> (ip, port));
+        OX_ASSERT (success);
         auto & remote = * iterator->second;
         auto request = remote.getMain <::Backend>().joinRequest();
-        request.setId (USERNAME);
+        request.setId (CLIENT_ID);
         request.setRemote (handle.synchro);
         request.send().wait (remote.getWaitScope());
     }

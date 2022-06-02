@@ -31,6 +31,7 @@ interface Backend {
     interface ShipSink {
         done @0 ();
         sendItem @1 (item :Item);
+        getShip @2 () -> (ship :Spaceship);
     }
 
     interface ShipHandle {
