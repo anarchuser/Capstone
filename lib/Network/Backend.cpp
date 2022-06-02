@@ -54,45 +54,10 @@ namespace cg {
 
         // Share our own synchro callback to new connection
         KJ_REQUIRE (params.hasRemote());
-        shareConnections (remoteID, params.getRemote());
+        synchro.shareConnections (remoteID, params.getRemote());
 
         /// Connect back to received synchro
-        return connectTo (remoteID, params.getRemote());
-    }
-
-    ::kj::Promise <void> BackendImpl::connectTo (ClientID const & id, Synchro_t remote) {
-        KJ_DASSERT (id != ID, id, "Cannot connect to client with our own identifier");
-
-        auto connectRequest = remote.connectRequest();
-        connectRequest.setId (ID);
-        connectRequest.setRegistrar (synchro.newRegistrar (id));
-        connectRequest.setSynchro (synchro.newSynchro (id));
-
-        return connectRequest.send().then ([this, remote, id] (auto results) mutable {
-            KJ_REQUIRE (results.hasRegistrar());
-            remotes.emplace (id, RemoteClient (results.getRegistrar (), remote));
-            log ("Number of remote clients connected: "s += std::to_string (remotes.size()));
-        });
-    }
-
-    void BackendImpl::shareConnections (ClientID const & id, Synchro_t remote) {
-        if (remotes.contains (id)) return;
-        log ("Share " + id + " our own remote");
-
-        auto shareRequest = remote.shareRequest();
-        shareRequest.setId (ID);
-        shareRequest.setSynchro (synchro.newSynchro (ID));
-        detach (shareRequest.send().ignoreResult());
-
-        // Share all other remote callbacks
-        for (auto & client : remotes) {
-            if (client.first != id) {
-                auto shareRequest = remote.shareRequest ();
-                shareRequest.setId (client.first);
-                shareRequest.setSynchro (client.second.synchro);
-                detach (shareRequest.send().ignoreResult());
-            }
-        }
+        return synchro.connectTo (remoteID, params.getRemote());
     }
 
     ::kj::Own <RegistrarImpl> BackendImpl::newRegistrar (ClientID const & id) {

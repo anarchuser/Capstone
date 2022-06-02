@@ -26,12 +26,6 @@ namespace cg {
         /// Return raw pointer to Client if id was in remote or local. Nullptr otherwise
         Client * findClient (ClientID const & id);
 
-        /* Client connection functions */
-        /// Share all our remote clients with the given remote
-        void shareConnections (ClientID const & id, Synchro_t remote);
-        /// Connect to a remote and store the resulting new client
-        kj::Promise <void> connectTo (ClientID const & id, Synchro_t remote);
-
         /* Ship registration functions */
         /// Configure the newly registered spaceship and return a sink to it. Registrar callback
         kj::Own <ShipSinkImpl> registerShip    (Spaceship const & ship, ClientID const & id, ShipHandle_t);
@@ -60,6 +54,12 @@ namespace cg {
         /// Build a new Synchro with corresponding callbacks
         kj::Own <SynchroImpl>   newSynchro   (ClientID const & id);
 
+        /* Client connection functions */
+        /// Share all our remote clients with the given remote
+        void shareConnections (ClientID const & id, Synchro_t remote);
+        /// Connect to a remote and store the resulting new client
+
+        kj::Promise <void> connectTo (ClientID const & id, Synchro_t remote);
         ::kj::Promise <void> connect (ConnectContext context) override;
         ::kj::Promise <void> share (ShareContext context) override;
     };
