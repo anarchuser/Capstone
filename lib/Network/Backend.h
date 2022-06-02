@@ -64,8 +64,6 @@ namespace cg {
         /* Impl builder functions */
         /// Build a new Registrar with registerShip as callback
         kj::Own <RegistrarImpl> newRegistrar (ClientID const & id);
-        /// Build a new Synchro with corresponding callbacks
-        kj::Own <SynchroImpl>   newSynchro   (ClientID const & id);
 
         /// Disconnect the client with this id, if exists
         kj::Promise <void> disconnect (ClientID const & id);

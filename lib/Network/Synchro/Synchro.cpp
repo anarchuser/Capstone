@@ -101,7 +101,7 @@ namespace cg {
         return registrar;
     }
     ::kj::Own <SynchroImpl> SynchroImpl::newSynchro (ClientID const & id) {
-        return kj::heap <SynchroImpl> (* this);
+        return kj::heap <SynchroImpl> (id, local, remote);
     }
 
     ::kj::Own <ShipSinkImpl> SynchroImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {

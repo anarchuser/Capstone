@@ -50,17 +50,17 @@ namespace cg {
         /// Helper to propagate item to sink of one specific client
         kj::Promise <void> sendItemToClient (Direction const & direction, Spaceship const & data, ShipHandle_t handle, Client & receiver);
 
-        /* Impl builder functions */
-        /// Build a new Registrar with registerShip as callback
-        kj::Own <RegistrarImpl> newRegistrar (ClientID const & id);
-        /// Build a new Synchro with corresponding callbacks
-        kj::Own <SynchroImpl>   newSynchro   (ClientID const & id);
-
         /// Disconnect the client with this id, if exists
         kj::Promise <void> disconnect (ClientID const & id);
 
     public:
         SynchroImpl (ClientID const & id, std::optional <LocalClient> & local, std::unordered_map <ClientID, RemoteClient> & remote);
+
+        /* Impl builder functions */
+        /// Build a new Registrar with registerShip as callback
+        kj::Own <RegistrarImpl> newRegistrar (ClientID const & id);
+        /// Build a new Synchro with corresponding callbacks
+        kj::Own <SynchroImpl>   newSynchro   (ClientID const & id);
 
         ::kj::Promise <void> connect (ConnectContext context) override;
         ::kj::Promise <void> share (ShareContext context) override;

@@ -40,7 +40,7 @@ namespace cg {
         auto results = context.getResults();
         results.setId (ID);
         results.setRegistrar (newRegistrar (remoteID));
-        results.setSynchro   (newSynchro   (remoteID));
+        results.setSynchro (synchro.newSynchro (remoteID));
 
         return kj::READY_NOW;
     }
@@ -66,7 +66,7 @@ namespace cg {
         auto connectRequest = synchro.connectRequest();
         connectRequest.setId (ID);
         connectRequest.setRegistrar (newRegistrar (id));
-        connectRequest.setSynchro   (newSynchro   (id));
+        connectRequest.setSynchro (this->synchro.newSynchro (id));
 
         return connectRequest.send().then ([this, synchro, id] (auto results) mutable {
             KJ_REQUIRE (results.hasRegistrar());
@@ -81,7 +81,7 @@ namespace cg {
 
         auto shareRequest = synchro.shareRequest();
         shareRequest.setId (ID);
-        shareRequest.setSynchro (newSynchro (id));
+        shareRequest.setSynchro (this->synchro.newSynchro (ID));
         detach (shareRequest.send().ignoreResult());
 
         // Share all other synchro callbacks
@@ -99,9 +99,6 @@ namespace cg {
         auto registrar = kj::heap <RegistrarImpl> (id);
         registrar->setOnRegisterShip (LAMBDA (registerShip));
         return registrar;
-    }
-    ::kj::Own <SynchroImpl> BackendImpl::newSynchro (ClientID const & id) {
-        return kj::heap <SynchroImpl> (synchro);
     }
 
     ::kj::Own <ShipSinkImpl> BackendImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
