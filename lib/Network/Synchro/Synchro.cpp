@@ -1,6 +1,13 @@
 #include "Synchro.h"
 
 namespace cg {
+    SynchroImpl::SynchroImpl (ClientID const & id, std::optional<LocalClient> & local,
+                              std::unordered_map<ClientID, RemoteClient> & remote)
+            : ID {id}
+            , local {local}
+            , remote {remote}
+            {}
+
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Synchro " << ID << " @" << this << ": '" << msg << "'";

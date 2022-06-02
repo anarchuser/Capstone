@@ -2,8 +2,13 @@
 #define CAPSTONE_NETWORK_SYNCHRO_H
 
 #include "Network/Registrar/Registrar.h"
+#include "Network/ShipSink/ShipSink.h"
+#include "Network/ShipHandle/ShipHandle.h"
+
+#include "Data/Client.h"
 
 #include <functional>
+#include <optional>
 
 namespace cg {
     class RegistrarImpl;
@@ -18,10 +23,13 @@ namespace cg {
         ConnectCallback onConnect;
         ShareCallback onShare;
 
-        ClientID const ID;
+        ClientID const & ID;
+
+        std::optional <LocalClient> & local;                  /// The one allowed *local* client connected
+        std::unordered_map <ClientID, RemoteClient> & remote; /// List of all *remote* clients connected
 
     public:
-        inline explicit SynchroImpl (ClientID id): ID {std::move (id)} {}
+        SynchroImpl (ClientID const & id, std::optional <LocalClient> & local, std::unordered_map <ClientID, RemoteClient> & remote);
 
         inline void setOnConnect (ConnectCallback && callback) { onConnect = callback; }
         inline void setOnShare   (ShareCallback   && callback) { onShare   = callback; }

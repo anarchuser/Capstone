@@ -1,6 +1,14 @@
 #include "Backend.h"
 
 namespace cg {
+    BackendImpl::BackendImpl (std::size_t seed, ClientID id)
+            : rng_seed {seed}
+            , ID {std::move (id)}
+            , local {}
+            , remote {}
+            , synchro (ID, local, remote)
+            {}
+
     void BackendImpl::log (std::string const & msg) {
         std::ostringstream ss;
         ss << "Backend " << ID << " @" << this << ": '" << msg << "'";
@@ -103,7 +111,7 @@ namespace cg {
         return registrar;
     }
     ::kj::Own <SynchroImpl> BackendImpl::newSynchro (ClientID const & id) {
-        auto localSynchro = kj::heap <SynchroImpl> (id);
+        auto localSynchro = kj::heap <SynchroImpl> (synchro);
         localSynchro->setOnConnect (LAMBDA (connectCallback));
         localSynchro->setOnShare (LAMBDA (connectTo));
         return localSynchro;

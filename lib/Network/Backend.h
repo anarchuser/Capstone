@@ -31,8 +31,9 @@ namespace cg {
         /* Member variables */
         ClientID const ID;                                  /// Our own identifier to send other backends
         std::size_t const rng_seed;                         /// Seed for the random number generator
+        std::optional <LocalClient> local;                  /// The one allowed *local* client connected
         std::unordered_map <ClientID, RemoteClient> remote; /// List of all *remote* clients connected
-        std::optional <LocalClient> local;                        /// List of all *local* clients connected
+        SynchroImpl synchro;
         // TODO: do we need a whole map for local clients?
 
         /// Return raw pointer to Client if id was in remote or local. Nullptr otherwise
@@ -75,7 +76,7 @@ namespace cg {
         void log (std::string const & msg);
 
     public:
-        inline BackendImpl (std::size_t seed, ClientID id): rng_seed {seed}, ID {std::move (id)} {}
+        BackendImpl (std::size_t seed, ClientID id);
 
         /* RPC function call implementations */
         ::kj::Promise <void> ping    (PingContext    context) override;
