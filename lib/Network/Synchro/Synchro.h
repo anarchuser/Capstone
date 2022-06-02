@@ -20,19 +20,17 @@ namespace cg {
 
         ClientID const & ID;
 
-        std::optional <LocalClient> & local;                  /// The one allowed *local* client connected
-        std::unordered_map <ClientID, RemoteClient> & remote; /// List of all *remote* clients connected
+        std::optional <LocalClient> & local;                   /// The one allowed *local* client connected
+        std::unordered_map <ClientID, RemoteClient> & remotes; /// List of all *remotes* clients connected
 
         /// Return raw pointer to Client if id was in remote or local. Nullptr otherwise
         Client * findClient (ClientID const & id);
 
         /* Client connection functions */
-        /// Callback for calls to Synchro::connect
-        kj::Own <RegistrarImpl> connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar);
-        /// Share all our remote clients with the given synchro
-        void shareConnections (ClientID const & id, Synchro_t synchro);
-        /// Connect to a synchro and store the resulting new client
-        kj::Promise <void> connectTo (ClientID const & id, Synchro_t synchro);
+        /// Share all our remote clients with the given remote
+        void shareConnections (ClientID const & id, Synchro_t remote);
+        /// Connect to a remote and store the resulting new client
+        kj::Promise <void> connectTo (ClientID const & id, Synchro_t remote);
 
         /* Ship registration functions */
         /// Configure the newly registered spaceship and return a sink to it. Registrar callback
@@ -54,7 +52,7 @@ namespace cg {
         kj::Promise <void> disconnect (ClientID const & id);
 
     public:
-        SynchroImpl (ClientID const & id, std::optional <LocalClient> & local, std::unordered_map <ClientID, RemoteClient> & remote);
+        SynchroImpl (ClientID const & id, std::optional <LocalClient> & local, std::unordered_map <ClientID, RemoteClient> & remotes);
 
         /* Impl builder functions */
         /// Build a new Registrar with registerShip as callback

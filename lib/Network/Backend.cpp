@@ -5,8 +5,8 @@ namespace cg {
             : rng_seed {seed}
             , ID {std::move (id)}
             , local {}
-            , remote {}
-            , synchro (ID, local, remote)
+            , remotes {}
+            , synchro (ID, local, remotes)
             {}
 
     void BackendImpl::log (std::string const & msg) {
@@ -60,34 +60,34 @@ namespace cg {
         return connectTo (remoteID, params.getRemote());
     }
 
-    ::kj::Promise <void> BackendImpl::connectTo (ClientID const & id, Synchro_t synchro) {
+    ::kj::Promise <void> BackendImpl::connectTo (ClientID const & id, Synchro_t remote) {
         KJ_DASSERT (id != ID, id, "Cannot connect to client with our own identifier");
 
-        auto connectRequest = synchro.connectRequest();
+        auto connectRequest = remote.connectRequest();
         connectRequest.setId (ID);
-        connectRequest.setRegistrar (newRegistrar (id));
-        connectRequest.setSynchro (this->synchro.newSynchro (id));
+        connectRequest.setRegistrar (synchro.newRegistrar (id));
+        connectRequest.setSynchro (synchro.newSynchro (id));
 
-        return connectRequest.send().then ([this, synchro, id] (auto results) mutable {
+        return connectRequest.send().then ([this, remote, id] (auto results) mutable {
             KJ_REQUIRE (results.hasRegistrar());
-            remote.emplace (id, RemoteClient (results.getRegistrar (), synchro));
-            log ("Number of remote clients connected: "s += std::to_string (remote.size()));
+            remotes.emplace (id, RemoteClient (results.getRegistrar (), remote));
+            log ("Number of remote clients connected: "s += std::to_string (remotes.size()));
         });
     }
 
-    void BackendImpl::shareConnections (ClientID const & id, Synchro_t synchro) {
-        if (remote.contains (id)) return;
-        log ("Share " + id + " our own synchro");
+    void BackendImpl::shareConnections (ClientID const & id, Synchro_t remote) {
+        if (remotes.contains (id)) return;
+        log ("Share " + id + " our own remote");
 
-        auto shareRequest = synchro.shareRequest();
+        auto shareRequest = remote.shareRequest();
         shareRequest.setId (ID);
-        shareRequest.setSynchro (this->synchro.newSynchro (ID));
+        shareRequest.setSynchro (synchro.newSynchro (ID));
         detach (shareRequest.send().ignoreResult());
 
-        // Share all other synchro callbacks
-        for (auto & client : remote) {
+        // Share all other remote callbacks
+        for (auto & client : remotes) {
             if (client.first != id) {
-                auto shareRequest = synchro.shareRequest ();
+                auto shareRequest = remote.shareRequest ();
                 shareRequest.setId (client.first);
                 shareRequest.setSynchro (client.second.synchro);
                 detach (shareRequest.send().ignoreResult());
@@ -114,7 +114,7 @@ namespace cg {
         log ("Health: " + std::to_string (ship.health));
 
         ships.emplace (username, handle);
-        broadcastSpaceship (ship, handle, remote.contains (id));
+        broadcastSpaceship (ship, handle, remotes.contains (id));
 
         // Prepare ShipSink
         auto sink = kj::heap <ShipSinkImpl>();
@@ -132,7 +132,7 @@ namespace cg {
             log ("Broadcast ship " + ship.username + " to local client");
             detach (distributeSpaceship (ship, handle, local.value()));
         }
-        for (auto & client : remote) {
+        for (auto & client : remotes) {
             if (isRemote) continue;
 
             log ("Broadcast ship " + ship.username + " to remote client " + client.first);
@@ -155,7 +155,7 @@ namespace cg {
     }
     void BackendImpl::doneCallback (ShipName const & username) {
         log ("Ship " + username + " is done");
-        for (auto & client : remote) {
+        for (auto & client : remotes) {
             detach (client.second.erase (username)
                     .then ([this, id = client.first] () {disconnect (id);}));
         }
@@ -173,7 +173,7 @@ namespace cg {
 
         // If item came from local client -> distribute it to all remote clients
         if (id == ID) {
-            for (auto & client : remote) {
+            for (auto & client : remotes) {
                 sendItemToClient (direction, data, handle, client.second).detach (
                         [this, id = client.first] (kj::Exception && e) { disconnect (id); });
             }
@@ -209,11 +209,11 @@ namespace cg {
         for (auto const & sink : client->sinks) {
             detach (client->erase (sink.first));
         }
-        remote.erase (id);
+        remotes.erase (id);
     }
 
     Client * BackendImpl::findClient (ClientID const & id) {
-        if (remote.contains (id)) return & remote.at (id);
+        if (remotes.contains (id)) return & remotes.at (id);
         if (id == ID) {
             if (local.has_value()) return & local.value();
 

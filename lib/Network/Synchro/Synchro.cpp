@@ -2,10 +2,10 @@
 
 namespace cg {
     SynchroImpl::SynchroImpl (ClientID const & id, std::optional<LocalClient> & local,
-                              std::unordered_map<ClientID, RemoteClient> & remote)
+                              std::unordered_map<ClientID, RemoteClient> & remotes)
             : ID {id}
             , local {local}
-            , remote {remote}
+            , remotes {remotes}
             {}
 
     void SynchroImpl::log (std::string const & msg) {
@@ -17,21 +17,25 @@ namespace cg {
 #endif
     }
 
-    ::kj::Promise<void> SynchroImpl::connect (ConnectContext context) {
+    ::kj::Promise <void> SynchroImpl::connect (ConnectContext context) {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasId());
         log ("Connection request received from client " + std::string (params.getId()));
+        std::string id = params.getId();
+        KJ_REQUIRE (id != ID, id, "Remote client cannot have our own identifier");
+
+        KJ_REQUIRE (params.hasRegistrar());
+        auto registrar = params.getRegistrar();
 
         KJ_REQUIRE (params.hasSynchro());
-        KJ_REQUIRE (params.hasRegistrar());
-        auto results = context.getResults();
+        auto remote = params.getSynchro();
 
-        try {
-            results.setRegistrar (connectCallback (params.getId(), params.getSynchro(), params.getRegistrar()));
-            results.setId (ID);
-        } catch (std::bad_function_call & e) {
-            KJ_DLOG (WARNING, "Synchro::connect called without valid callback registered");
-        }
+        remotes.emplace (id, RemoteClient (registrar, remote));
+        shareConnections (id, remote);
+
+        auto results = context.getResults();
+        results.setRegistrar (newRegistrar (id));
+
         return kj::READY_NOW;
     }
 
@@ -50,44 +54,34 @@ namespace cg {
         return kj::READY_NOW;
     }
 
-    ::kj::Own <RegistrarImpl> SynchroImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
-        log ("Received Synchro::connect request from " + id);
-        KJ_REQUIRE (id != ID, id, "Remote client cannot have our own identifier");
-
-        remote.emplace (id, RemoteClient (remoteRegistrar, synchro));
-        shareConnections (id, synchro);
-
-        return newRegistrar (id);
-    }
-
-    ::kj::Promise <void> SynchroImpl::connectTo (ClientID const & id, Synchro_t synchro) {
+    ::kj::Promise <void> SynchroImpl::connectTo (ClientID const & id, Synchro_t remote) {
                 KJ_DASSERT (id != ID, id, "Cannot connect to client with our own identifier");
 
-        auto connectRequest = synchro.connectRequest();
+        auto connectRequest = remote.connectRequest();
         connectRequest.setId (ID);
         connectRequest.setRegistrar (newRegistrar (id));
         connectRequest.setSynchro   (newSynchro   (id));
 
-        return connectRequest.send().then ([this, synchro, id] (auto results) mutable {
+        return connectRequest.send().then ([this, remote, id] (auto results) mutable {
             KJ_REQUIRE (results.hasRegistrar());
-            remote.emplace (id, RemoteClient (results.getRegistrar (), synchro));
-            log ("Number of remote clients connected: "s += std::to_string (remote.size()));
+            remotes.emplace (id, RemoteClient (results.getRegistrar (), remote));
+            log ("Number of remote clients connected: "s += std::to_string (remotes.size()));
         });
     }
 
-    void SynchroImpl::shareConnections (ClientID const & id, Synchro_t synchro) {
-        if (remote.contains (id)) return;
-        log ("Share " + id + " our own synchro");
+    void SynchroImpl::shareConnections (ClientID const & id, Synchro_t remote) {
+        if (remotes.contains (id)) return;
+        log ("Share " + id + " our own remote");
 
-        auto shareRequest = synchro.shareRequest();
+        auto shareRequest = remote.shareRequest();
         shareRequest.setId (ID);
         shareRequest.setSynchro (newSynchro (id));
         detach (shareRequest.send().ignoreResult());
 
-        // Share all other synchro callbacks
-        for (auto & client : remote) {
+        // Share all other remote callbacks
+        for (auto & client : remotes) {
             if (client.first != id) {
-                auto shareRequest = synchro.shareRequest ();
+                auto shareRequest = remote.shareRequest ();
                 shareRequest.setId (client.first);
                 shareRequest.setSynchro (client.second.synchro);
                 detach (shareRequest.send().ignoreResult());
@@ -101,7 +95,7 @@ namespace cg {
         return registrar;
     }
     ::kj::Own <SynchroImpl> SynchroImpl::newSynchro (ClientID const & id) {
-        return kj::heap <SynchroImpl> (id, local, remote);
+        return kj::heap <SynchroImpl> (id, local, remotes);
     }
 
     ::kj::Own <ShipSinkImpl> SynchroImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
@@ -117,7 +111,7 @@ namespace cg {
         log ("Health: " + std::to_string (ship.health));
 
         ships.emplace (username, handle);
-        broadcastSpaceship (ship, handle, remote.contains (id));
+        broadcastSpaceship (ship, handle, remotes.contains (id));
 
         // Prepare ShipSink
         auto sink = kj::heap <ShipSinkImpl>();
@@ -135,7 +129,7 @@ namespace cg {
             log ("Broadcast ship " + ship.username + " to local client");
             detach (distributeSpaceship (ship, handle, local.value()));
         }
-        for (auto & client : remote) {
+        for (auto & client : remotes) {
             if (isRemote) continue;
 
             log ("Broadcast ship " + ship.username + " to remote client " + client.first);
@@ -158,7 +152,7 @@ namespace cg {
     }
     void SynchroImpl::doneCallback (ShipName const & username) {
         log ("Ship " + username + " is done");
-        for (auto & client : remote) {
+        for (auto & client : remotes) {
             detach (client.second.erase (username)
                             .then ([this, id = client.first] () {disconnect (id);}));
         }
@@ -176,7 +170,7 @@ namespace cg {
 
         // If item came from local client -> distribute it to all remote clients
         if (id == ID) {
-            for (auto & client : remote) {
+            for (auto & client : remotes) {
                 sendItemToClient (direction, data, handle, client.second).detach (
                         [this, id = client.first] (kj::Exception && e) { disconnect (id); });
             }
@@ -212,11 +206,11 @@ namespace cg {
         for (auto const & sink : client->sinks) {
             detach (client->erase (sink.first));
         }
-        remote.erase (id);
+        remotes.erase (id);
     }
 
     Client * SynchroImpl::findClient (ClientID const & id) {
-        if (remote.contains (id)) return & remote.at (id);
+        if (remotes.contains (id)) return & remotes.at (id);
         if (id == ID) {
             if (local.has_value()) return & local.value();
 

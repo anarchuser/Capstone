@@ -29,10 +29,10 @@ namespace cg {
     class BackendImpl final: public Backend::Server {
     private:
         /* Member variables */
-        ClientID const ID;                                  /// Our own identifier to send other backends
-        std::size_t const rng_seed;                         /// Seed for the random number generator
-        std::optional <LocalClient> local;                  /// The one allowed *local* client connected
-        std::unordered_map <ClientID, RemoteClient> remote; /// List of all *remote* clients connected
+        ClientID const ID;                                   /// Our own identifier to send other backends
+        std::size_t const rng_seed;                          /// Seed for the random number generator
+        std::optional <LocalClient> local;                   /// The one allowed *local* client connected
+        std::unordered_map <ClientID, RemoteClient> remotes; /// List of all *remote* clients connected
         SynchroImpl synchro;
         // TODO: do we need a whole map for local clients?
 
@@ -40,8 +40,8 @@ namespace cg {
         Client * findClient (ClientID const & id);
 
         /* Client connection functions */
-        /// Share all our remote clients with the given synchro
-        void shareConnections (ClientID const & id, Synchro_t synchro);
+        /// Share all our remote clients with the given remote
+        void shareConnections (ClientID const & id, Synchro_t remote);
         /// Connect to a synchro and store the resulting new client
         kj::Promise <void> connectTo (ClientID const & id, Synchro_t synchro);
 
