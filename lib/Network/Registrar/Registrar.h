@@ -20,7 +20,7 @@ namespace cg {
         ClientID const ID;
 
     public:
-        inline explicit RegistrarImpl (ClientID id): ID {id} {}
+        inline explicit RegistrarImpl (ClientID id): ID {std::move (id)} {}
 
         inline void setOnRegisterShip (RegisterShipCallback && callback) { onRegisterShip = callback; }
 

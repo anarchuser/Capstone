@@ -15,7 +15,7 @@ namespace kt {
             , waitscope {client.getWaitScope()}
             , handle {[this] () {
                 auto request = client.getMain <::Backend>().connectRequest();
-                request.setId (USERNAME);
+                request.setId (CLIENT_ID);
                 request.setRegistrar (getRegistrarImpl());
                 auto result = request.send().wait (waitscope);
                 KJ_REQUIRE (result.hasSynchro());
@@ -72,7 +72,7 @@ namespace kt {
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
-        auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
+        auto registrar = kj::heap <cg::RegistrarImpl> (CLIENT_ID);
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
             try {
                 auto & username = data.username;
@@ -185,7 +185,7 @@ namespace kt {
         auto [iterator, success] = remoteClients.emplace (ip, kj::heap <capnp::EzRpcClient> (ip, port));
         auto & remote = * iterator->second;
         auto request = remote.getMain <::Backend>().joinRequest();
-        request.setId (USERNAME);
+        request.setId (CLIENT_ID);
         request.setRemote (handle.synchro);
         request.send().wait (remote.getWaitScope());
     }

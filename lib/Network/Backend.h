@@ -75,7 +75,7 @@ namespace cg {
         void log (std::string const & msg);
 
     public:
-        inline BackendImpl (std::size_t seed, ClientID id): rng_seed {seed}, ID {id} {}
+        inline BackendImpl (std::size_t seed, ClientID id): rng_seed {seed}, ID {std::move (id)} {}
 
         /* RPC function call implementations */
         ::kj::Promise <void> ping    (PingContext    context) override;

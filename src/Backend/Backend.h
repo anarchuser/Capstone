@@ -29,8 +29,6 @@ namespace kt {
 
         std::atomic <bool> stop = false;
 
-        kj::WaitScope * waitScope;
-
         void serve ();
 
     public:

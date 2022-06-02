@@ -21,7 +21,7 @@ namespace cg {
         ClientID const ID;
 
     public:
-        inline explicit SynchroImpl (ClientID id): ID {id} {}
+        inline explicit SynchroImpl (ClientID id): ID {std::move (id)} {}
 
         inline void setOnConnect (ConnectCallback && callback) { onConnect = callback; }
         inline void setOnShare   (ShareCallback   && callback) { onShare   = callback; }
