@@ -183,6 +183,7 @@ namespace kt {
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
         if (!Backend::ping (ip, port)) return;
         auto [iterator, success] = remoteClients.emplace (ip, kj::heap <capnp::EzRpcClient> (ip, port));
+        OX_ASSERT (success);
         auto & remote = * iterator->second;
         auto request = remote.getMain <::Backend>().joinRequest();
         request.setId (CLIENT_ID);

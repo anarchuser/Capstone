@@ -1,9 +1,15 @@
 #include "Registrar.h"
 
 namespace cg {
+    RegistrarImpl::RegistrarImpl (ClientID id)
+            : ID {std::move (id)}
+            {
+                log ("<" + ID + ">");
+            }
+
     void RegistrarImpl::log (std::string const & msg) {
         std::stringstream ss;
-        ss << "Registrar " << ID << " @" << this << ": '" << msg << "'";
+        ss << "Registrar {" << ID << "} @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
 #ifdef DEBUG_MINOR
         debug_stdout (ss.str());

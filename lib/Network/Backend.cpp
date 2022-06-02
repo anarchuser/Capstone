@@ -7,11 +7,13 @@ namespace cg {
             , local {}
             , remotes {}
             , synchro (ID, local, remotes)
-            {}
+            {
+                log ("<" + ID + ">");
+            }
 
     void BackendImpl::log (std::string const & msg) {
         std::ostringstream ss;
-        ss << "Backend " << ID << " @" << this << ": '" << msg << "'";
+        ss << "Backend {" << ID << "} @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
         debug_stdout (ss.str());
     }
@@ -39,8 +41,8 @@ namespace cg {
 
         auto results = context.getResults();
         results.setId (ID);
-        results.setRegistrar (synchro.newRegistrar (remoteID));
-        results.setSynchro (synchro.newSynchro (remoteID));
+        results.setRegistrar (synchro.newRegistrar (ID));
+        results.setSynchro   (synchro.newSynchro   (ID));
 
         return kj::READY_NOW;
     }
