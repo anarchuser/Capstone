@@ -22,12 +22,12 @@ namespace cg {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasId());
         ClientID const & remoteID = params.getId();
-        KJ_REQUIRE (!local.contains (remoteID), remoteID, "Client is already registered locally!");
-        KJ_REQUIRE (!remote.contains (remoteID), remoteID, "Client is already registered remotely!");
         log ("Connect request received from local client " + ClientID (params.getId()));
+        KJ_REQUIRE (remoteID == ID, remoteID, "Local client ID must have our backend ID");
+        KJ_REQUIRE (!local, "A local client is registered already");
 
         KJ_REQUIRE (params.hasRegistrar());
-        local.emplace (params.getId(), params.getRegistrar());
+        local.emplace (params.getRegistrar());
 
         auto results = context.getResults();
         results.setId (ID);
@@ -42,6 +42,7 @@ namespace cg {
         KJ_REQUIRE (params.hasId());
         ClientID const & remoteID = params.getId();
         log ("Join request received from " + remoteID);
+        KJ_REQUIRE (remoteID != ID, remoteID, "Remote client cannot have our own identifier");
 
         // Share our own synchro callback to new connection
         KJ_REQUIRE (params.hasRemote());
@@ -53,6 +54,8 @@ namespace cg {
 
     ::kj::Own <RegistrarImpl> BackendImpl::connectCallback (ClientID const & id, Synchro_t synchro, Registrar_t remoteRegistrar) {
         log ("Received Synchro::connect request from " + id);
+        KJ_REQUIRE (id != ID, id, "Remote client cannot have our own identifier");
+
         remote.emplace (id, RemoteClient (remoteRegistrar, synchro));
         shareConnections (id, synchro);
 
@@ -60,6 +63,8 @@ namespace cg {
     }
 
     ::kj::Promise <void> BackendImpl::connectTo (ClientID const & id, Synchro_t synchro) {
+        KJ_DASSERT (id != ID, id, "Cannot connect to client with our own identifier");
+
         auto connectRequest = synchro.connectRequest();
         connectRequest.setId (ID);
         connectRequest.setRegistrar (newRegistrar (id));
@@ -131,14 +136,14 @@ namespace cg {
     }
 
     void BackendImpl::broadcastSpaceship (Spaceship const & ship, ShipHandle_t handle, bool isRemote) {
+        if (local.has_value()) {
+            log ("Broadcast ship " + ship.username + " to local client");
+            detach (distributeSpaceship (ship, handle, local.value()));
+        }
         for (auto & client : remote) {
             if (isRemote) continue;
 
             log ("Broadcast ship " + ship.username + " to remote client " + client.first);
-            detach (distributeSpaceship (ship, handle, client.second));
-        }
-        for (auto & client : local) {
-            log ("Broadcast ship " + ship.username + " to local client " + client.first);
             detach (distributeSpaceship (ship, handle, client.second));
         }
     }
@@ -159,10 +164,8 @@ namespace cg {
     void BackendImpl::doneCallback (ShipName const & username) {
         log ("Ship " + username + " is done");
         for (auto & client : remote) {
-            detach (client.second.erase (username).then ([this, id = client.first] () {
-                if (remote.contains (id)) disconnect (id);
-                if (local.contains (id)) disconnect (id);
-            }));
+            detach (client.second.erase (username)
+                    .then ([this, id = client.first] () {disconnect (id);}));
         }
     }
     void BackendImpl::sendItemCallback (Direction const & direction, Spaceship const & data, ClientID const & id) {
@@ -177,16 +180,15 @@ namespace cg {
         auto & handle = sender->ships.at (username);
 
         // If item came from local client -> distribute it to all remote clients
-        if (local.contains (id)) {
+        if (id == ID) {
             for (auto & client : remote) {
                 sendItemToClient (direction, data, handle, client.second).detach (
                         [this, id = client.first] (kj::Exception && e) { disconnect (id); });
             }
         }
         // Distribute item to all local clients
-        for (auto & client : local) {
-            sendItemToClient (direction, data, handle, client.second).detach (
-                    [this, id = client.first] (kj::Exception && e) { disconnect (id); });
+        if (local.has_value()) {
+            detach (sendItemToClient (direction, data, handle, local.value()));
         }
     }
     kj::Promise <void> BackendImpl::sendItemToClient (Direction const & direction, Spaceship const & data, ShipHandle_t handle, Client & receiver) {
@@ -220,7 +222,11 @@ namespace cg {
 
     Client * BackendImpl::findClient (ClientID const & id) {
         if (remote.contains (id)) return & remote.at (id);
-        if (local.contains  (id)) return & local.at  (id);
+        if (id == ID) {
+            if (local.has_value()) return & local.value();
+
+            KJ_LOG (WARNING, "Local client requested but it does not exist (yet)");
+        }
         return nullptr;
     }
 }

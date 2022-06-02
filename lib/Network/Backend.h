@@ -32,7 +32,7 @@ namespace cg {
         ClientID const ID;                                  /// Our own identifier to send other backends
         std::size_t const rng_seed;                         /// Seed for the random number generator
         std::unordered_map <ClientID, RemoteClient> remote; /// List of all *remote* clients connected
-        std::unordered_map <ClientID, LocalClient> local;   /// List of all *local* clients connected
+        std::optional <LocalClient> local;                        /// List of all *local* clients connected
         // TODO: do we need a whole map for local clients?
 
         /// Return raw pointer to Client if id was in remote or local. Nullptr otherwise
