@@ -7,9 +7,7 @@ namespace cg {
             , local {}
             , remotes {}
             , synchro (ID, local, remotes)
-            {
-                log ("<" + ID + ">");
-            }
+            {}
 
     void BackendImpl::log (std::string const & msg) {
         std::ostringstream ss;
@@ -37,11 +35,14 @@ namespace cg {
         KJ_REQUIRE (!local, "A local client is registered already");
 
         KJ_REQUIRE (params.hasRegistrar());
+
         local.emplace (params.getRegistrar());
 
         auto results = context.getResults();
         results.setId (ID);
+        log ("new registrar");
         results.setRegistrar (synchro.newRegistrar (ID));
+        log ("new synchro");
         results.setSynchro   (synchro.newSynchro   (ID));
 
         return kj::READY_NOW;

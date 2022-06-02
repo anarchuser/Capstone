@@ -3,9 +3,7 @@
 namespace cg {
     RegistrarImpl::RegistrarImpl (ClientID id)
             : ID {std::move (id)}
-            {
-                log ("<" + ID + ">");
-            }
+            {}
 
     void RegistrarImpl::log (std::string const & msg) {
         std::stringstream ss;

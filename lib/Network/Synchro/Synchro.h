@@ -18,7 +18,7 @@ namespace cg {
         /// Log function of this implementation
         void log (std::string const & msg);
 
-        ClientID const & ID;
+        ClientID const ID;
 
         std::optional <LocalClient> & local;                   /// The one allowed *local* client connected
         std::unordered_map <ClientID, RemoteClient> & remotes; /// List of all *remotes* clients connected
@@ -46,13 +46,13 @@ namespace cg {
         kj::Promise <void> disconnect (ClientID const & id);
 
     public:
-        SynchroImpl (ClientID const & id, std::optional <LocalClient> & local, std::unordered_map <ClientID, RemoteClient> & remotes);
+        SynchroImpl (ClientID id, std::optional <LocalClient> & local, std::unordered_map <ClientID, RemoteClient> & remotes);
 
         /* Impl builder functions */
         /// Build a new Registrar with registerShip as callback
         kj::Own <RegistrarImpl> newRegistrar (ClientID const & id);
         /// Build a new Synchro with corresponding callbacks
-        kj::Own <SynchroImpl>   newSynchro   (ClientID const & id);
+        kj::Own <SynchroImpl>   newSynchro   (ClientID id);
 
         /* Client connection functions */
         /// Share all our remote clients with the given remote

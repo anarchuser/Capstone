@@ -1,22 +1,18 @@
 #include "Synchro.h"
 
 namespace cg {
-    SynchroImpl::SynchroImpl (ClientID const & id, std::optional<LocalClient> & local,
+    SynchroImpl::SynchroImpl (ClientID id, std::optional<LocalClient> & local,
                               std::unordered_map<ClientID, RemoteClient> & remotes)
-            : ID {id}
+            : ID {std::move (id)}
             , local {local}
             , remotes {remotes}
-            {
-                log ("<" + ID + ">");
-            }
+            {}
 
     void SynchroImpl::log (std::string const & msg) {
         std::stringstream ss;
         ss << "Synchro {" << ID << "} @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
-#ifdef DEBUG_MINOR
         debug_stdout (ss.str());
-#endif
     }
 
     ::kj::Promise <void> SynchroImpl::connect (ConnectContext context) {
@@ -97,8 +93,7 @@ namespace cg {
         registrar->setOnRegisterShip (LAMBDA (registerShip));
         return registrar;
     }
-    ::kj::Own <SynchroImpl> SynchroImpl::newSynchro (ClientID const & id) {
-        log ("Creating new synchro from " + id);
+    ::kj::Own <SynchroImpl> SynchroImpl::newSynchro (ClientID id) {
         return kj::heap <SynchroImpl> (id, local, remotes);
     }
 
