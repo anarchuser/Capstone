@@ -7,7 +7,10 @@
 #include <array>
 
 namespace cg {
-    using vector2 = std::array <float, 2>;
+    struct vector2 {
+        float x = 0;
+        float y = 0;
+    };
 
     struct Spaceship {
         std::string username;

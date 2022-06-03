@@ -174,8 +174,8 @@ namespace kt {
     }
     void Spaceship::setData (cg::Spaceship const & spaceship) {
         setName (spaceship.username);
-        setPhysicalTransform ({spaceship.position[0], spaceship.position[1]}, spaceship.angle);
-        setPhysicalVelocity ({spaceship.velocity[0], spaceship.velocity[1]});
+        setPhysicalTransform ({spaceship.position.x, spaceship.position.y}, spaceship.angle);
+        setPhysicalVelocity ({spaceship.velocity.x, spaceship.velocity.y});
         auto tmp = health;
         health = spaceship.health;
         if (health != tmp) updateScoreboard ();
@@ -188,9 +188,9 @@ namespace kt {
             destroy();
             return kj::READY_NOW;
         });
-        sink->setOnSendItem ([this] (cg::Direction const & direction, cg::Spaceship const & data) {
-            updateDirection (direction);
-            setData (data);
+        sink->setOnSendItem ([this] (cg::Item const & item) {
+            updateDirection (item.direction);
+            setData (item.spaceship);
             return kj::READY_NOW;
         });
         return sink;
