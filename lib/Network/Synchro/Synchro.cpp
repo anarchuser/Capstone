@@ -186,7 +186,7 @@ namespace cg {
     }
     void SynchroImpl::sendItemCallback (Item const & item, ClientID const & id) {
         auto * sender = findClient (id);
-        auto const & [direction, data] = item;
+        auto const & [time, direction, data] = item;
         auto const & username = data.username;
         KJ_REQUIRE_NONNULL (sender, id, username, "Received item from unregistered client");
         if (sender->ships.empty()) {
@@ -199,10 +199,12 @@ namespace cg {
         if (id == ID) {  // Item came from local client -> distribute to all clients
             auto estimate = estimateShipData (data);
 
-            detach (estimate.then ([this, handle = handle, direction = direction] (Spaceship const & data) mutable {
+            detach (estimate.then ([this, handle = handle, item = item] (Spaceship const & data) mutable {
+                item.spaceship = data;
+
                 // Distribute item to all remote clients
                 for (auto & client : remotes) {
-                    sendItemToClient ({direction, data}, handle, client.second).detach (
+                    sendItemToClient (item, handle, client.second).detach (
                             [this, id = client.first] (kj::Exception && e) {
                                 KJ_DLOG (WARNING, "Sending item to remote client " + id + " failed", e.getDescription());
                                 disconnect (id);
@@ -210,7 +212,7 @@ namespace cg {
                 }
                 // Distribute item to local client
                 if (local.has_value()) {
-                    detach (sendItemToClient ({direction, data}, handle, local.value()));
+                    detach (sendItemToClient (item, handle, local.value()));
                 }
             }));
         } else {  // Item came from remote client -> distribute to local client only
@@ -221,7 +223,7 @@ namespace cg {
     }
     kj::Promise <void> SynchroImpl::sendItemToClient (Item const & item, ShipHandle_t handle, Client & receiver) {
         auto & sinks = receiver.sinks;
-        auto const & [direction, data] = item;
+        auto const & [time, direction, data] = item;
         auto const & username = data.username;
 
         if (!sinks.contains (username)) {
@@ -231,7 +233,8 @@ namespace cg {
                     });
         }
         auto request = sinks.at (username).sendItemRequest();
-        direction.initialise (request.initItem().initDirection());
+        request.initItem().setTimestamp (time);
+        direction.initialise (request.getItem().initDirection());
         data.initialise (request.getItem().initSpaceship());
         return request.send().ignoreResult()
                 .catch_ ([this, & sinks, & username] (kj::Exception && e) { sinks.erase (username); });

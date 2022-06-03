@@ -1,19 +1,22 @@
 #include "Item.h"
 
 namespace cg {
-    Item::Item (Direction direction, Spaceship spaceship)
-            : direction {direction}
+    Item::Item (int timestamp, Direction direction, Spaceship spaceship)
+            : timestamp {timestamp}
+            , direction {direction}
             , spaceship {std::move (spaceship)}
             {
             }
 
     Item::Item (Backend::Item::Reader reader)
-            : direction {reader.getDirection()}
+            : timestamp {reader.getTimestamp()}
+            , direction {reader.getDirection()}
             , spaceship {reader.getSpaceship()}
             {
             }
 
     void Item::initialise (Backend::Item::Builder builder) const {
+        builder.setTimestamp (timestamp);
         direction.initialise (builder.initDirection());
         spaceship.initialise (builder.initSpaceship());
     }

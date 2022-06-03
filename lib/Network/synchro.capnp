@@ -13,8 +13,9 @@ interface Backend {
 
     struct Item {
     # A wrapper for everything to be sent. The contents of this may be adjusted to the game as needed
-        direction @0 :Direction;
+        timestamp @0 :Int32;
         spaceship @1 :Spaceship;
+        direction @2 :Direction;
     }
 
     struct Spaceship {

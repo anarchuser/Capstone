@@ -30,8 +30,10 @@ namespace cg {
         KJ_REQUIRE (params.getItem().hasSpaceship());
         Spaceship spaceship (params.getItem().getSpaceship());
 
+        auto timestamp = params.getItem().getTimestamp();
+
         try {
-            onSendItem ({directions, spaceship});
+            onSendItem ({timestamp, directions, spaceship});
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipSink::sendItem called without valid callback registered");
         }

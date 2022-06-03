@@ -7,12 +7,13 @@
 namespace cg {
 
     struct Item {
+        int timestamp;
         Direction direction;
         Spaceship spaceship;
 
         Item() = default;
         explicit Item (Backend::Item::Reader reader);
-        Item (Direction direction, Spaceship spaceship);
+        Item (int timestamp, Direction direction, Spaceship spaceship);
 
         void initialise (Backend::Item::Builder builder) const;
     };

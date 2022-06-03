@@ -49,7 +49,7 @@ namespace kt {
 
     void KeyboardSpaceship::update (UpdateState const & us) {
         try {
-            onUpdate ({queried, getData()});
+            onUpdate ({us.time, queried, getData()});
         } catch (std::bad_function_call & e) {
             logs::warning ("KeyboardSpaceship::onUpdate not configured");
         }
