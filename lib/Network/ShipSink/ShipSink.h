@@ -8,7 +8,7 @@
 namespace cg {
     using DoneCallback = std::function <void ()>;
     using SendItemCallback = std::function <void (Item const &)>;
-    using GetShipCallback = std::function <Spaceship ()>;
+    using GetShipCallback = std::function <kj::Promise <Spaceship> ()>;
 
     class ShipSinkImpl final: public Backend::ShipSink::Server {
     private:

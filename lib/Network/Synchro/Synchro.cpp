@@ -120,6 +120,13 @@ namespace cg {
         sink->setOnSendItem ([this, id] (Item const & item) {
             return sendItemCallback (item, id);
         });
+        sink->setOnGetShip ([this, username] () -> kj::Promise <Spaceship> {
+            KJ_REQUIRE (local.has_value());
+            KJ_REQUIRE (local->sinks.contains (username));
+            return local->sinks.at (username).getShipRequest().send().then ([] (auto results) {
+                return Spaceship (results.getShip());
+            });
+        });
         return sink;
     }
 
