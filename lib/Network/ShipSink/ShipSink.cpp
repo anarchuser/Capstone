@@ -25,13 +25,13 @@ namespace cg {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasItem());
         KJ_REQUIRE (params.getItem().hasDirection());
-        auto directions = params.getItem().getDirection();
+        Direction directions (params.getItem().getDirection());
 
         KJ_REQUIRE (params.getItem().hasSpaceship());
-        auto spaceship = params.getItem().getSpaceship();
+        Spaceship spaceship (params.getItem().getSpaceship());
 
         try {
-            onSendItem (Direction (directions), Spaceship (spaceship));
+            onSendItem ({directions, spaceship});
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipSink::sendItem called without valid callback registered");
         }

@@ -25,12 +25,12 @@ namespace cg {
         builder.setUsername (username);
 
         auto pos = builder.initPosition();
-        pos.setX (position[0]);
-        pos.setY (position[1]);
+        pos.setX (position.x);
+        pos.setY (position.y);
 
         auto vel = builder.initVelocity();
-        vel.setX (velocity[0]);
-        vel.setY (velocity[1]);
+        vel.setX (velocity.x);
+        vel.setY (velocity.y);
 
         builder.setAngle (angle);
         builder.setHealth (health);

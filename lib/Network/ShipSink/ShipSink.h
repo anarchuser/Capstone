@@ -1,14 +1,13 @@
 #ifndef CAPSTONE_NETWORK_SHIPSINK_H
 #define CAPSTONE_NETWORK_SHIPSINK_H
 
-#include "Data/Direction.h"
-#include "Data/Spaceship.h"
+#include "Data/Item.h"
 
 #include <functional>
 
 namespace cg {
     using DoneCallback = std::function <void ()>;
-    using SendItemCallback = std::function <void (Direction const &, Spaceship const &)>;
+    using SendItemCallback = std::function <void (Item const &)>;
 
     class ShipSinkImpl final: public Backend::ShipSink::Server {
     private:

@@ -6,6 +6,7 @@
 #include "Network/ShipHandle/ShipHandle.h"
 
 #include "Data/Client.h"
+#include "Data/Item.h"
 
 #include <functional>
 #include <optional>
@@ -38,9 +39,9 @@ namespace cg {
         /// Callback on closing sink; propagate to sink of all clients
         void doneCallback     (ShipName const & username);
         /// Callback on item received; propagate to sink of all clients
-        void sendItemCallback (Direction const & direction, Spaceship const & data, ClientID const & id);
+        void sendItemCallback (Item const & item, ClientID const & id);
         /// Helper to propagate item to sink of one specific client
-        kj::Promise <void> sendItemToClient (Direction const & direction, Spaceship const & data, ShipHandle_t handle, Client & receiver);
+        kj::Promise <void> sendItemToClient (Item const & item, ShipHandle_t handle, Client & receiver);
 
         /// Disconnect the client with this id, if exists
         kj::Promise <void> disconnect (ClientID const & id);
@@ -58,8 +59,8 @@ namespace cg {
         /// Share all our remote clients with the given remote
         void shareConnections (ClientID const & id, Synchro_t remote);
         /// Connect to a remote and store the resulting new client
-
         kj::Promise <void> connectTo (ClientID const & id, Synchro_t remote);
+
         ::kj::Promise <void> connect (ConnectContext context) override;
         ::kj::Promise <void> share (ShareContext context) override;
     };

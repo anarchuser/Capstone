@@ -49,11 +49,10 @@ namespace kt {
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
         handle.keyboard_sink.emplace (request.send().wait (waitscope).getSink());
-        ship->setOnUpdate ([this] (cg::Direction const & direction, cg::Spaceship const & data) {
+        ship->setOnUpdate ([this] (cg::Item const & item) {
             if (!handle.keyboard_sink.has_value()) return;
             auto request = handle.keyboard_sink->sendItemRequest ();
-            direction.initialise (request.initItem ().initDirection ());
-            data.initialise (request.getItem().initSpaceship());
+            item.initialise (request.initItem ());
             request.send ().wait (waitscope);
         });
         ship->setOnDone ([this] () {

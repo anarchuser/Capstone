@@ -105,8 +105,8 @@ namespace cg {
         KJ_REQUIRE (!ships.contains (username), id, username, "Client 'id' already contains a ship named 'username'");
 
         log ("Registering ship " + username + " from client " + id);
-        log ("Position: / "  + std::to_string (ship.position[0]) + " | " + std::to_string (ship.position[1]) + " \\");
-        log ("Velocity: \\ " + std::to_string (ship.velocity[0]) + " | " + std::to_string (ship.velocity[1]) + " /");
+        log ("Position: / "  + std::to_string (ship.position.x) + " | " + std::to_string (ship.position.y) + " \\");
+        log ("Velocity: \\ " + std::to_string (ship.velocity.x) + " | " + std::to_string (ship.velocity.y) + " /");
         log ("Health: " + std::to_string (ship.health));
 
         ships.emplace (username, handle);
@@ -117,8 +117,8 @@ namespace cg {
         sink->setOnDone ([this, username] () {
             return doneCallback (username);
         });
-        sink->setOnSendItem ([this, id] (Direction const & direction, Spaceship const & data) {
-            return sendItemCallback (direction, data, id);
+        sink->setOnSendItem ([this, id] (Item const & item) {
+            return sendItemCallback (item, id);
         });
         return sink;
     }
@@ -155,9 +155,10 @@ namespace cg {
                             .then ([this, id = client.first] () {disconnect (id);}));
         }
     }
-    void SynchroImpl::sendItemCallback (Direction const & direction, Spaceship const & data, ClientID const & id) {
+    void SynchroImpl::sendItemCallback (Item const & item, ClientID const & id) {
         auto * sender = findClient (id);
-        auto & username = data.username;
+        auto const & [direction, data] = item;
+        auto const & username = data.username;
         KJ_REQUIRE_NONNULL (sender, id, username, "Received item from unregistered client");
         if (sender->ships.empty()) {
             disconnect (id);
@@ -169,18 +170,19 @@ namespace cg {
         // If item came from local client -> distribute it to all remote clients
         if (id == ID) {
             for (auto & client : remotes) {
-                sendItemToClient (direction, data, handle, client.second).detach (
+                sendItemToClient (item, handle, client.second).detach (
                         [this, id = client.first] (kj::Exception && e) { disconnect (id); });
             }
         }
         // Distribute item to all local clients
         if (local.has_value()) {
-            detach (sendItemToClient (direction, data, handle, local.value()));
+            detach (sendItemToClient (item, handle, local.value()));
         }
     }
-    kj::Promise <void> SynchroImpl::sendItemToClient (Direction const & direction, Spaceship const & data, ShipHandle_t handle, Client & receiver) {
+    kj::Promise <void> SynchroImpl::sendItemToClient (Item const & item, ShipHandle_t handle, Client & receiver) {
         auto & sinks = receiver.sinks;
-        auto & username = data.username;
+        auto const & [direction, data] = item;
+        auto const & username = data.username;
 
         if (!sinks.contains (username)) {
             return handle.getShipRequest().send()
