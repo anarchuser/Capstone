@@ -8,6 +8,7 @@
 namespace cg {
     using DoneCallback = std::function <void ()>;
     using SendItemCallback = std::function <void (Item const &)>;
+    using GetShipCallback = std::function <Spaceship ()>;
 
     class ShipSinkImpl final: public Backend::ShipSink::Server {
     private:
@@ -16,13 +17,16 @@ namespace cg {
 
         DoneCallback onDone;
         SendItemCallback onSendItem;
+        GetShipCallback onGetShip;
 
     public:
         inline void setOnDone (DoneCallback && callback) { onDone = callback; };
         inline void setOnSendItem (SendItemCallback && callback) { onSendItem = callback; };
+        inline void setOnGetShip (GetShipCallback && callback) { onGetShip = callback; };
 
         ::kj::Promise <void> done (DoneContext context) override;
         ::kj::Promise <void> sendItem (SendItemContext context) override;
+        ::kj::Promise <void> getShip (GetShipContext context) override;
     };
 
 } // cg

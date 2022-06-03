@@ -37,6 +37,17 @@ namespace cg {
         }
         return kj::READY_NOW;
     }
+
+    ::kj::Promise <void> ShipSinkImpl::getShip (GetShipContext context) {
+        auto results = context.getResults();
+
+        try {
+            onGetShip().initialise (results.initShip());
+        } catch (std::bad_function_call & e) {
+            KJ_DLOG (WARNING, "ShipSink::getShip called without valid callback registered");
+        }
+        return kj::READY_NOW;
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */
