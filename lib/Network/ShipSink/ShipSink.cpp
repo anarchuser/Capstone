@@ -42,7 +42,9 @@ namespace cg {
         auto results = context.getResults();
 
         try {
-            onGetShip().initialise (results.initShip());
+            return onGetShip().then ([results] (Spaceship const & ship) mutable {
+                return ship.initialise (results.initShip());
+            });
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipSink::getShip called without valid callback registered");
         }
