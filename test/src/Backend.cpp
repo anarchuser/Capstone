@@ -47,7 +47,9 @@ SCENARIO ("A backend handles basic requests") {
 
                 auto sink = kj::heap <cg::ShipSinkImpl> ();
                 sink->setOnDone ([](){ return kj::READY_NOW; });
-                sink->setOnSendItem ([] (cg::Direction const & dir, cg::Spaceship const & data) {
+                sink->setOnSendItem ([] (cg::Item const & item) {
+                    auto const & [dir, data] = item;
+
                     CHECK (dir.accelerate  == -1);
                     CHECK (dir.decelerate  ==  1);
                     CHECK (dir.rotateLeft  == -1);
