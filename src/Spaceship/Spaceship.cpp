@@ -184,15 +184,12 @@ namespace kt {
     kj::Own <cg::ShipSinkImpl> Spaceship::getSink () {
         auto sink = kj::heap <cg::ShipSinkImpl> ();
         setAwake (true);
-        sink->setOnDone ([this] {
-            destroy();
-            return kj::READY_NOW;
-        });
+        sink->setOnDone (LAMBDA (destroy));
         sink->setOnSendItem ([this] (cg::Item const & item) {
             updateDirection (item.direction);
             setData (item.spaceship);
-            return kj::READY_NOW;
         });
+        sink->setOnGetShip (LAMBDA (getData));
         return sink;
     }
 

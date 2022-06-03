@@ -30,10 +30,25 @@ namespace cg {
         KJ_REQUIRE (params.getItem().hasSpaceship());
         Spaceship spaceship (params.getItem().getSpaceship());
 
+        auto timestamp = params.getItem().getTimestamp();
+
         try {
-            onSendItem ({directions, spaceship});
+            onSendItem ({timestamp, directions, spaceship});
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipSink::sendItem called without valid callback registered");
+        }
+        return kj::READY_NOW;
+    }
+
+    ::kj::Promise <void> ShipSinkImpl::getShip (GetShipContext context) {
+        auto results = context.getResults();
+
+        try {
+            return onGetShip().then ([results] (Spaceship const & ship) mutable {
+                return ship.initialise (results.initShip());
+            });
+        } catch (std::bad_function_call & e) {
+            KJ_DLOG (WARNING, "ShipSink::getShip called without valid callback registered");
         }
         return kj::READY_NOW;
     }

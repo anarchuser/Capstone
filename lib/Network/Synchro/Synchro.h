@@ -26,6 +26,8 @@ namespace cg {
 
         /// Return raw pointer to Client if id was in remote or local. Nullptr otherwise
         Client * findClient (ClientID const & id);
+        /// Disconnect the client with this id, if exists
+        kj::Promise <void> disconnect (ClientID const & id);
 
         /* Ship registration functions */
         /// Configure the newly registered spaceship and return a sink to it. Registrar callback
@@ -43,8 +45,8 @@ namespace cg {
         /// Helper to propagate item to sink of one specific client
         kj::Promise <void> sendItemToClient (Item const & item, ShipHandle_t handle, Client & receiver);
 
-        /// Disconnect the client with this id, if exists
-        kj::Promise <void> disconnect (ClientID const & id);
+        /// Compare original ship to all remote clones and estimate their true status
+        kj::Promise <Spaceship> estimateShipData (Spaceship const & original);
 
     public:
         SynchroImpl (ClientID id, std::optional <LocalClient> & local, std::unordered_map <ClientID, RemoteClient> & remotes);

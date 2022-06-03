@@ -69,7 +69,7 @@ namespace cg {
 
         auto shareRequest = remote.shareRequest();
         shareRequest.setId (ID);
-        shareRequest.setSynchro (newSynchro (id));
+        shareRequest.setSynchro (newSynchro (ID));
         shareRequest.send().detach ([this, id] (kj::Exception && e) {
             KJ_LOG (WARNING, "Failed to send a request to remote client " + id, e.getDescription());
         });
@@ -97,6 +97,28 @@ namespace cg {
         return kj::heap <SynchroImpl> (id, local, remotes);
     }
 
+    kj::Promise <void> SynchroImpl::disconnect (ClientID const & id) {
+        log ("Disconnecting client " + id);
+        auto * client = findClient (id);
+        if (!client) return kj::READY_NOW;
+
+        // TODO: tie each promise in the loop to the returned promise
+        for (auto const & sink : client->sinks) {
+            detach (client->erase (sink.first));
+        }
+        remotes.erase (id);
+    }
+
+    Client * SynchroImpl::findClient (ClientID const & id) {
+        if (remotes.contains (id)) return & remotes.at (id);
+        if (id == ID) {
+            if (local.has_value()) return & local.value();
+
+            KJ_LOG (WARNING, "Local client requested but it does not exist (yet)");
+        }
+        return nullptr;
+    }
+
     ::kj::Own <ShipSinkImpl> SynchroImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
         auto * client = findClient (id);
         KJ_REQUIRE_NONNULL (client, id, "Ship owner is not registered");
@@ -119,6 +141,13 @@ namespace cg {
         });
         sink->setOnSendItem ([this, id] (Item const & item) {
             return sendItemCallback (item, id);
+        });
+        sink->setOnGetShip ([this, username] () -> kj::Promise <Spaceship> {
+            KJ_REQUIRE (local.has_value());
+            KJ_REQUIRE (local->sinks.contains (username));
+            return local->sinks.at (username).getShipRequest().send().then ([] (auto results) {
+                return Spaceship (results.getShip());
+            });
         });
         return sink;
     }
@@ -157,7 +186,7 @@ namespace cg {
     }
     void SynchroImpl::sendItemCallback (Item const & item, ClientID const & id) {
         auto * sender = findClient (id);
-        auto const & [direction, data] = item;
+        auto const & [time, direction, data] = item;
         auto const & username = data.username;
         KJ_REQUIRE_NONNULL (sender, id, username, "Received item from unregistered client");
         if (sender->ships.empty()) {
@@ -167,21 +196,34 @@ namespace cg {
                 KJ_ASSERT (sender->ships.contains (username), id, username, "Client does not own ship 'username'");
         auto & handle = sender->ships.at (username);
 
-        // If item came from local client -> distribute it to all remote clients
-        if (id == ID) {
-            for (auto & client : remotes) {
-                sendItemToClient (item, handle, client.second).detach (
-                        [this, id = client.first] (kj::Exception && e) { disconnect (id); });
+        if (id == ID) {  // Item came from local client -> distribute to all clients
+            auto estimate = estimateShipData (data);
+
+            detach (estimate.then ([this, handle = handle, item = item] (Spaceship const & data) mutable {
+                item.spaceship = data;
+
+                // Distribute item to all remote clients
+                for (auto & client : remotes) {
+                    sendItemToClient (item, handle, client.second).detach (
+                            [this, id = client.first] (kj::Exception && e) {
+                                KJ_DLOG (WARNING, "Sending item to remote client " + id + " failed", e.getDescription());
+                                disconnect (id);
+                            });
+                }
+                // Distribute item to local client
+                if (local.has_value()) {
+                    detach (sendItemToClient (item, handle, local.value()));
+                }
+            }));
+        } else {  // Item came from remote client -> distribute to local client only
+            if (local.has_value()) {
+                detach (sendItemToClient (item, handle, local.value()));
             }
-        }
-        // Distribute item to all local clients
-        if (local.has_value()) {
-            detach (sendItemToClient (item, handle, local.value()));
         }
     }
     kj::Promise <void> SynchroImpl::sendItemToClient (Item const & item, ShipHandle_t handle, Client & receiver) {
         auto & sinks = receiver.sinks;
-        auto const & [direction, data] = item;
+        auto const & [time, direction, data] = item;
         auto const & username = data.username;
 
         if (!sinks.contains (username)) {
@@ -191,32 +233,15 @@ namespace cg {
                     });
         }
         auto request = sinks.at (username).sendItemRequest();
-        direction.initialise (request.initItem().initDirection());
+        request.initItem().setTimestamp (time);
+        direction.initialise (request.getItem().initDirection());
         data.initialise (request.getItem().initSpaceship());
         return request.send().ignoreResult()
                 .catch_ ([this, & sinks, & username] (kj::Exception && e) { sinks.erase (username); });
     }
 
-    kj::Promise <void> SynchroImpl::disconnect (ClientID const & id) {
-        log ("Disconnecting client " + id);
-        auto * client = findClient (id);
-        if (!client) return kj::READY_NOW;
-
-        // TODO: tie each promise in the loop to the returned promise
-        for (auto const & sink : client->sinks) {
-            detach (client->erase (sink.first));
-        }
-        remotes.erase (id);
-    }
-
-    Client * SynchroImpl::findClient (ClientID const & id) {
-        if (remotes.contains (id)) return & remotes.at (id);
-        if (id == ID) {
-            if (local.has_value()) return & local.value();
-
-            KJ_LOG (WARNING, "Local client requested but it does not exist (yet)");
-        }
-        return nullptr;
+    ::kj::Promise <Spaceship> SynchroImpl::estimateShipData (Spaceship const & original) {
+        return {original};
     }
 }
 
