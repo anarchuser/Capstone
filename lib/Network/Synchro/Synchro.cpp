@@ -69,7 +69,7 @@ namespace cg {
 
         auto shareRequest = remote.shareRequest();
         shareRequest.setId (ID);
-        shareRequest.setSynchro (newSynchro (id));
+        shareRequest.setSynchro (newSynchro (ID));
         shareRequest.send().detach ([this, id] (kj::Exception && e) {
             KJ_LOG (WARNING, "Failed to send a request to remote client " + id, e.getDescription());
         });
