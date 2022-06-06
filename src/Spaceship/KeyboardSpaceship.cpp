@@ -17,6 +17,8 @@ namespace kt {
             }
 
     void KeyboardSpaceship::setOnUpdate (cg::SendItemCallback && onUpdate) {
+        // Before onUpdate callback has been provided, the spaceship has not received updates anyway
+        setAwake (true);
         this->onUpdate = onUpdate;
     }
     void KeyboardSpaceship::setOnDone (cg::DoneCallback && onDone) {
@@ -26,8 +28,6 @@ namespace kt {
     void KeyboardSpaceship::onSteeringEvent (ox::KeyEvent * event) {
         auto keysym = event->data->keysym;
         bool key_is_down = event->type == ox::KeyEvent::KEY_DOWN;
-
-        ONCE (setAwake (true));
 
         // If WASD or arrow keys were pressed, update the directions queried
         switch (keysym.scancode) {
