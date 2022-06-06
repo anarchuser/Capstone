@@ -6,13 +6,6 @@ namespace kt {
             {
                 setAddColor (REMOTE_SPACESHIP_COLOR);
             }
-
-    void RemoteSpaceship::destroy () {
-        for (auto listener: listeners)
-            getStage ()->removeEventListener (listener);
-        updateScoreboard ("ghost");
-        setAwake (false);
-    }
 }
 
 /* Copyright © 2022 Aaron Alef */

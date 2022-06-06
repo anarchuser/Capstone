@@ -82,7 +82,7 @@ namespace kt {
                 if (auto ship = actors.localShip) {
                     if (ship->getName () == username) {
                         ship->setData (data);
-                        ship->setHandle (kj::heap<cg::ShipHandle_t> (handle));
+                        ship->setHandle (std::move (handle));
                         return ship->getSink ();
                     }
                 }
@@ -93,7 +93,7 @@ namespace kt {
                 spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
                 actors.remoteShips.push_back (ship);
                 ship->setData (data);
-                ship->setHandle (kj::heap <cg::ShipHandle_t> (handle));
+                ship->setHandle (std::move (handle));
                 return ship->getSink ();
             } catch (std::exception & e) {
                 logs::warning ("Error on registering new spaceship");

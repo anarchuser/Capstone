@@ -10,6 +10,7 @@ namespace kt {
     Spaceship::Spaceship (World & world, Resources * res, std::string const & username) {
         setName (username);
 
+        // Create and position the sprite appropriately
         attachTo (& world);
         setPosition (world.getSize() * 0.5);
         setRotation (1.5 * b2_pi);
@@ -18,19 +19,26 @@ namespace kt {
         if (res)
             setResAnim (res->getResAnim ("spaceship"));
 
+        // Define physical properties
         b2BodyDef bodyDef;
         bodyDef.type = b2_dynamicBody;
         bodyDef.position = 0.5 * world.world_size;
-        bodyDef.userData.pointer = (uintptr_t) this;
         bodyDef.angle = 1.5 * b2_pi;
+        // Store a reference to the actor in the body
+        bodyDef.userData.pointer = (uintptr_t) this;
 
+        // Create the physical body in the world, asleep
         body = world.world.CreateBody (& bodyDef);
-        setUserData (body);
         body->SetAwake (false);
 
-        float scale = SPACESHIP_SCALE;
+        // Store a reference to the body in the actor
+        setUserData (body);
+
+        static float const scale = SPACESHIP_SCALE;
         setScale (scale);
 
+        // Define the shape of the spaceship
+        // - the cone, consisting of a triangle
         b2PolygonShape cone;
         b2Vec2 triangle[3];
         triangle[0].Set (-0.25f * scale, -0.25f * scale);
@@ -38,12 +46,14 @@ namespace kt {
         triangle[2].Set (-0.25f * scale, 0.25f * scale);
         cone.Set (triangle, sizeof (triangle) / 8);
 
+        // Attach the cone to the body
         b2FixtureDef coneFixture;
         coneFixture.shape = & cone;
         coneFixture.density = SPACESHIP_DENSITY;
         coneFixture.isSensor = true;
         body->CreateFixture (& coneFixture);
 
+        // - the rear, consisting of a regular trapeze
         b2PolygonShape rear;
         b2Vec2 trapezoid[4];
         trapezoid[0].Set (-0.50f * scale, 0.50f * scale);
@@ -52,12 +62,14 @@ namespace kt {
         trapezoid[3].Set (-0.50f * scale, -0.50f * scale);
         rear.Set (trapezoid, sizeof (trapezoid) / 8);
 
+        // Attach the rear to the body
         b2FixtureDef rearFixture;
         rearFixture.shape = & rear;
         rearFixture.density = SPACESHIP_DENSITY;
         rearFixture.isSensor = true;
         body->CreateFixture (& rearFixture);
 
+        // Create a scoreboard displaying name, hp/status, and latency to its origin
         scoreboard = new Text (res ? res->getResFont ("kt-liberation") : nullptr);
         scoreboard->setPosition (0.70 * getParent()->getSize().x, 10 + id * 40);
         getParent()->addChild (scoreboard);
@@ -66,12 +78,11 @@ namespace kt {
         listeners.push_back (addEventListener (CollisionEvent::BEGIN, [this] (Event * event) {
             if (!body->IsAwake()) return;
 //            spSprite other = safeCast <CollisionEvent *> (event)->other;
+            // Update health and then the scoreboard
+            // TODO: update scoreboard automatically on health changes
             --health;
             updatePing();
-            if (health <= 0) {
-                logs::messageln ("Spaceship of '%s' crashed...", getName().c_str());
-                destroy();
-            }
+            if (health <= 0) destroy();
         }));
     }
 
@@ -80,18 +91,28 @@ namespace kt {
     };
 
     void Spaceship::destroy () {
+        // Stop listening to anything
         for (auto listener: listeners)
             getStage ()->removeEventListener (listener);
+
+        // Update ship status
         updateScoreboard ("dead");
+
+        // Put ship to sleep
         setAwake (false);
-        if (body) body->GetUserData ().pointer = 0;
+
+        // Remove the physical body and detach the ship from the game
+        if (body) body->GetUserData().pointer = 0;
         body = nullptr;
         detach ();
     }
 
     void Spaceship::updateScoreboard (std::string const & msg, long ping) {
+        // Start HUD with ship username
         auto text = getName() + ": ";
+        // Either set the given text
         if (!msg.empty()) text += msg;
+        // Or set health and ping instead
         else {
             text += std::to_string (health) + " hp";
             text += " (" + std::to_string (ping) + ")";
@@ -100,18 +121,21 @@ namespace kt {
     }
 
     void Spaceship::setAwake (bool awake) {
+        // Make every fixture a sensor -> remove collision from the body
         auto * part = body->GetFixtureList();
         while (part) {
-        part->SetSensor (!awake);
+            part->SetSensor (!awake);
             part = part->GetNext();
         }
+        // Stop planets from applying force to this body
         body->SetAwake (awake);
     }
 
     void Spaceship::update (oxygine::UpdateState const & us) {
+        // Update each ship's ping roughly once a second
         if (us.time % int (1000 / FPS) == 0) updatePing ();
 
-        // Update ship velocity
+        // Update ship velocity depending on whether W or S is pressed
         if (direction.decelerate && !direction.accelerate) {
             // Decelerate spaceship. Works as universal brake, e.g., against gravity
             auto velocity = body->GetLinearVelocity ();
@@ -125,7 +149,7 @@ namespace kt {
             body->ApplyLinearImpulseToCenter (SPACESHIP_FORCE * angle, true);
         }
 
-        // Update angular velocity
+        // Update angular velocity depending on whether A or D is pressed
         if (direction.rotateLeft && !direction.rotateRight) {
             // Rotate spaceship counter clock-wise around its origin
             body->ApplyAngularImpulse (-SPACESHIP_TORQUE, true);
@@ -195,15 +219,20 @@ namespace kt {
 
     kj::Own <cg::ShipHandleImpl> Spaceship::getHandle () {
         auto handle = kj::heap <cg::ShipHandleImpl> ();
-        handle->setOnGetSink ([this] () { return getSink(); });
-        handle->setOnGetShip ([this] () { return getData(); });
-        handle->setOnSetShip ([this] (cg::Spaceship const & ship) { setData (ship); });
+        handle->setOnGetSink (LAMBDA (getSink));
+        handle->setOnGetShip (LAMBDA (getData));
+        handle->setOnSetShip (LAMBDA (setData));
         return handle;
+    }
+    void Spaceship::setHandle (cg::ShipHandle_t && handle) {
+        remote = handle;
     }
 
     void Spaceship::updatePing () {
+        // If we don't receive update events yet, display our ping as -1
         if (!remote) return updateScoreboard ();
 
+        // Measure the time it takes for a ping to return
         auto start = std::chrono::high_resolution_clock::now();
         remote->pingRequest().send().ignoreResult().then ([this, start] () {
             auto end = std::chrono::high_resolution_clock::now();

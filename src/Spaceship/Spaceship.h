@@ -17,6 +17,7 @@
 #include "Data/Spaceship.h"
 
 #include <chrono>
+#include <optional>
 
 /// Relative spaceship size
 #define SPACESHIP_SCALE     2e-1
@@ -36,13 +37,13 @@
 namespace kt {
     using namespace oxygine;
 
-    /// Spaceship intended to be controlled by (human) players. No control mechanism included; subclass to do so
+    /// Base spaceship class converting direction commands to force. No control mechanisms included
     class Spaceship: public Sprite {
     private:
-        /// Counter incrementing IDs. Reset on creating a new GameScene instance
+        /// Counter incrementing IDs. Reset on starting a new game
         static std::size_t ship_counter;
 
-        /// ID of this spaceship. IDs increment with each ship, starting from 0 each game
+        /// ID of this spaceship, incremented starting from 0. Used only to determine HUD position
         std::size_t const id = ship_counter++;
 
         /// HUD showing current health of this ship
@@ -51,9 +52,11 @@ namespace kt {
         /// Current issued direction:
         cg::Direction direction;
 
-        kj::Own <cg::ShipHandle_t> remote;
+        /// Remote, mainly used to check if the ship is still connected
+        std::optional <cg::ShipHandle_t> remote;
 
     protected:
+        /// A list of all listeners so they can be removed from the stage on death
         std::vector <int> listeners;
 
         /// Health of this particular instance
@@ -68,6 +71,7 @@ namespace kt {
     public:
         /// Construct a new ship in the current world, at given position (usually centred)
         Spaceship (World & world, Resources * res, std::string const & username);
+        /// Default non-throwing dtor as demanded by the base class
         ~Spaceship() noexcept override = default;
 
         /// Apply linear or angular impulses based on command flags
@@ -79,20 +83,31 @@ namespace kt {
         /// Replace current directions with new ones
         void updateDirection (cg::Direction new_dir);
 
+        /// Destroy this spaceship and remove from the world
         virtual void destroy ();
 
+        /// Return current position in physical coordinates
         b2Vec2 getPhysicalPosition () const;
+        /// Return current velocity in physical coordinates
         b2Vec2 getPhysicalVelocity () const;
 
+        /// Update current physical position and direction
         void setPhysicalTransform (b2Vec2 pos, float angle);
+        /// Update current physical velocity
         void setPhysicalVelocity (b2Vec2 vel);
 
+        /// Return all data necessary to reconstruct this ship's current state
         cg::Spaceship getData () const;
+        /// Force-set this ship's state
         void setData (cg::Spaceship const & spaceship);
 
+        /// Configure a handle for direction and state updates
         virtual kj::Own <cg::ShipSinkImpl> getSink();
+        /// Configure an overall handle to this ship
         virtual kj::Own <cg::ShipHandleImpl> getHandle();
-        inline void setHandle (kj::Own <cg::ShipHandle_t> && remote) { this->remote = kj::mv (remote); }
+        /// Give the ship a reference to its remote counterpart
+        void setHandle (cg::ShipHandle_t && remote);
+        /// Calculate the latency to its remote counterpart
         void updatePing();
 
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
