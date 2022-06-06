@@ -4,7 +4,7 @@ Control a spaceship through a field of planets. In space. On a Torus manifold.
 
 ----
 
-![Screenshot](img/screenshot2.png)
+![Screenshot](data/screenshot2.png)
 
 ----
 
@@ -53,12 +53,13 @@ Pressing `Escape` in-game opens a menu that allows you to restart, disconnect, a
   * [x] Mirror local commands to remote spaceship too
   * [x] Join back to the other client
   * [x] Run game over player 1's local backend
-  * [ ] Run game over each player's local backend
-  * [ ] Share all existing connections back
+  * [x] Run game over each player's local backend
+  * [x] Share all existing connections back
+  * [ ] Handle disconnects smoothly
 * [ ] Synchronisation
   * [x] Transmit initial spaceship data on join
-  * [ ] Continuously synchronise spaceships per server across clients *
-  * [ ] Synchronise spaceships across servers *
+  * [x] Continuously synchronise spaceships per server across clients *
+  * [x] Synchronise spaceships across servers *
   * [ ] Reach consensus of current game state
   * [ ] Enforce consensus to every client
   * [ ] [maybe] Detect and kick cheaters
