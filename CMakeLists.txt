@@ -20,6 +20,7 @@ add_custom_command(OUTPUT ${CAPNP_GEN}
 # List source files and define target
 file(GLOB_RECURSE SRCS ${PROJECT_SOURCE_DIR}/src/*)
 file(GLOB_RECURSE LIBS ${PROJECT_SOURCE_DIR}/lib/*)
+file(GLOB_RECURSE TESTS ${PROJECT_SOURCE_DIR}/test/*.c*)
 set(LIBS ${LIBS} ${CAPNP_GEN})
 add_executable(Capstone ${PROJECT_SOURCE_DIR}/main.cpp ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
 
@@ -76,8 +77,7 @@ endif(EMSCRIPTEN)
 find_package(Catch2 3 CONFIG)
 if (Catch2_FOUND)
     add_subdirectory(Catch2)
-    file(GLOB_RECURSE TEST_SRCS ${PROJECT_SOURCE_DIR}/test/*.c*)
-    add_executable(Test ${TEST_SRCS} ${PROJECT_SOURCE_DIR}/config.h ${SRCS} ${LIBS})
+    add_executable(Test ${TESTS} ${SRCS} ${LIBS} ${PROJECT_SOURCE_DIR}/config.h)
 
     target_include_directories(Test PRIVATE ${PROJECT_SOURCE_DIR}/lib/)
     target_include_directories(Test PRIVATE ${PROJECT_SOURCE_DIR}/src/)
