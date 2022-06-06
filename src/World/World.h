@@ -24,22 +24,23 @@ namespace kt {
         /// Toggled with `` ` ``. Overlays rendered sprites with box2d primitives for debugging purposes
         spBox2DDraw debugDraw;
 
+        /// Turn debug view on or off. Invoked by pressing `` ` ``
+        void toggleDebugDraw ();
+
     public:
         /// Physical world, i.e., box2d world responsible for the physics in the game
-        b2World world;
+        b2World world {b2Vec2_zero};
         /// Size of physical world
         b2Vec2 const world_size;
 
         /// Construct a new world with the given background and size
         World (ResAnim * background, b2Vec2 size);
-        ~World () noexcept override = default;
 
-        /// Iteratively called for each descendent of the root actor. Calculates the next physics iteration
+        /// Update all physical bodies and their corresponding sprites
         void update (UpdateState const & updateState) override;
 
         /// Modulates the given vector to be within [0, world_size], i.e., ensures no object leaves the world
         b2Vec2 wrap (b2Vec2 pos) const;
-        Vector2 wrap (Vector2 pos) const;
 
         /// Convert an oxygine vector to a box2d vector
         b2Vec2 convert (Vector2 const & pos) const;
@@ -47,9 +48,7 @@ namespace kt {
         /// Convert a box2d vector to an oxygine vector
         Vector2 convert (const b2Vec2 & pos) const;
 
-        /// Turn debug view on or off. Called by pressing `` ` ``
-        void toggleDebugDraw ();
-
+        /// Overload to ensure all children have their position normalised
         void addChild (spActor child);
     };
 
