@@ -93,7 +93,7 @@ namespace cg {
         registrar->setOnRegisterShip (LAMBDA (registerShip));
         return registrar;
     }
-    ::kj::Own <SynchroImpl> SynchroImpl::newSynchro (ClientID id) {
+    ::kj::Own <SynchroImpl> SynchroImpl::newSynchro (ClientID const & id) {
         return kj::heap <SynchroImpl> (id, local, remotes);
     }
 

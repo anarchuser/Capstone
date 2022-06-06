@@ -26,7 +26,7 @@ namespace cg {
             KJ_DLOG (WARNING, "RegistrarImpl::registerShip called without valid callback registered");
         }
         catch (std::exception & e) {
-//            log ("Unknown exception caught; likely Duplicate username");
+            log ("Unknown exception caught; likely Duplicate username");
         }
         return kj::READY_NOW;
     }

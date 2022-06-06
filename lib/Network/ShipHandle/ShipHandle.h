@@ -10,6 +10,7 @@ namespace cg {
     using GetShipCallback = std::function <Spaceship ()>;
     using SetShipCallback = std::function <void (Spaceship)>;
 
+    /// Implementation of the ShipHandle::Server interface
     class ShipHandleImpl final: public Backend::ShipHandle::Server {
     private:
         /// Log function of this implementation
@@ -27,7 +28,7 @@ namespace cg {
         ::kj::Promise <void> getSink (GetSinkContext context) override;
         ::kj::Promise <void> getShip (GetShipContext context) override;
         ::kj::Promise <void> setShip (SetShipContext context) override;
-        ::kj::Promise <void> ping (PingContext context) override;
+        ::kj::Promise <void> ping    (PingContext    context) override;
     };
 
 } // cg

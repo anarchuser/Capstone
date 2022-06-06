@@ -17,9 +17,11 @@ namespace cg {
 
         RegisterShipCallback onRegisterShip;
 
+        /// The identifier of this instance
         ClientID const ID;
 
     public:
+        /// Construct a new Registrar::Server implementation
         explicit RegistrarImpl (ClientID id);
 
         inline void setOnRegisterShip (RegisterShipCallback && callback) { onRegisterShip = callback; }
