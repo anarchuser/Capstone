@@ -14,6 +14,7 @@ namespace kt {
             , client {SERVER_FULL_ADDRESS}
             , waitscope {client.getWaitScope()}
             , handle {[this] () {
+                // Connect to our own backend, storing the returned handles
                 auto request = client.getMain <::Backend>().connectRequest();
                 request.setId (CLIENT_ID);
                 request.setRegistrar (getRegistrarImpl());
@@ -29,6 +30,7 @@ namespace kt {
         // Load all required game assets
         gameResources.loadXML (GAME_RESOURCES);
 
+        // Create the world
         auto & world = actors.world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
         addChild (world);
 
@@ -41,10 +43,11 @@ namespace kt {
             }, float (rng.random ({0.3, 0.7}))));
         }
 
+        // Create the keyboard-controlled spaceship with ID = 0
         Spaceship::resetCounter();
         auto & ship = actors.localShip = new KeyboardSpaceship (* world, & gameResources, USERNAME);
 
-
+        // Register the keyboard-controlled spaceship to the backend
         auto request = handle.registrar.registerShipRequest();
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
@@ -61,6 +64,7 @@ namespace kt {
             handle.keyboard_sink->doneRequest().send().wait (waitscope);
         });
 
+        // On Escape, open an in-game menu
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;
@@ -79,6 +83,7 @@ namespace kt {
                 auto & username = data.username;
                 OX_ASSERT (username != "Planet");
 
+                // Case 1: the registered ship is the keyboard-controlled original one
                 if (auto ship = actors.localShip) {
                     if (ship->getName () == username) {
                         ship->setData (data);
@@ -86,10 +91,12 @@ namespace kt {
                         return ship->getSink ();
                     }
                 }
+                // Case 2a: A remote ship with the given name is already registered -> destroy the existing one
                 std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship const & ship) {
                     return ship && ship->getName() == username;
                 });
 
+                // Case 2b: Create a new remote ship connected to the given handle
                 spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
                 actors.remoteShips.push_back (ship);
                 ship->setData (data);
@@ -107,17 +114,20 @@ namespace kt {
         static bool gameOver = false;
         if (!gameOver) {
             if (!actors.localShip) {
+                // The keyboard-controlled instance got destroyed: open the menu
                 gameOver = true;
                 onMenu (nullptr);
             }
         }
 
+        // All ships were destroyed: stop the game instance
         if (!actors.localShip && actors.remoteShips.empty()) onDisconnect (nullptr);
 
         Actor::update (us);
     }
 
     void GameScene::onMenu (Event * event) {
+        // Open a dialog with options to join a remote game or restart or quit the current one
         static auto size = getSize();
         static spDialog dialog = [this]() {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
@@ -138,14 +148,17 @@ namespace kt {
         // Free all game assets
         gameResources.free();
 
-        detach();
-        getStage()->removeAllEventListeners();
-
+        // Destroy the keyboard-controlled ship if it still exists
         if (auto & ship = actors.localShip) ship->destroy();
         actors.localShip = nullptr;
 
+        // Destroy all remote ships
         for (auto & ship : actors.remoteShips) if (ship) ship->destroy();
         actors.remoteShips.clear();
+
+        // Remove this scene including all its listeners
+        detach();
+        getStage()->removeAllEventListeners();
     }
 
     void GameScene::onRestart (Event * event) {
@@ -169,6 +182,7 @@ namespace kt {
     }
 
     void GameScene::onJoinGame (Event * event) {
+        // Open a dialog asking for an address to connect to
         static auto size = getSize ();
         static spDialog dialog = [this] () {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to connect to:");
@@ -177,21 +191,27 @@ namespace kt {
             return dialog;
         } ();
 
-        // TODO: check if *any* child is dialog
         if (getLastChild () != dialog) addChild (dialog);
         else removeChild (dialog);
     }
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
+        // Ignore if we've already joined this client
         if (!Backend::ping (ip, port)) return;
+
+        // Create a new client to the given address
         auto [iterator, success] = remoteClients.emplace (ip, kj::heap <capnp::EzRpcClient> (ip, port));
         OX_ASSERT (success);
+
+        // Send a join request to the remote backend
         auto & remote = * iterator->second;
         auto request = remote.getMain <::Backend>().joinRequest();
+        // Set our own synchro instance as payload
         request.setId (CLIENT_ID);
         request.setRemote (handle.synchro);
         request.send().wait (remote.getWaitScope());
     }
     std::size_t GameScene::requestSeed (std::string const & ip, unsigned short port) {
+        // Retrieve the seed of the backend of the address given
         auto client = capnp::EzRpcClient (ip, port);
         auto promise = client.getMain <::Backend>().seedRequest().send();
         return promise.wait (client.getWaitScope()).getSeed();
