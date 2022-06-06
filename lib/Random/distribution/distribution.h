@@ -3,11 +3,16 @@
 
 #include <random>
 
+/// Abstract base class for initialising random number distributions
 struct Distribution {
+    /// Create a new random number distribution with the given seed
     explicit Distribution (std::size_t seed);
+    /// Make this class abstract
     virtual ~Distribution () = 0;
 
+    /// Seed used to initialise the random number generator
     std::size_t const seed;
+    /// Mersenne Twister pseudo-random number generator, initialised by the given seed and used to generate numbers
     std::mt19937 mt;
 };
 

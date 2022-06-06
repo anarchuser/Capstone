@@ -6,8 +6,10 @@
 
 /** Uniform probabilistic distribution, provides a very random but seeded random generator */
 struct Uniform : Distribution {
+    /** Uniform real pseudo-random number distribution */
     std::uniform_real_distribution <double> realDistribution;
 
+    /** Boundaries between numbers should be generated */
     Bounds const bounds;
 
     /** Constructs a Random Generator generating numbers uniformly distributed. Randomly produces a seed
