@@ -1,5 +1,5 @@
-#ifndef CAPSTONE_COLLISIONLISTENER_H
-#define CAPSTONE_COLLISIONLISTENER_H
+#ifndef CAPSTONE_COLLISION_LISTENER_H
+#define CAPSTONE_COLLISION_LISTENER_H
 
 #include "config.h"
 
@@ -14,7 +14,7 @@ namespace kt {
     class CollisionListener: public b2ContactListener {
     public:
         /// Creates a new listener to be added to the world
-        CollisionListener ();
+        CollisionListener () = default;
 
         /// Callback when two objects collide
         void BeginContact (b2Contact * contact) override;
@@ -29,6 +29,6 @@ namespace kt {
 
 } // kt
 
-#endif //CAPSTONE_COLLISIONLISTENER_H
+#endif //CAPSTONE_COLLISION_LISTENER_H
 
 /* Copyright © 2022 Aaron Alef */

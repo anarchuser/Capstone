@@ -2,12 +2,11 @@
 
 namespace kt {
 
-    CollisionListener::CollisionListener () {}
-
     void CollisionListener::BeginContact (b2Contact * contact) {
         auto * actorA = (Sprite *) contact->GetFixtureA()->GetBody()->GetUserData().pointer;
         auto * actorB = (Sprite *) contact->GetFixtureB()->GetBody()->GetUserData().pointer;
 
+        // Fire corresponding collision events to all actors that are not planets (and therefore spaceships)
         if (! actorB->isName ("Planet")) {
             actorB->dispatchEvent (new CollisionEvent (actorA, CollisionEvent::BEGIN));
         }

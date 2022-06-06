@@ -30,7 +30,7 @@ namespace kt {
         spSprite other;
 
         /// Create a new collision event of given type with given object. Can then be dispatched onto the collidee
-        CollisionEvent (spSprite other, eventType type);
+        CollisionEvent (spSprite const & other, eventType type);
     };
 
 } // kt
