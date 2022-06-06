@@ -8,8 +8,9 @@
 namespace cg {
     /// Struct holding all kinds of information about things connected
     struct Client {
-        inline explicit Client (Registrar_t registrar): registrar {registrar} {}
+        inline explicit Client (Registrar_t registrar): registrar {std::move (registrar)} {}
 
+        /// Send a done request to the sink of the given ship, then remove it from the list
         kj::Promise <void> erase (ShipName const & username);
 
         /// Thing used to update the client (e.g., new ship spawned)
@@ -22,12 +23,16 @@ namespace cg {
         std::unordered_map <ShipName, ShipSink_t> sinks;
     };
 
+    /// Effectively the same as its parent; indicates a local client
     struct LocalClient : public Client {
+        /// Constructs a new local client instance
         inline explicit LocalClient(Registrar_t registrar): Client (registrar) {}
     };
 
+    /// A client additionally holding a reference to a remote synchro
     struct RemoteClient : public Client {
-        inline RemoteClient (Registrar_t registrar, Synchro_t synchro): Client (registrar), synchro {synchro} {}
+        /// Constructs a new remote client connected to the given synchro instance
+        inline RemoteClient (Registrar_t registrar, Synchro_t synchro): Client (registrar), synchro {std::move (synchro)} {}
 
         /// If the client is a remote backend use this to interact with it
         Synchro_t synchro;
