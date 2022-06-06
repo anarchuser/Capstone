@@ -1,10 +1,11 @@
 # Exclude IDE config files
 /.idea
 
-# Exclude temporary / build directories
+# Exclude temporary / build / auto-generated directories
 /*Remote*
 /*Debug*
 /*build*
 /*tmp*
 *generated*
+/docs
 
