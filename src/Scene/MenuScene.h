@@ -20,6 +20,9 @@ namespace kt {
         /// Dialog opened on pressing "Join Game"
         spDialog onJoinDialog;
 
+        static std::string username;
+        static void changeUsername (std::string const & new_name);
+
     public:
         /// Inject a new Main Menu scene instance into the stage
         MenuScene ();
@@ -35,6 +38,8 @@ namespace kt {
 
         /// If the address resolves a ping request connect to it
         void joinGame (std::string const & address);
+
+        static std::string const & getUsername ();
     };
     DECLARE_SMART (MenuScene, spMenuScene);
 

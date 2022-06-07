@@ -45,7 +45,7 @@ namespace kt {
 
         // Create the keyboard-controlled spaceship with ID = 0
         Spaceship::resetCounter();
-        auto & ship = actors.localShip = new KeyboardSpaceship (* world, & gameResources, USERNAME);
+        auto & ship = actors.localShip = new KeyboardSpaceship (* world, & gameResources, MenuScene::getUsername());
 
         // Register the keyboard-controlled spaceship to the backend
         auto request = handle.registrar.registerShipRequest();

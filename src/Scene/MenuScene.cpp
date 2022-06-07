@@ -1,9 +1,12 @@
 #include "MenuScene.h"
 
 namespace kt {
+    std::string MenuScene::username = USERNAME;
+
     MenuScene::MenuScene (): Scene() {
         // Create a new main menu dialog
         spDialog dialog = new Dialog ({0, 0}, getStage()->getSize(), "Menu");
+        dialog->addInput (username, MenuScene::changeUsername);
         dialog->addButton ("New Game", CLOSURE (this, & MenuScene::onNewGame));
         dialog->addButton ("Join Game", CLOSURE (this, & MenuScene::onJoinGame));
         dialog->addButton ("Join Directly", [this] (Event * event) { joinGame (REMOTE_ADDRESS); });
@@ -46,6 +49,14 @@ namespace kt {
     }
     void MenuScene::onRequestExit (Event * event) {
         core::requestQuit();
+    }
+
+    void MenuScene::changeUsername (std::string const & new_name) {
+        username = new_name;
+        logs::messageln ("Updated username to '%s'", username.c_str());
+    }
+    std::string const & MenuScene::getUsername() {
+        return username;
     }
 }
 
