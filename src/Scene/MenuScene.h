@@ -21,6 +21,16 @@ namespace kt {
         /// Dialog opened on pressing "Join Game"
         spDialog onJoinDialog;
 
+        /// Callback for when starting a new game is requested
+        void onNewGame (Event * event);
+        /// Callback for when quitting the application is requested
+        static void onRequestExit (Event * event);
+        /// Callback for when joining an existing game is requested
+        void onJoinGame (Event * event);
+
+        /// If the address resolves a ping request connect to it
+        void joinGame (std::string const & address);
+
         static std::string username;
         static void changeUsername (std::string const & new_name);
 
@@ -29,16 +39,6 @@ namespace kt {
         MenuScene ();
         /// Clean up all traces of this scene
         ~MenuScene ();
-
-        /// Callback for when starting a new game is requested
-        void onNewGame (Event * event);
-        /// Callback for when joining an existing game is requested
-        void onJoinGame (Event * event);
-        /// Callback for when quitting the application is requested
-        static void onRequestExit (Event * event);
-
-        /// If the address resolves a ping request connect to it
-        void joinGame (std::string const & address);
 
         static std::string const & getUsername();
     };
