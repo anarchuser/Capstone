@@ -38,7 +38,7 @@ namespace kt {
 
     public:
         /// Start a new server
-        Backend (std::size_t seed, std::string const & ip, unsigned short port);
+        Backend (std::size_t seed, std::string const & ip, unsigned short port = 0);
         /// Tell the server thread to stop and wait until it did so
         ~Backend ();
 
