@@ -3,17 +3,14 @@
 
 #include <string>
 
+#include "Network/config.h"
+
 /// Resource folder. Specifically, points to the resource XML file containing the relevant information
 #define GAME_RESOURCES  (PROJECT_ROOT "/src/data/res.xml")
 
-#define USERNAME        "lucifer"
-#define CLIENT_ID       USERNAME
 #define SERVER_ADDRESS  "*"
 #define REMOTE_ADDRESS  "azazel"
 #define SERVER_PORT     44444
-#define SERVER_FULL_ADDRESS (std::string (SERVER_ADDRESS)  + ":" + std::to_string (SERVER_PORT))
-
-static std::string remote = REMOTE_ADDRESS;
 
 #endif //Capstone_CONFIG_H
 

@@ -2,6 +2,7 @@
 #define CAPSTONE_MENUSCENE_H
 
 #include "config.h"
+#include "env.h"
 
 #include "oxygine-framework.h"
 
@@ -16,10 +17,16 @@ namespace kt {
 
     /// Scene representing the main menu. Consists of a window-spanning dialog with "start game" and "quit" options
     class MenuScene: public Scene {
+    private:
+        /// Dialog opened on pressing "Join Game"
+        spDialog onJoinDialog;
+
+        static std::string username;
+        static void changeUsername (std::string const & new_name);
+
     public:
         /// Inject a new Main Menu scene instance into the stage
         MenuScene ();
-
         /// Clean up all traces of this scene
         ~MenuScene ();
 
@@ -32,6 +39,8 @@ namespace kt {
 
         /// If the address resolves a ping request connect to it
         void joinGame (std::string const & address);
+
+        static std::string const & getUsername();
     };
     DECLARE_SMART (MenuScene, spMenuScene);
 

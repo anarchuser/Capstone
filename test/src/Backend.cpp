@@ -5,8 +5,11 @@
 
 #include "Random/random.h"
 
+#include "env.h"
+
 #define RANDOM_SEED generateSeed()
 
+#define USERNAME hostname()
 #define HEALTH_VALUE 42
 
 SCENARIO ("A backend handles basic requests") {
@@ -114,7 +117,7 @@ TEST_CASE ("Ping checks whether the backend is running on a local port ") {
     }
 
     SECTION ("Ping with active server") {
-        kt::Backend backend (RANDOM_SEED, SERVER_FULL_ADDRESS);
+        kt::Backend backend (RANDOM_SEED, SERVER_ADDRESS);
 
         REQUIRE (kt::Backend::ping ("*", backend.getPort()));
     }

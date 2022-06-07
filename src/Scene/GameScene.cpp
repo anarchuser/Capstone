@@ -10,13 +10,13 @@ namespace kt {
     GameScene::GameScene (std::size_t seed)
             : Scene()
             , rng (seed)
-            , backend {seed, SERVER_FULL_ADDRESS}
-            , client {SERVER_FULL_ADDRESS}
+            , backend {seed, SERVER_ADDRESS, SERVER_PORT}
+            , client {SERVER_ADDRESS, SERVER_PORT}
             , waitscope {client.getWaitScope()}
             , handle {[this] () {
                 // Connect to our own backend, storing the returned handles
                 auto request = client.getMain <::Backend>().connectRequest();
-                request.setId (CLIENT_ID);
+                request.setId (hostname());
                 request.setRegistrar (getRegistrarImpl());
                 auto result = request.send().wait (waitscope);
                 KJ_REQUIRE (result.hasSynchro());
@@ -45,7 +45,7 @@ namespace kt {
 
         // Create the keyboard-controlled spaceship with ID = 0
         Spaceship::resetCounter();
-        auto & ship = actors.localShip = new KeyboardSpaceship (* world, & gameResources, USERNAME);
+        auto & ship = actors.localShip = new KeyboardSpaceship (* world, & gameResources, MenuScene::getUsername());
 
         // Register the keyboard-controlled spaceship to the backend
         auto request = handle.registrar.registerShipRequest();
@@ -64,6 +64,15 @@ namespace kt {
             handle.keyboard_sink->doneRequest().send().wait (waitscope);
         });
 
+        // Configure dialog to open on pressing Escape
+        auto size = getSize();
+        onMenuDialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
+        onMenuDialog->addButton ("Restart", CLOSURE (this, & GameScene::onRestart));
+        onMenuDialog->addButton ("New game", CLOSURE (this, & GameScene::onNewGame));
+        onMenuDialog->addButton ("Disconnect", CLOSURE (this, & GameScene::onDisconnect));
+        onMenuDialog->addButton ("Quit", CLOSURE (this, & GameScene::onQuit));
+        onMenuDialog->addButton ("Cancel", CLOSURE (this, & GameScene::onMenu));
+
         // On Escape, open an in-game menu
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
@@ -77,7 +86,7 @@ namespace kt {
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
-        auto registrar = kj::heap <cg::RegistrarImpl> (CLIENT_ID);
+        auto registrar = kj::heap <cg::RegistrarImpl> (hostname());
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
             try {
                 auto & username = data.username;
@@ -128,20 +137,8 @@ namespace kt {
 
     void GameScene::onMenu (Event * event) {
         // Open a dialog with options to join a remote game or restart or quit the current one
-        static auto size = getSize();
-        static spDialog dialog = [this]() {
-            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
-            dialog->addButton ("Join", CLOSURE (this, & GameScene::onJoinGame));
-            dialog->addButton ("Restart", CLOSURE (this, & GameScene::onRestart));
-            dialog->addButton ("New game", CLOSURE (this, & GameScene::onNewGame));
-            dialog->addButton ("Disconnect", CLOSURE (this, & GameScene::onDisconnect));
-            dialog->addButton ("Quit", CLOSURE (this, & GameScene::onQuit));
-            dialog->addButton ("Cancel", CLOSURE (this, & GameScene::onMenu));
-            return dialog;
-        }();
-
-        if (getLastChild() == dialog) removeChild (dialog);
-        else addChild (dialog);
+        if (getLastChild() == onMenuDialog) removeChild (onMenuDialog);
+        else addChild (onMenuDialog);
     }
 
     GameScene::~GameScene() noexcept {
@@ -181,19 +178,6 @@ namespace kt {
         core::requestQuit();
     }
 
-    void GameScene::onJoinGame (Event * event) {
-        // Open a dialog asking for an address to connect to
-        static auto size = getSize ();
-        static spDialog dialog = [this] () {
-            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to connect to:");
-            dialog->addInput (REMOTE_ADDRESS, [this] (std::string msg) { joinGame (msg, SERVER_PORT); });
-            dialog->addButton ("Cancel", CLOSURE (this, & GameScene::onJoinGame));
-            return dialog;
-        } ();
-
-        if (getLastChild () != dialog) addChild (dialog);
-        else removeChild (dialog);
-    }
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
         // Ignore if we've already joined this client
         if (!Backend::ping (ip, port)) return;
@@ -206,7 +190,7 @@ namespace kt {
         auto & remote = * iterator->second;
         auto request = remote.getMain <::Backend>().joinRequest();
         // Set our own synchro instance as payload
-        request.setId (CLIENT_ID);
+        request.setId (hostname());
         request.setRemote (handle.synchro);
         request.send().wait (remote.getWaitScope());
     }
