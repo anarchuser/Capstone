@@ -17,6 +17,7 @@ namespace kt {
     /// Scene representing the main menu. Consists of a window-spanning dialog with "start game" and "quit" options
     class MenuScene: public Scene {
     private:
+        /// Dialog opened on pressing "Join Game"
         spDialog onJoinDialog;
 
     public:

@@ -70,6 +70,9 @@ namespace kt {
             std::vector <spPlanet> planets;
         } actors;
 
+        /// Menu opened on pressing Escape in-game
+        spDialog onMenuDialog;
+
         /// Send a seedRequest to the given address
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         /// Request connection to a remote client
@@ -100,8 +103,6 @@ namespace kt {
         void onDisconnect (Event * event);
         /// Quit game and close application
         void onQuit (Event * event);
-        /// Join existing game
-        void onJoinGame (Event * event);
     };
 
     DECLARE_SMART(GameScene, spGameScene);

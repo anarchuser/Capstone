@@ -64,6 +64,15 @@ namespace kt {
             handle.keyboard_sink->doneRequest().send().wait (waitscope);
         });
 
+        // Configure dialog to open on pressing Escape
+        auto size = getSize();
+        onMenuDialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
+        onMenuDialog->addButton ("Restart", CLOSURE (this, & GameScene::onRestart));
+        onMenuDialog->addButton ("New game", CLOSURE (this, & GameScene::onNewGame));
+        onMenuDialog->addButton ("Disconnect", CLOSURE (this, & GameScene::onDisconnect));
+        onMenuDialog->addButton ("Quit", CLOSURE (this, & GameScene::onQuit));
+        onMenuDialog->addButton ("Cancel", CLOSURE (this, & GameScene::onMenu));
+
         // On Escape, open an in-game menu
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [this] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
@@ -128,20 +137,8 @@ namespace kt {
 
     void GameScene::onMenu (Event * event) {
         // Open a dialog with options to join a remote game or restart or quit the current one
-        static auto size = getSize();
-        static spDialog dialog = [this]() {
-            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
-            dialog->addButton ("Join", CLOSURE (this, & GameScene::onJoinGame));
-            dialog->addButton ("Restart", CLOSURE (this, & GameScene::onRestart));
-            dialog->addButton ("New game", CLOSURE (this, & GameScene::onNewGame));
-            dialog->addButton ("Disconnect", CLOSURE (this, & GameScene::onDisconnect));
-            dialog->addButton ("Quit", CLOSURE (this, & GameScene::onQuit));
-            dialog->addButton ("Cancel", CLOSURE (this, & GameScene::onMenu));
-            return dialog;
-        }();
-
-        if (getLastChild() == dialog) removeChild (dialog);
-        else addChild (dialog);
+        if (getLastChild() == onMenuDialog) removeChild (onMenuDialog);
+        else addChild (onMenuDialog);
     }
 
     GameScene::~GameScene() noexcept {
@@ -181,19 +178,6 @@ namespace kt {
         core::requestQuit();
     }
 
-    void GameScene::onJoinGame (Event * event) {
-        // Open a dialog asking for an address to connect to
-        static auto size = getSize ();
-        static spDialog dialog = [this] () {
-            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to connect to:");
-            dialog->addInput (REMOTE_ADDRESS, [this] (std::string msg) { joinGame (msg, SERVER_PORT); });
-            dialog->addButton ("Cancel", CLOSURE (this, & GameScene::onJoinGame));
-            return dialog;
-        } ();
-
-        if (getLastChild () != dialog) addChild (dialog);
-        else removeChild (dialog);
-    }
     void GameScene::joinGame (std::string const & ip, unsigned short port) {
         // Ignore if we've already joined this client
         if (!Backend::ping (ip, port)) return;

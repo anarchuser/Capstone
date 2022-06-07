@@ -40,9 +40,7 @@ namespace cg {
 
         auto results = context.getResults();
         results.setId (ID);
-        log ("new registrar");
         results.setRegistrar (synchro.newRegistrar (ID));
-        log ("new synchro");
         results.setSynchro   (synchro.newSynchro   (ID));
 
         return kj::READY_NOW;
