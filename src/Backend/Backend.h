@@ -14,9 +14,6 @@
 #include <string>
 #include <thread>
 
-#define ITOS(I) std::to_string (I)
-#define IP(first, second, third, fourth) (ITOS (first) +'.'+ ITOS (second) +'.'+ ITOS (third) +'.'+ ITOS (fourth))
-
 namespace kt {
     using namespace oxygine;
 
@@ -31,7 +28,7 @@ namespace kt {
         /// Address the server is bound to
         std::string const address;
         /// Port the server is listening to
-        std::atomic <short> port = -1;
+        std::atomic <int> port = -1;
 
         /// Flag to tell the server to stop
         std::atomic <bool> stop = false;
@@ -41,7 +38,7 @@ namespace kt {
 
     public:
         /// Start a new server
-        Backend (std::size_t seed, std::string address);
+        Backend (std::size_t seed, std::string const & ip, unsigned short port);
         /// Tell the server thread to stop and wait until it did so
         ~Backend ();
 
@@ -49,7 +46,7 @@ namespace kt {
         unsigned short getPort() const;
 
         /// Send a ping to the given address and return success status
-        static bool ping (std::string const & ip, short port);
+        static bool ping (std::string const & ip, unsigned short port);
     };
 
 } // kt

@@ -11,7 +11,6 @@
 #define SERVER_ADDRESS  "*"
 #define REMOTE_ADDRESS  "azazel"
 #define SERVER_PORT     44444
-#define SERVER_FULL_ADDRESS (std::string (SERVER_ADDRESS)  + ":" + std::to_string (SERVER_PORT))
 
 #endif //Capstone_CONFIG_H
 

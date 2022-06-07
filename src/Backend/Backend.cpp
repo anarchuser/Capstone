@@ -1,10 +1,10 @@
 #include "Backend.h"
 
 namespace kt {
-    Backend::Backend (std::size_t seed, std::string address)
+    Backend::Backend (std::size_t seed, std::string const & address, unsigned short port)
             : seed {seed}
-            , address {std::move (address)}
-            , server_thread {& Backend::serve, this}
+            , address {address + ':' + std::to_string (port)}
+            , server_thread {CLOSURE (this, & Backend::serve)}
             {
                 getPort();
             }
@@ -20,7 +20,7 @@ namespace kt {
             try {
                 auto server = capnp::EzRpcServer (kj::heap <cg::BackendImpl> (seed, hostname()), address);
                 port = server.getPort ().wait (server.getWaitScope ());
-                logs::messageln ("Backend starts serving now");
+                logs::messageln ("Backend starts serving now on address '%s'", address.c_str());
 
                 auto & exec = kj::getCurrentThreadExecutor();
                 while (!stop) {
@@ -41,7 +41,7 @@ namespace kt {
         return port;
     }
 
-    bool Backend::ping (std::string const & ip, short port) {
+    bool Backend::ping (std::string const & ip, unsigned short port) {
         auto client = capnp::EzRpcClient (ip, port);
         auto request = client.getMain <::Backend>().pingRequest();
         try {

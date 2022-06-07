@@ -10,8 +10,8 @@ namespace kt {
     GameScene::GameScene (std::size_t seed)
             : Scene()
             , rng (seed)
-            , backend {seed, SERVER_FULL_ADDRESS}
-            , client {SERVER_FULL_ADDRESS}
+            , backend {seed, SERVER_ADDRESS, SERVER_PORT}
+            , client {SERVER_ADDRESS, SERVER_PORT}
             , waitscope {client.getWaitScope()}
             , handle {[this] () {
                 // Connect to our own backend, storing the returned handles
