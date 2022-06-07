@@ -41,12 +41,13 @@ Pressing `Escape` in-game opens a menu that allows you to restart, disconnect, a
   * [x] Spawn planets exerting gravitational pull onto spaceships
   * [x] Damage spaceships on collision
   * [ ] Allow shooting of bullets
-* [ ] UI/UX
+* [x] UI/UX
   * [x] Provide a main menu
   * [x] Provide an in-game menu
   * [x] Allow restarting and quitting the game
   * [x] Enter the ip to connect to
-  * [ ] Change the username in-game
+  * [x] Change the username in-game
+  * [x] Read host- and username from env variables
 * [ ] Network
   * [x] Connect to another player's game client
   * [x] Ensure clients use the same RNG seed
