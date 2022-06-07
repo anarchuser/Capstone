@@ -13,6 +13,7 @@ namespace kt {
     public:
         /// Construct a new Scene. Injects itself into the stage. Should be the only scene there
         Scene ();
+        ~Scene() override = 0;
     };
     DECLARE_SMART (Scene, spScene);
 

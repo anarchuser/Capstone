@@ -7,6 +7,8 @@ namespace kt {
         setPosition (getStage()->getPosition());
         setSize     (getStage()->getSize());
     }
+
+    Scene::~Scene () noexcept = default;
 }
 
 /* Copyright © 2022 Aaron Alef */
