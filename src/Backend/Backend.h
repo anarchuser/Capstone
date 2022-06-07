@@ -1,8 +1,9 @@
 #ifndef _CAPSTONE_BACKEND_H
 #define _CAPSTONE_BACKEND_H
 
-#include "config.h"
 #include "Network/config.h"
+#include "config.h"
+#include "env.h"
 
 #include "oxygine-framework.h"
 

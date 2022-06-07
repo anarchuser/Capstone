@@ -8,6 +8,8 @@
 #include "src/UI/Dialog.h"
 #include "src/Scene/MenuScene.h"
 
+#include <unistd.h>
+
 /// Height of game client, in pixels
 #define WINDOW_HEIGHT   1000
 /// Width of game clients, in pixels

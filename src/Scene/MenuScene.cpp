@@ -1,7 +1,7 @@
 #include "MenuScene.h"
 
 namespace kt {
-    std::string MenuScene::username = USERNAME;
+    std::string MenuScene::username = ::username();
 
     MenuScene::MenuScene (): Scene() {
         // Create a new main menu dialog
@@ -55,7 +55,7 @@ namespace kt {
         username = new_name;
         logs::messageln ("Updated username to '%s'", username.c_str());
     }
-    std::string const & MenuScene::getUsername() {
+    std::string const & MenuScene::getUsername () {
         return username;
     }
 }

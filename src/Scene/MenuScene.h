@@ -2,6 +2,7 @@
 #define CAPSTONE_MENUSCENE_H
 
 #include "config.h"
+#include "env.h"
 
 #include "oxygine-framework.h"
 
@@ -39,7 +40,7 @@ namespace kt {
         /// If the address resolves a ping request connect to it
         void joinGame (std::string const & address);
 
-        static std::string const & getUsername ();
+        static std::string const & getUsername();
     };
     DECLARE_SMART (MenuScene, spMenuScene);
 

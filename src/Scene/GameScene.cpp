@@ -16,7 +16,7 @@ namespace kt {
             , handle {[this] () {
                 // Connect to our own backend, storing the returned handles
                 auto request = client.getMain <::Backend>().connectRequest();
-                request.setId (CLIENT_ID);
+                request.setId (hostname());
                 request.setRegistrar (getRegistrarImpl());
                 auto result = request.send().wait (waitscope);
                 KJ_REQUIRE (result.hasSynchro());
@@ -86,7 +86,7 @@ namespace kt {
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
-        auto registrar = kj::heap <cg::RegistrarImpl> (CLIENT_ID);
+        auto registrar = kj::heap <cg::RegistrarImpl> (hostname());
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
             try {
                 auto & username = data.username;
@@ -190,7 +190,7 @@ namespace kt {
         auto & remote = * iterator->second;
         auto request = remote.getMain <::Backend>().joinRequest();
         // Set our own synchro instance as payload
-        request.setId (CLIENT_ID);
+        request.setId (hostname());
         request.setRemote (handle.synchro);
         request.send().wait (remote.getWaitScope());
     }
