@@ -1,7 +1,7 @@
 #include "MenuScene.h"
 
 namespace kt {
-    std::string MenuScene::username = ::username();
+    std::string MenuScene::username = HOSTNAME_AS_USERNAME ? hostname() : ::username();
 
     MenuScene::MenuScene (): Scene() {
         // Create a new main menu dialog
