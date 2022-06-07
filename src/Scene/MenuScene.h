@@ -16,10 +16,12 @@ namespace kt {
 
     /// Scene representing the main menu. Consists of a window-spanning dialog with "start game" and "quit" options
     class MenuScene: public Scene {
+    private:
+        spDialog onJoinDialog;
+
     public:
         /// Inject a new Main Menu scene instance into the stage
         MenuScene ();
-
         /// Clean up all traces of this scene
         ~MenuScene ();
 

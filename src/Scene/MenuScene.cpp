@@ -10,6 +10,11 @@ namespace kt {
         dialog->addButton ("Exit", & MenuScene::onRequestExit);
         addChild (dialog);
 
+        auto size = getSize ();
+        onJoinDialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to join:");
+        onJoinDialog->addInput (REMOTE_ADDRESS, LAMBDA (joinGame));
+        onJoinDialog->addButton ("Cancel", LAMBDA (onJoinGame));
+
         // Quit the game if Escape is pressed
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
@@ -29,19 +34,11 @@ namespace kt {
     }
     void MenuScene::onJoinGame (Event * event) {
         // Request entering an address to connect to
-        static auto size = getSize ();
-        static spDialog dialog = [this] () {
-            auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to ping to:");
-            dialog->addInput (REMOTE_ADDRESS, [this] (std::string msg) { joinGame (msg); });
-            dialog->addButton ("Cancel", CLOSURE (this, & MenuScene::onJoinGame));
-            return dialog;
-        } ();
-
-        // TODO: check if *any* child is dialog
-        if (getLastChild () != dialog) addChild (dialog);
-        else removeChild (dialog);
+        if (getLastChild() == onJoinDialog) removeChild (onJoinDialog);
+        else addChild (onJoinDialog);
     }
     void MenuScene::joinGame (std::string const & address) {
+        // Ping the address; if it resolves start a new game and connect to it
         if (Backend::ping (address, SERVER_PORT)) {
             MenuScene::~MenuScene();
             new GameScene (address, SERVER_PORT);
