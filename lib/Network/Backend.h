@@ -26,6 +26,7 @@
 namespace cg {
     using namespace std::string_literals;
 
+    /// Implementation of the Backend::Server interface
     class BackendImpl final: public Backend::Server {
     private:
         /* Member variables */
@@ -39,6 +40,7 @@ namespace cg {
         void log (std::string const & msg);
 
     public:
+        /// Construct a new Backend::Server implementation
         BackendImpl (std::size_t seed, ClientID id);
 
         /* RPC function call implementations */

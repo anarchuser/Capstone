@@ -1,7 +1,7 @@
 #include "Text.h"
 
 namespace kt {
-    Text::Text (ResFont * font, std::string message) {
+    Text::Text (ResFont * font, std::string const & message) {
         setText (message);
 
         if (font) {

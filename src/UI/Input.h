@@ -11,17 +11,19 @@
 namespace kt {
     using namespace oxygine;
 
+    /// Input field. Only supports alphanumerical characters and dots
     class Input: public Sprite {
     private:
+        /// The listener used to capture key presses. Attached on click, detached when losing focus
         int listener;
 
         /// Callback function to call upon press
         std::function <void (std::string)> onEnter;
 
-        /// Text field
+        /// Text field mirroring whatever has been typed
         spText message;
 
-        /// Click on field
+        /// On click, execute enEnter callback
         void onClick (Event * event);
         /// Mouse over animation (highlight field)
         void onMouseOver (Event * event);
@@ -29,6 +31,7 @@ namespace kt {
         void onMouseOut  (Event * event);
 
     public:
+        /// Construct new Input field with given sprite, text field and callback
         Input (ResAnim * animation, spText default_value, std::function <void (std::string)> && onEnter);
 
     };

@@ -3,16 +3,17 @@
 
 #include <iostream>
 
+/// If this is defined, backend debug output will be more fine-grained
 #define DEBUG_MINOR
 
+/// Output function printing to stdout if debug mode is enabled
 inline void debug_stdout (std::string const & message) {
 #ifdef DEBUG
     std::cout << message << std::endl;
 #endif
 }
 
-#define ONCE(expr) static bool __once__ = [this]() { ((expr)); return true; }()
-
+/// Generic macro for converting a member function into a lambda
 #define LAMBDA(func) [this] (auto ...args) { return func (args...); }
 
 #endif //CAPSTONE_HELPER_H

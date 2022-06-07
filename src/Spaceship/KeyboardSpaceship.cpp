@@ -6,15 +6,19 @@ namespace kt {
             {
                 setAddColor (KEYBOARD_SPACESHIP_COLOR);
 
+                // Update directional commands on releasing corresponding keys
                 listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_UP, [this](Event * event) {
                     onSteeringEvent ((KeyEvent *) event);
                 }));
+                // Update directional commands on pressing corresponding keys
                 listeners.push_back (getStage()->addEventListener (KeyEvent::KEY_DOWN, [this](Event * event) {
                     onSteeringEvent ((KeyEvent *) event);
                 }));
             }
 
     void KeyboardSpaceship::setOnUpdate (cg::SendItemCallback && onUpdate) {
+        // Before onUpdate callback has been provided, the spaceship has not received updates anyway
+        setAwake (true);
         this->onUpdate = onUpdate;
     }
     void KeyboardSpaceship::setOnDone (cg::DoneCallback && onDone) {
@@ -25,8 +29,7 @@ namespace kt {
         auto keysym = event->data->keysym;
         bool key_is_down = event->type == ox::KeyEvent::KEY_DOWN;
 
-        ONCE (setAwake (true));
-
+        // If WASD or arrow keys were pressed, update the directions queried
         switch (keysym.scancode) {
             case SDL_SCANCODE_UP: // accelerate
             case SDL_SCANCODE_W: // accelerate

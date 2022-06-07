@@ -1,7 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include "Algebra/algebra.h"
-
 #include "World/World.h"
 #include "Planet/Planet.h"
 #include "Random/random.h"

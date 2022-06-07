@@ -16,7 +16,9 @@
 #include <sstream>
 
 namespace cg {
+    /// Typedef to make function parameters more explicit
     typedef std::string ClientID;
+    /// Typedef to make function parameters more explicit
     typedef std::string ShipName;
 
     using Backend_t    = ::Backend::Client;

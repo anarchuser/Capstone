@@ -1,8 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_approx.hpp>
 
-#include "Algebra/algebra.h"
-
 #include "Planet/Planet.h"
 #include "World/World.h"
 #include "Spaceship/Spaceship.h"
@@ -50,8 +48,7 @@ SCENARIO ("Planets exert gravitational pull on Spaceships") {
 
                     auto new_direction = p_planet.GetPosition() - p_ship.GetPosition();
                     auto new_distance = new_direction.Normalize();
-                    if (i < 2) CHECK (new_distance == distance);
-                    else CHECK (new_distance < distance);
+                    CHECK (new_distance < distance);
                     CHECK (new_direction.x == Approx (direction.x).epsilon (1e-4));
                     CHECK (new_direction.y == Approx (direction.y).epsilon (1e-4));
                     distance = new_distance;

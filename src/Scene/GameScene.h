@@ -38,28 +38,44 @@ namespace kt {
         HashedRNG rng;
 
         /* All objects related to the connection to the backend */
+        /// A wrapper around the running backend, stopping it on destruction
         Backend backend;
+        /// A list of all clients we connected to, to prevent concurrent connections to the same address
         std::unordered_map <std::string, kj::Own <capnp::EzRpcClient>> remoteClients;
+        /// The handle to our own backend
         capnp::EzRpcClient client;
+        /// The wait scope of our own client
         kj::WaitScope & waitscope;
 
+        /// A struct holding several handles to the backend
         struct Handle {
+            /// Registrar used to register new ships
             cg::Registrar_t registrar;
+            /// Reference to our own synchro instance, to send to remote clients
             cg::Synchro_t synchro;
+            /// Sink to pour keyboard events into
             std::optional <cg::ShipSink_t> keyboard_sink;
         } handle;
 
         /* References to all objects stored in the world */
+        /// A struct holding the different actors in one game
         struct Actors {
+            /// The world holding all things and updating physics
             spWorld world;
+            /// The ship controlled by WASD / arrow keys
             spKeyboardSpaceship localShip;
+            /// The list of all remote ships registered by the backend
             std::vector <spRemoteSpaceship> remoteShips;
+            /// All planets in the game
             std::vector <spPlanet> planets;
         } actors;
 
+        /// Send a seedRequest to the given address
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
+        /// Request connection to a remote client
         void joinGame (std::string const & ip, unsigned short port);
 
+        /// Helper function to create a registrar, handling new ships joining the game
         kj::Own <cg::RegistrarImpl> getRegistrarImpl ();
         
     public:

@@ -9,7 +9,7 @@ namespace kt {
                 getPort();
             }
     
-    Backend::~Backend () noexcept {
+    Backend::~Backend () {
         if (!stop) logs::messageln ("Shutting down backend");
         stop = true;
         if (server_thread.joinable()) server_thread.join();
@@ -39,9 +39,6 @@ namespace kt {
     unsigned short Backend::getPort () const {
         while (port == -1) std::this_thread::yield();
         return port;
-    }
-    std::string const & Backend::getAddress() const {
-        return address;
     }
 
     bool Backend::ping (std::string const & ip, short port) {

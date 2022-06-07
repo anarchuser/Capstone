@@ -15,12 +15,11 @@
 namespace kt {
     using namespace oxygine;
 
-    /// Class used to create a dialog window.
-    /// Consists of a message and a list of buttons that get appended below the message
+    /// Interactive dialog window with description and list of buttons / input fields
     class Dialog: public Box9Sprite {
     private:
         /// Font and background of the dialog
-        static Resources dialogResources;
+        Resources dialogResources;
         /// Text field displayed in the dialog
         spText text;
         /// List of buttons displayed
@@ -29,16 +28,14 @@ namespace kt {
     public:
         /// Generate a new dialog of given size at given position with given message. Buttons get added later
         Dialog (Vector2 pos, Vector2 size, std::string message = "");
+        /// Free resources on destruction
         ~Dialog () noexcept override;
 
-        /// Replace the dialog message
-        void setMessage (std::string message);
         /// Append another button to the dialog with a callback to call upon press
-        void addButton (std::string message, std::function <void (Event *)> && callback);
+        void addButton (std::string const & message, std::function <void (Event *)> && callback);
         /// Append another button to the dialog with a callback to call upon press
-        void addInput (std::string default_value, std::function <void (std::string)> && callback);
+        void addInput (std::string const & default_value, std::function <void (std::string)> && callback);
     };
-
     DECLARE_SMART (Dialog, spDialog);
 
 } // kt

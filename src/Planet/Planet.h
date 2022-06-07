@@ -26,6 +26,7 @@ namespace kt {
     /// Round object with heavy mass. Exerts gravitational pull on non-planet objects
     class Planet : public Sprite {
     private:
+        /// The mass of this planet
         double const mass;
 
     public:
@@ -36,7 +37,7 @@ namespace kt {
         void update (UpdateState const & us) override;
 
         /// Mass formula as workaround since static bodies do not have mass
-        static inline double getMass (double radius) {
+        static constexpr inline double getMass (double radius) {
             return 0.5 * M_PI * radius * radius * PLANET_DENSITY;
         }
     };

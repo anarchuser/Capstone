@@ -27,6 +27,7 @@ namespace kt {
         Point size = core::getDisplaySize();
         getStage()->setSize(size);
 
+        // Initialisation done
         initialised = true;
     }
 
@@ -38,7 +39,7 @@ namespace kt {
             return;
         }
         // Ensure game has been initialised already
-        while (!initialised) {
+        if (!initialised) {
             logs::messageln ("Called run before initialisation. Initialising now");
             init ();
         }
@@ -52,8 +53,8 @@ namespace kt {
         DebugActor::show();
 #endif
 
+        // Create main menu scene
         new MenuScene ();
-
         logs::messageln ("Scene initialisation complete");
 
         // Main game loop. Returns true if done
@@ -78,7 +79,6 @@ namespace kt {
         // If the function returns true, it means that the user requested the application to terminate
         bool done = core::update();
 
-        // Update our stage
         // Update all actors. Actor::update will also be called for all its children
         getStage()->update();
 

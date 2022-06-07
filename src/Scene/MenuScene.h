@@ -20,6 +20,7 @@ namespace kt {
         /// Inject a new Main Menu scene instance into the stage
         MenuScene ();
 
+        /// Clean up all traces of this scene
         ~MenuScene ();
 
         /// Callback for when starting a new game is requested
@@ -29,6 +30,7 @@ namespace kt {
         /// Callback for when quitting the application is requested
         static void onRequestExit (Event * event);
 
+        /// If the address resolves a ping request connect to it
         void joinGame (std::string const & address);
     };
     DECLARE_SMART (MenuScene, spMenuScene);

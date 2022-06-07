@@ -6,15 +6,21 @@
 
 namespace cg {
 
+    /// Item struct in correspondence to Backend::Item
     struct Item {
+        /// The in-game time when this item was sent
         int timestamp;
+        /// The direction sent with this item
         Direction direction;
+        /// The status of the spaceship when it sent this
         Spaceship spaceship;
 
-        Item() = default;
+        /// Construct a new item from the given Item::Reader
         explicit Item (Backend::Item::Reader reader);
+        /// Construct a new item from the given parameters
         Item (int timestamp, Direction direction, Spaceship spaceship);
 
+        /// Use this item to construct an Item::Builder object
         void initialise (Backend::Item::Builder builder) const;
     };
 

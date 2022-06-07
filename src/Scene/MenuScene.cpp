@@ -2,6 +2,7 @@
 
 namespace kt {
     MenuScene::MenuScene (): Scene() {
+        // Create a new main menu dialog
         spDialog dialog = new Dialog ({0, 0}, getStage()->getSize(), "Menu");
         dialog->addButton ("New Game", CLOSURE (this, & MenuScene::onNewGame));
         dialog->addButton ("Join Game", CLOSURE (this, & MenuScene::onJoinGame));
@@ -9,6 +10,7 @@ namespace kt {
         dialog->addButton ("Exit", & MenuScene::onRequestExit);
         addChild (dialog);
 
+        // Quit the game if Escape is pressed
         getStage()->addEventListener (KeyEvent::KEY_DOWN, [] (Event * event) {
             auto * keyEvent = (KeyEvent *) event;
             auto keysym = keyEvent->data->keysym;
@@ -17,8 +19,8 @@ namespace kt {
     }
 
     MenuScene::~MenuScene () {
-        detach();
         getStage()->removeAllEventListeners();
+        detach();
     }
 
     void MenuScene::onNewGame (Event * event) {
@@ -26,6 +28,7 @@ namespace kt {
         new GameScene (RANDOM_SEED);
     }
     void MenuScene::onJoinGame (Event * event) {
+        // Request entering an address to connect to
         static auto size = getSize ();
         static spDialog dialog = [this] () {
             auto dialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Enter ip to ping to:");
