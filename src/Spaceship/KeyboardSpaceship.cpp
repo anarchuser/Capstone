@@ -50,13 +50,13 @@ namespace kt {
         }
     }
 
-    void KeyboardSpaceship::update (UpdateState const & us) {
+    void KeyboardSpaceship::update (UpdateState const & updateState) {
         try {
-            onUpdate ({us.time, queried, getData()});
+            onUpdate ({updateState.time, queried, getData()});
         } catch (std::bad_function_call & e) {
             logs::warning ("KeyboardSpaceship::onUpdate not configured");
         }
-        Spaceship::update (us);
+        Spaceship::update (updateState);
     }
 
     void KeyboardSpaceship::destroy () {

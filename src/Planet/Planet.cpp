@@ -36,7 +36,7 @@ namespace kt {
         body->CreateFixture (& circleFixture);
     }
 
-    void Planet::update (UpdateState const & us) {
+    void Planet::update (UpdateState const & updateState) {
         auto * body = (b2Body *) getUserData();
         auto * world = safeCast<World *> (getParent());
 
@@ -64,7 +64,7 @@ namespace kt {
                 }
 
                 // Calculate the gravitational pull based on distance and apply it onto the body
-                auto force = mass * PLANET_GRAVITY * us.dt / direction.Normalize ();
+                auto force = mass * PLANET_GRAVITY * updateState.dt / direction.Normalize ();
                 actor_body->ApplyLinearImpulseToCenter (force * direction, PLANET_WAKES_SHIP);
             }
 
@@ -72,7 +72,7 @@ namespace kt {
             current_actor = current_actor->getNextSibling();
         }
 
-        Actor::update (us);
+        Actor::update (updateState);
     }
 }
 

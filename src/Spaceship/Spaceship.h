@@ -66,7 +66,9 @@ namespace kt {
         b2Body * body = nullptr;
 
         /// Update personal scoreboard based on current health
-        void updateScoreboard (const std::string& msg = "", long ping = -1);
+        void updateScoreboard (std::string const & msg = "", long ping = -1);
+        /// Calculate the latency to its remote counterpart
+        void updatePing();
 
     public:
         /// Construct a new ship in the current world, at given position (usually centred)
@@ -75,7 +77,7 @@ namespace kt {
         ~Spaceship() noexcept override = default;
 
         /// Apply linear or angular impulses based on command flags
-        void update (UpdateState const & us) override;
+        void update (UpdateState const & updateState) override;
 
         /// Wakes or puts a spaceship to sleep. Asleep spaceships have collision and gravity turned off
         void setAwake (bool awake);
@@ -107,8 +109,6 @@ namespace kt {
         virtual kj::Own <cg::ShipHandleImpl> getHandle();
         /// Give the ship a reference to its remote counterpart
         void setHandle (cg::ShipHandle_t && remote);
-        /// Calculate the latency to its remote counterpart
-        void updatePing();
 
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
         static void resetCounter();

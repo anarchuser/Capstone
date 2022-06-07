@@ -34,7 +34,7 @@ namespace kt {
         Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale = 1);
 
         /// Exert gravitational force on non-planet objects based on mass and distance
-        void update (UpdateState const & us) override;
+        void update (UpdateState const & updateState) override;
 
         /// Mass formula as workaround since static bodies do not have mass
         static constexpr inline double getMass (double radius) {

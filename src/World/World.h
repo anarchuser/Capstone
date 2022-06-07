@@ -46,7 +46,7 @@ namespace kt {
         b2Vec2 convert (Vector2 const & pos) const;
 
         /// Convert a box2d vector to an oxygine vector
-        Vector2 convert (const b2Vec2 & pos) const;
+        Vector2 convert (b2Vec2 const & pos) const;
 
         /// Overload to ensure all children have their position normalised
         void addChild (spActor child);

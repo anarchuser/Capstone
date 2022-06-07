@@ -81,18 +81,6 @@ namespace kt {
 
         /// Helper function to create a registrar, handling new ships joining the game
         kj::Own <cg::RegistrarImpl> getRegistrarImpl ();
-        
-    public:
-        /// Inject a new Game instance with random seed into the stage
-        GameScene ();
-        /// Directly ping to an existing Game remotely
-        GameScene (std::string const & ip, unsigned short port);
-        /// Inject a new Game instance with given seed into the stage
-        explicit GameScene (std::size_t seed);
-        ~GameScene() noexcept override;
-
-        /// Updates its children, given that the game is not paused (i.e., hard and soft pause set to false)
-        void update(UpdateState const & us) override;
 
         /// Toggle menu. Opens dialog with options to start a new game with same or new seed, or to quit the game
         void onMenu (Event * event);
@@ -104,6 +92,18 @@ namespace kt {
         void onDisconnect (Event * event);
         /// Quit game and close application
         void onQuit (Event * event);
+
+    public:
+        /// Inject a new Game instance with random seed into the stage
+        GameScene ();
+        /// Inject a new Game instance with given seed into the stage
+        explicit GameScene (std::size_t seed);
+        /// Directly ping to an existing Game remotely
+        GameScene (std::string const & ip, unsigned short port);
+        ~GameScene() noexcept override;
+
+        /// Updates its children, given that the game is not paused (i.e., hard and soft pause set to false)
+        void update(UpdateState const & updateState) override;
     };
 
     DECLARE_SMART(GameScene, spGameScene);

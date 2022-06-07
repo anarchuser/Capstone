@@ -39,7 +39,7 @@ namespace kt {
         /// Update how to behave on update
         void setOnUpdate (cg::SendItemCallback && onUpdate);
         /// Send directions queried by the user to the callback
-        void update (UpdateState const & us) override;
+        void update (UpdateState const & updateState) override;
 
         /// Update the callback for when we crash
         void setOnDone (cg::DoneCallback && onDone);

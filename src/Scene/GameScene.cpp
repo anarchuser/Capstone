@@ -119,7 +119,7 @@ namespace kt {
         return registrar;
     }
 
-    void GameScene::update (UpdateState const & us) {
+    void GameScene::update (UpdateState const & updateState) {
         static bool gameOver = false;
         if (!gameOver) {
             if (!actors.localShip) {
@@ -132,7 +132,7 @@ namespace kt {
         // All ships were destroyed: stop the game instance
         if (!actors.localShip && actors.remoteShips.empty()) onDisconnect (nullptr);
 
-        Actor::update (us);
+        Actor::update (updateState);
     }
 
     void GameScene::onMenu (Event * event) {
