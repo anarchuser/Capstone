@@ -29,7 +29,7 @@ namespace cg {
         /// Return raw pointer to Client if id was in remote or local. Nullptr otherwise
         Client * findClient (ClientID const & id);
         /// Disconnect the client with this id, if exists
-        kj::Promise <void> disconnect (ClientID const & id);
+        void disconnect (ClientID const & id);
 
         /* Ship registration functions */
         /// Configure the newly registered spaceship and return a sink to it. Registrar callback
