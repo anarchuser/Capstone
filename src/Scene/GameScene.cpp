@@ -24,30 +24,11 @@ namespace kt {
                 return Handle {result.getRegistrar(), result.getSynchro()};
             }()}
             {
-
         logs::messageln ("Seed: %lu", rng.seed);
-
-        // Load all required game assets
-        gameResources.loadXML (GAME_RESOURCES);
-
-        // Create the world
-        auto & world = actors.world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
-        addChild (world);
-
-        // Generate a couple of planets, number based on world size
-        auto planetAnimation = gameResources.getResAnim ("venus");
-        for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
-            actors.planets.emplace_back (new Planet (* world, planetAnimation, {
-                    float (rng.random ({100, world->getSize().x - 100})),
-                    float (rng.random ({100, world->getSize().y - 100}))
-            }, float (rng.random ({0.3, 0.7}))));
-        }
-
-        // Create the keyboard-controlled spaceship with ID = 0
-        Spaceship::resetCounter();
-        auto & ship = actors.localShip = new KeyboardSpaceship (* world, & gameResources, MenuScene::getUsername());
+        initWorld();
 
         // Register the keyboard-controlled spaceship to the backend
+        auto & ship = actors.localShip;
         auto request = handle.registrar.registerShipRequest();
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
@@ -83,6 +64,29 @@ namespace kt {
                     break;
             }
         });
+    }
+
+    void GameScene::initWorld () {
+        // Load all required game assets
+        gameResources.loadXML (GAME_RESOURCES);
+
+        // Create the world
+        auto & world = actors.world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
+        addChild (world);
+
+        // Generate a couple of planets, number based on world size
+        auto planetAnimation = gameResources.getResAnim ("venus");
+        int const number_of_planets = PLANETS_PER_PIXEL * getSize().x * getSize().y;
+        for (std::size_t i = 0; i < number_of_planets; i++) {
+            actors.planets.emplace_back (new Planet (* world, planetAnimation, {
+                    float (rng.random ({100, world->getSize().x - 100})),
+                    float (rng.random ({100, world->getSize().y - 100}))
+            }, float (rng.random ({0.3, 0.7}))));
+        }
+
+        // Create the keyboard-controlled spaceship with ID = 0
+        Spaceship::resetCounter();
+        actors.localShip = new KeyboardSpaceship (* world, & gameResources, MenuScene::getUsername());
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
@@ -142,9 +146,6 @@ namespace kt {
     }
 
     GameScene::~GameScene() noexcept {
-        // Free all game assets
-        gameResources.free();
-
         // Destroy the keyboard-controlled ship if it still exists
         if (auto & ship = actors.localShip) ship->destroy();
         actors.localShip = nullptr;
@@ -156,6 +157,9 @@ namespace kt {
         // Remove this scene including all its listeners
         detach();
         getStage()->removeAllEventListeners();
+
+        // Free all game assets
+        gameResources.free();
     }
 
     void GameScene::onRestart (Event * event) {

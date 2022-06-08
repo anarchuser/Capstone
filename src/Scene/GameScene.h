@@ -79,6 +79,9 @@ namespace kt {
         /// Request connection to a remote client
         void joinGame (std::string const & ip, unsigned short port);
 
+        /// Helper function to inialise the world
+        void initWorld ();
+
         /// Helper function to create a registrar, handling new ships joining the game
         kj::Own <cg::RegistrarImpl> getRegistrarImpl ();
 
