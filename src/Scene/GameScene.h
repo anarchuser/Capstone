@@ -36,7 +36,7 @@ namespace kt {
         /// Resources used throughout the game (font, background, sprites)
         Resources gameResources;
         /// Random number generator based on the seed given. Ensures every random number used depends on this seed
-        HashedRNG rng;
+        RNG rng;
 
         /* All objects related to the connection to the backend */
         /// A wrapper around the running backend, stopping it on destruction
