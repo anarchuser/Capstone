@@ -105,7 +105,7 @@ namespace kt {
                     }
                 }
                 // Case 2a: A remote ship with the given name is already registered -> destroy the existing one
-                std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship const & ship) {
+                std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship ship) {
                     return ship->getName() == username;
                 });
                 for (auto iter = actors.remoteShips.begin(); iter != actors.remoteShips.end(); ++iter) {
@@ -117,10 +117,7 @@ namespace kt {
 
                 // Case 2b: Create a new remote ship connected to the given handle
                 auto & ship = actors.remoteShips.emplace_back (new RemoteSpaceship (* actors.world, & gameResources, username));
-                ship->setOnDone ([this, username] () {
-                    std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship const & ship) {
-                        return ship->getName() == username;
-                    });
+                ship->setOnDone ([this] () {
                 });
                 ship->setData (data);
                 ship->setHandle (std::move (handle));
@@ -160,9 +157,6 @@ namespace kt {
         if (auto ship = actors.localShip) ship->destroy();
 
         // Destroy RemoteSpaceships
-        for (auto ship : actors.remoteShips) {
-            if (ship) ship->destroy();
-        }
         actors.remoteShips.clear();
 
         // Free all game assets
