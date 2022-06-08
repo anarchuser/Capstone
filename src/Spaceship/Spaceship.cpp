@@ -131,9 +131,9 @@ namespace kt {
         body->SetAwake (awake);
     }
 
-    void Spaceship::update (oxygine::UpdateState const & us) {
+    void Spaceship::update (oxygine::UpdateState const & updateState) {
         // Update each ship's ping roughly once a second
-        if (us.time % int (1000 / FPS) == 0) updatePing ();
+        if (updateState.time % int (1000 / FPS) == 0) updatePing ();
 
         // Update ship velocity depending on whether W or S is pressed
         if (direction.decelerate && !direction.accelerate) {
@@ -164,7 +164,7 @@ namespace kt {
             body->ApplyAngularImpulse (- 0.1 * SPACESHIP_TORQUE * omega, false);
         }
 
-        Actor::update (us);
+        Actor::update (updateState);
     }
 
     b2Vec2 Spaceship::getPhysicalPosition () const {
