@@ -117,8 +117,7 @@ namespace kt {
 
                 // Case 2b: Create a new remote ship connected to the given handle
                 auto & ship = actors.remoteShips.emplace_back (new RemoteSpaceship (* actors.world, & gameResources, username));
-                ship->setOnDone ([this] () {
-                });
+                ship->setOnDone ([this] () {});
                 ship->setData (data);
                 ship->setHandle (std::move (handle));
                 return ship->getSink ();

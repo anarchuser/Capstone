@@ -110,6 +110,8 @@ namespace kt {
         for (auto listener: listeners) getStage ()->removeEventListener (listener);
         listeners.clear();
 
+        remote.reset();
+
         // Update ship status
         updateScoreboard ("dead");
 
