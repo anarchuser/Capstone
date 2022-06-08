@@ -86,14 +86,29 @@ namespace kt {
         }));
     }
 
+    void Spaceship::setOnUpdate (cg::SendItemCallback && onUpdate) {
+        // Before onUpdate callback has been provided, the spaceship has not received updates anyway
+        setAwake (true);
+        this->onUpdate = onUpdate;
+    }
+    void Spaceship::setOnDone (cg::DoneCallback && onDone) {
+        this->onDone = onDone;
+    }
+
     void Spaceship::updateDirection (cg::Direction new_dir) {
         direction = new_dir;
-    };
+    }
 
-    void Spaceship::destroy () {
+    Spaceship::~Spaceship() noexcept {
+        try {
+            onDone();
+        } catch (std::bad_function_call & e) {
+            logs::warning ("Spaceship destroyed without done callback registered");
+        }
+
         // Stop listening to anything
-        for (auto listener: listeners)
-            getStage ()->removeEventListener (listener);
+        for (auto listener: listeners) getStage ()->removeEventListener (listener);
+        listeners.clear();
 
         // Update ship status
         updateScoreboard ("dead");
@@ -105,6 +120,10 @@ namespace kt {
         if (body) body->GetUserData().pointer = 0;
         body = nullptr;
         detach ();
+    }
+
+    void Spaceship::destroy () {
+        Spaceship::~Spaceship();
     }
 
     void Spaceship::updateScoreboard (std::string const & msg, long ping) {

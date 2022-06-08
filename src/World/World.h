@@ -10,7 +10,7 @@
 #include "src/Collision/CollisionListener.h"
 
 /// Size of the physical world. Determines x/y ratio and size of objects contained
-#define WORLD_SIZE {10, 10}
+#define WORLD_SIZE b2Vec2 {10, 10}
 
 /// Number of iterations performed per second. Adjust based on network load
 #define FPS 60.0

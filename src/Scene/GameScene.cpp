@@ -78,7 +78,7 @@ namespace kt {
         auto planetAnimation = gameResources.getResAnim ("venus");
         int const number_of_planets = PLANETS_PER_PIXEL * getSize().x * getSize().y;
         for (std::size_t i = 0; i < number_of_planets; i++) {
-            actors.planets.emplace_back (new Planet (* world, planetAnimation, {
+            actors.planets.push_back (new Planet (* world, planetAnimation, {
                     float (rng.random ({100, world->getSize().x - 100})),
                     float (rng.random ({100, world->getSize().y - 100}))
             }, float (rng.random ({0.3, 0.7}))));
@@ -97,7 +97,7 @@ namespace kt {
                 OX_ASSERT (username != "Planet");
 
                 // Case 1: the registered ship is the keyboard-controlled original one
-                if (auto ship = actors.localShip) {
+                if (auto & ship = actors.localShip) {
                     if (ship->getName () == username) {
                         ship->setData (data);
                         ship->setHandle (std::move (handle));
@@ -106,12 +106,22 @@ namespace kt {
                 }
                 // Case 2a: A remote ship with the given name is already registered -> destroy the existing one
                 std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship const & ship) {
-                    return ship && ship->getName() == username;
+                    return ship->getName() == username;
                 });
+                for (auto iter = actors.remoteShips.begin(); iter != actors.remoteShips.end(); ++iter) {
+                    if ((* iter)->getName() == username) {
+                        actors.remoteShips.erase (iter);
+                        break;
+                    }
+                }
 
                 // Case 2b: Create a new remote ship connected to the given handle
-                spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
-                actors.remoteShips.push_back (ship);
+                auto & ship = actors.remoteShips.emplace_back (new RemoteSpaceship (* actors.world, & gameResources, username));
+                ship->setOnDone ([this, username] () {
+                    std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship const & ship) {
+                        return ship->getName() == username;
+                    });
+                });
                 ship->setData (data);
                 ship->setHandle (std::move (handle));
                 return ship->getSink ();
@@ -146,20 +156,21 @@ namespace kt {
     }
 
     GameScene::~GameScene() noexcept {
-        // Destroy the keyboard-controlled ship if it still exists
-        if (auto & ship = actors.localShip) ship->destroy();
-        actors.localShip = nullptr;
+        // Destroy KeyboardSpaceship
+        if (auto ship = actors.localShip) ship->destroy();
 
-        // Destroy all remote ships
-        for (auto & ship : actors.remoteShips) if (ship) ship->destroy();
+        // Destroy RemoteSpaceships
+        for (auto ship : actors.remoteShips) {
+            if (ship) ship->destroy();
+        }
         actors.remoteShips.clear();
+
+        // Free all game assets
+        gameResources.free();
 
         // Remove this scene including all its listeners
         detach();
         getStage()->removeAllEventListeners();
-
-        // Free all game assets
-        gameResources.free();
     }
 
     void GameScene::onRestart (Event * event) {

@@ -56,6 +56,11 @@ namespace kt {
         std::optional <cg::ShipHandle_t> remote;
 
     protected:
+        /// Callback to send directions & state to the backend
+        cg::SendItemCallback onUpdate;
+        /// Callback to tell the backend that we died
+        cg::DoneCallback onDone;
+
         /// A list of all listeners so they can be removed from the stage on death
         std::vector <int> listeners;
 
@@ -74,7 +79,7 @@ namespace kt {
         /// Construct a new ship in the current world, at given position (usually centred)
         Spaceship (World & world, Resources * res, std::string const & username);
         /// Default non-throwing dtor as demanded by the base class
-        ~Spaceship() noexcept override = default;
+        ~Spaceship() noexcept override;
 
         /// Apply linear or angular impulses based on command flags
         void update (UpdateState const & updateState) override;
@@ -86,7 +91,7 @@ namespace kt {
         void updateDirection (cg::Direction new_dir);
 
         /// Destroy this spaceship and remove from the world
-        virtual void destroy ();
+        void destroy ();
 
         /// Return current position in physical coordinates
         b2Vec2 getPhysicalPosition () const;
@@ -109,6 +114,11 @@ namespace kt {
         virtual kj::Own <cg::ShipHandleImpl> getHandle();
         /// Give the ship a reference to its remote counterpart
         void setHandle (cg::ShipHandle_t && remote);
+
+        /// Update how to behave on update
+        void setOnUpdate (cg::SendItemCallback && onUpdate);
+        /// Update the callback for when we crash
+        void setOnDone (cg::DoneCallback && onDone);
 
         /// Counter incrementing IDs. Reset on creating a new GameScene instance
         static void resetCounter();
