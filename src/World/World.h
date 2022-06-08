@@ -27,6 +27,8 @@ namespace kt {
         /// Turn debug view on or off. Invoked by pressing `` ` ``
         void toggleDebugDraw ();
 
+        /// Flag to tell the game when the game has been fully destroyed
+
     public:
         /// Physical world, i.e., box2d world responsible for the physics in the game
         b2World world {b2Vec2_zero};

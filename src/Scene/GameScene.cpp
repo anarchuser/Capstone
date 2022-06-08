@@ -162,6 +162,7 @@ namespace kt {
         gameResources.free();
 
         // Remove this scene including all its listeners
+        removeChildren();
         detach();
         getStage()->removeAllEventListeners();
     }

@@ -32,7 +32,10 @@ namespace kt {
                 break;
             } catch (std::exception & e) {
                 std::string desc {e.what()};
-                if (desc.find ("Eventloop destroyed") != std::string::npos) return;
+                if (desc.find ("Eventloop destroyed") != std::string::npos) {
+                    logs::warning (e.what());
+//                    return;
+                }
                 std::this_thread::sleep_for (std::chrono::milliseconds (500));
             }
         }
