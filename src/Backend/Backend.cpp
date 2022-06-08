@@ -23,13 +23,16 @@ namespace kt {
                 logs::messageln ("Backend starts serving now on address '%s'", address.c_str());
 
                 auto & exec = kj::getCurrentThreadExecutor();
+                auto & waitscope = server.getWaitScope();
                 while (!stop) {
                     exec.executeAsync ([this] () {
                         std::this_thread::yield ();
-                    }).wait (server.getWaitScope ());
+                    }).wait (waitscope);
                 }
-                return;
-            } catch (...) {
+                break;
+            } catch (std::exception & e) {
+                std::string desc {e.what()};
+                if (desc.find ("Eventloop destroyed") != std::string::npos) return;
                 std::this_thread::sleep_for (std::chrono::milliseconds (500));
             }
         }
