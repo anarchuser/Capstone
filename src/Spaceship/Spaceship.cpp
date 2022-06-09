@@ -77,9 +77,7 @@ namespace kt {
 
         listeners.push_back (addEventListener (CollisionEvent::BEGIN, [this] (Event * event) {
             if (!body->IsAwake()) return;
-//            spSprite other = safeCast <CollisionEvent *> (event)->other;
             // Update health and then the scoreboard
-            // TODO: update scoreboard automatically on health changes
             --health;
             updatePing();
             if (health <= 0) destroy();
@@ -87,12 +85,13 @@ namespace kt {
     }
 
     void Spaceship::setOnUpdate (cg::SendItemCallback && onUpdate) {
-        // Before onUpdate callback has been provided, the spaceship has not received updates anyway
+        this->onUpdate = std::move (onUpdate);
+
+        // OnUpdate must be set before the ship can receive updates, so wake them up then
         setAwake (true);
-        this->onUpdate = onUpdate;
     }
     void Spaceship::setOnDone (cg::DoneCallback && onDone) {
-        this->onDone = onDone;
+        this->onDone = std::move (onDone);
     }
 
     void Spaceship::updateDirection (cg::Direction new_dir) {
@@ -246,7 +245,7 @@ namespace kt {
         return handle;
     }
     void Spaceship::setHandle (cg::ShipHandle_t && handle) {
-        remote = handle;
+        remote = std::move (handle);
     }
 
     void Spaceship::updatePing () {
