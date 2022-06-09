@@ -16,23 +16,25 @@ namespace kt {
     }
     
     void Backend::serve () {
-        for (int i = 0; i < 100; i++) {
-            try {
-                auto server = capnp::EzRpcServer (kj::heap <cg::BackendImpl> (seed, hostname()), address);
-                port = server.getPort ().wait (server.getWaitScope ());
-                logs::messageln ("Backend starts serving now on address '%s'", address.c_str());
-
-                auto & exec = kj::getCurrentThreadExecutor();
-                kj::WaitScope & waitscope = server.getWaitScope();
-
-                kj::Promise <void> NEVER_DONE = kj::NEVER_DONE;
-                while (!stop) NEVER_DONE.poll (waitscope);
-                return;
-            } catch (std::exception & e) {
-                logs::warning (e.what());
-                std::this_thread::sleep_for (std::chrono::milliseconds (500));
+        auto server = [this] () {
+            for (int i = 0; i < 100; i++) {
+                try {
+                    return capnp::EzRpcServer (kj::heap <cg::BackendImpl> (seed, hostname ()), address);
+                } catch (std::exception & e) {
+                    // Server could not be started, e.g., because the port is still blocked. Wait, then retry
+                    std::this_thread::sleep_for (std::chrono::milliseconds (500));
+                }
             }
-        }
+        }();
+        port = server.getPort ().wait (server.getWaitScope ());
+        logs::messageln ("Backend starts serving now on address '%s'", address.c_str ());
+
+        auto & exec = kj::getCurrentThreadExecutor ();
+        kj::WaitScope & waitscope = server.getWaitScope ();
+
+        // NEVER_DONE.poll executes events until the queue is empty. If it is, check if stop has been requested.
+        kj::Promise<void> NEVER_DONE = kj::NEVER_DONE;
+        while (!stop) NEVER_DONE.poll (waitscope);
     }
     
     unsigned short Backend::getPort () const {
