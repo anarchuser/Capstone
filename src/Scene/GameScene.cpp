@@ -27,6 +27,10 @@ namespace kt {
         logs::messageln ("Seed: %lu", rng.seed);
         initWorld();
 
+        clock = new Text (gameResources.getResFont ("kt-liberation"));
+        clock->setPosition (0.78 * getSize().x, 0.95 * getSize().y);
+        addChild (clock);
+
         // Register the keyboard-controlled spaceship to the backend
         auto & ship = actors.localShip;
         auto request = handle.registrar.registerShipRequest();
@@ -135,10 +139,21 @@ namespace kt {
             }
         }
 
+        // Update time twice a second, because game time is inaccurate
+        if (updateState.time % int (500 / FPS) == 0) updateTime();
+
         // All ships were destroyed: stop the game instance
         if (!actors.localShip && actors.remoteShips.empty()) onDisconnect (nullptr);
 
         Actor::update (updateState);
+    }
+
+    void GameScene::updateTime () {
+        auto timestamp = std::chrono::system_clock::now();
+        auto time = std::chrono::system_clock::to_time_t (timestamp);
+        std::ostringstream readable_time;
+        readable_time << std::put_time (std::localtime (& time), "Time: %H:%M:%S");
+        clock->setText (readable_time.str());
     }
 
     void GameScene::onMenu (Event * event) {

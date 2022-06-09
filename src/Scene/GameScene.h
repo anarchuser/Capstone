@@ -11,6 +11,7 @@
 #include <thread>
 #include <memory>
 #include <mutex>
+#include <iomanip>
 
 #include "UI/Dialog.h"
 #include "Planet/Planet.h"
@@ -76,6 +77,11 @@ namespace kt {
 
         /// Menu opened on pressing Escape in-game
         spDialog onMenuDialog;
+
+        /// clock window
+        spText clock;
+        /// Update the clock
+        void updateTime ();
 
         /// Send a seedRequest to the given address
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
