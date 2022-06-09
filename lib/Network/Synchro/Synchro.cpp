@@ -179,7 +179,16 @@ namespace cg {
     void SynchroImpl::doneCallback (ShipName const & username) {
         log ("Ship " + username + " is done");
         // TODO: propagate done request
-        if (local.has_value()) local->erase (username);
+        if (local.has_value()) {
+            local->erase (username);
+            local->ships.erase (username);
+            if (local->ships.empty()) {
+                log ("Local client has no ships anymore - disconnecting");
+                local.reset();
+                remotes.clear();
+                return;
+            }
+        }
         for (auto & client : remotes) {
             client.second.erase (username);
         }
