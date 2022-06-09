@@ -23,23 +23,16 @@ namespace kt {
                 logs::messageln ("Backend starts serving now on address '%s'", address.c_str());
 
                 auto & exec = kj::getCurrentThreadExecutor();
-                auto & waitscope = server.getWaitScope();
-                while (!stop) {
-                    exec.executeAsync ([this] () {
-                        std::this_thread::yield ();
-                    }).wait (waitscope);
-                }
-                break;
+                kj::WaitScope & waitscope = server.getWaitScope();
+
+                kj::Promise <void> NEVER_DONE = kj::NEVER_DONE;
+                while (!stop) NEVER_DONE.poll (waitscope);
+                return;
             } catch (std::exception & e) {
-                std::string desc {e.what()};
-                if (desc.find ("Eventloop destroyed") != std::string::npos) {
-                    logs::warning (e.what());
-//                    return;
-                }
+                logs::warning (e.what());
                 std::this_thread::sleep_for (std::chrono::milliseconds (500));
             }
         }
-        logs::error ("Failed to set up server");
     }
     
     unsigned short Backend::getPort () const {
