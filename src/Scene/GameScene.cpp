@@ -105,19 +105,13 @@ namespace kt {
                     }
                 }
                 // Case 2a: A remote ship with the given name is already registered -> destroy the existing one
-                std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship ship) {
-                    return ship->getName() == username;
-                });
-                for (auto iter = actors.remoteShips.begin(); iter != actors.remoteShips.end(); ++iter) {
-                    if ((* iter)->getName() == username) {
-                        actors.remoteShips.erase (iter);
-                        break;
-                    }
-                }
+                std::lock_guard<std::mutex> guard (actors.mx);
+                actors.remoteShips.erase (username);
 
                 // Case 2b: Create a new remote ship connected to the given handle
-                auto & ship = actors.remoteShips.emplace_back (new RemoteSpaceship (* actors.world, & gameResources, username));
-                ship->setOnDone ([this] () {});
+                spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
+                actors.remoteShips.emplace (username, ship);
+                ship->setOnDone ([](){});
                 ship->setData (data);
                 ship->setHandle (std::move (handle));
                 return ship->getSink ();

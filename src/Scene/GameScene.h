@@ -61,12 +61,14 @@ namespace kt {
         /* References to all objects stored in the world */
         /// A struct holding the different actors in one game
         struct Actors {
+            std::mutex mx;
+
             /// The world holding all things and updating physics
             spWorld world;
             /// The ship controlled by WASD / arrow keys
             spKeyboardSpaceship localShip;
             /// The list of all remote ships registered by the backend
-            std::vector <spRemoteSpaceship> remoteShips;
+            std::unordered_map <cg::ShipName, spRemoteSpaceship> remoteShips;
             /// All planets in the game
             std::vector <spPlanet> planets;
         } actors;
