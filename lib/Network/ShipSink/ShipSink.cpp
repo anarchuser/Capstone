@@ -14,7 +14,7 @@ namespace cg {
         log ("Ship closed stream");
 
         try {
-            onDone();
+            return onDone();
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipSink::done called without valid callback registered");
         }
@@ -33,7 +33,7 @@ namespace cg {
         auto timestamp = params.getItem().getTimestamp();
 
         try {
-            onSendItem ({timestamp, directions, spaceship});
+            return onSendItem ({timestamp, directions, spaceship});
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipSink::sendItem called without valid callback registered");
         }

@@ -29,12 +29,11 @@ namespace cg {
         auto remote = params.getSynchro();
 
         remotes.emplace (id, RemoteClient (registrar, remote));
-        shareConnections (id, remote);
 
         auto results = context.getResults();
         results.setRegistrar (newRegistrar (id));
 
-        return kj::READY_NOW;
+        return shareConnections (id, remote);
     }
 
     ::kj::Promise <void> SynchroImpl::share (ShareContext context) {
@@ -63,16 +62,16 @@ namespace cg {
         });
     }
 
-    void SynchroImpl::shareConnections (ClientID const & id, Synchro_t remote) {
-        if (remotes.contains (id)) return;
+    kj::Promise <void> SynchroImpl::shareConnections (ClientID const & id, Synchro_t remote) {
+        if (remotes.contains (id)) return kj::READY_NOW;
         log ("Share our own remote to client " + id);
+
+        kj::Vector <kj::Promise <void>> promises;
 
         auto shareRequest = remote.shareRequest();
         shareRequest.setId (ID);
         shareRequest.setSynchro (newSynchro (ID));
-        shareRequest.send().detach ([this, id] (kj::Exception && e) {
-            KJ_LOG (WARNING, "Failed to send a request to remote client " + id, e.getDescription());
-        });
+        promises.add (shareRequest.send().ignoreResult());
 
         // Share all other remote callbacks
         for (auto & client : remotes) {
@@ -82,10 +81,9 @@ namespace cg {
             auto shareRequest = remote.shareRequest ();
             shareRequest.setId (client.first);
             shareRequest.setSynchro (client.second.synchro);
-            shareRequest.send().ignoreResult().detach ([this, id] (kj::Exception && e) {
-                KJ_LOG (WARNING, "Failed to send a request to remote client " + id, e.getDescription());
-            });
+            promises.add (shareRequest.send().ignoreResult());
         }
+        return kj::joinPromises (promises.releaseAsArray());
     }
 
     ::kj::Own <RegistrarImpl> SynchroImpl::newRegistrar (ClientID const & id) {
@@ -97,16 +95,14 @@ namespace cg {
         return kj::heap <SynchroImpl> (id, local, remotes);
     }
 
-    void SynchroImpl::disconnect (ClientID const & id) {
+    kj::Promise <void> SynchroImpl::disconnect (ClientID const & id) {
         auto * client = findClient (id);
-        if (!client) return;
+        if (!client) return kj::READY_NOW;
 
         log ("Disconnecting " + id);
-        for (auto & ship : client->ships) {
-            doneCallback (ship.first);
-        }
-        client->destroy();
-        remotes.erase (id);
+        return client->destroy().then ([this, id] () {
+            removeClient (id);
+        });
     }
 
     Client * SynchroImpl::findClient (ClientID const & id) {
@@ -116,6 +112,14 @@ namespace cg {
             KJ_LOG (WARNING, "Local client requested but it does not exist (yet)");
         }
         return nullptr;
+    }
+    kj::Promise <void> SynchroImpl::removeClient (ClientID const & id) {
+        if (id == ID) {
+            local.reset();
+            return kj::READY_NOW;
+        }
+        remotes.erase (id);
+        return kj::READY_NOW;
     }
 
     ::kj::Own <ShipSinkImpl> SynchroImpl::registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t handle) {
@@ -151,17 +155,19 @@ namespace cg {
         return sink;
     }
 
-    void SynchroImpl::broadcastSpaceship (Spaceship const & ship, ShipHandle_t handle, bool isRemote) {
+    kj::Promise <void> SynchroImpl::broadcastSpaceship (Spaceship const & ship, ShipHandle_t handle, bool isRemote) {
+        kj::Vector <kj::Promise <void>> promises;
         if (local.has_value()) {
             log ("Broadcast ship " + ship.username + " to local client");
-            detach (distributeSpaceship (ship, handle, local.value()));
+            promises.add (distributeSpaceship (ship, handle, local.value()));
         }
         for (auto & client : remotes) {
             if (isRemote) continue;
 
             log ("Broadcast ship " + ship.username + " to remote client " + client.first);
-            detach (distributeSpaceship (ship, handle, client.second));
+            promises.add (distributeSpaceship (ship, handle, client.second));
         }
+        return kj::joinPromises (promises.releaseAsArray());
     }
     kj::Promise <void> SynchroImpl::distributeSpaceship (Spaceship const & ship, ShipHandle_t handle, Client & receiver) {
         auto & username = ship.username;
@@ -176,59 +182,61 @@ namespace cg {
             receiver.sinks.insert_or_assign (username, results.getSink ());
         });
     }
-    void SynchroImpl::doneCallback (ShipName const & username) {
+    kj::Promise <void> SynchroImpl::doneCallback (ShipName const & username) {
         log ("Ship " + username + " is done");
-        // TODO: propagate done request
+        kj::Vector <kj::Promise <void>> promises;
         if (local.has_value()) {
-            local->erase (username);
             local->ships.erase (username);
             if (local->ships.empty()) {
                 log ("Local client has no ships anymore - disconnecting");
+                auto promise = local->destroy();
                 local.reset();
                 remotes.clear();
-                return;
+                return promise;
             }
+            promises.add (local->erase (username));
         }
         for (auto & client : remotes) {
-            client.second.erase (username);
+            promises.add (client.second.erase (username));
         }
+        return kj::joinPromises (promises.releaseAsArray());
     }
-    void SynchroImpl::sendItemCallback (Item const & item, ClientID const & id) {
+    kj::Promise <void> SynchroImpl::sendItemCallback (Item const & item, ClientID const & id) {
         auto * sender = findClient (id);
         auto const & [time, direction, data] = item;
         auto const & username = data.username;
         KJ_REQUIRE_NONNULL (sender, id, username, "Received item from unregistered client");
-        if (sender->ships.empty()) {
-            disconnect (id);
-            return;
-        }
-                KJ_ASSERT (sender->ships.contains (username), id, username, "Client does not own ship 'username'");
+        if (sender->ships.empty()) return disconnect (id);
+
+        KJ_ASSERT (sender->ships.contains (username), id, username, "Client does not own ship 'username'");
         auto & handle = sender->ships.at (username);
 
         if (id == ID) {  // Item came from local client -> distribute to all clients
             auto estimate = estimateShipData (data);
-
-            detach (estimate.then ([this, handle = handle, item = item] (Spaceship const & data) mutable {
+            return estimate.then ([this, handle = handle, item = item] (Spaceship const & data) mutable {
                 item.spaceship = data;
+                kj::Vector <kj::Promise <void>> promises;
 
                 // Distribute item to all remote clients
                 for (auto & client : remotes) {
-                    sendItemToClient (item, handle, client.second).detach (
+                    promises.add (sendItemToClient (item, handle, client.second).catch_ (
                             [this, id = client.first] (kj::Exception && e) {
                                 KJ_DLOG (WARNING, "Sending item to remote client " + id + " failed", e.getDescription());
                                 disconnect (id);
-                            });
+                            }));
                 }
                 // Distribute item to local client
                 if (local.has_value()) {
-                    detach (sendItemToClient (item, handle, local.value()));
+                    promises.add (sendItemToClient (item, handle, local.value()));
                 }
-            }));
-        } else {  // Item came from remote client -> distribute to local client only
-            if (local.has_value()) {
-                detach (sendItemToClient (item, handle, local.value()));
-            }
+                return kj::joinPromises (promises.releaseAsArray());
+            });
+        } // Item came from remote client -> distribute to local client only
+        if (local.has_value()) {
+            return sendItemToClient (item, handle, local.value());
         }
+        // All possible cases should have been handled by now
+        KJ_UNREACHABLE;
     }
     kj::Promise <void> SynchroImpl::sendItemToClient (Item const & item, ShipHandle_t handle, Client & receiver) {
         auto & sinks = receiver.sinks;

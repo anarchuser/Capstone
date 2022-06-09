@@ -33,16 +33,18 @@ namespace kt {
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
         handle.keyboard_sink.emplace (request.send().wait (waitscope).getSink());
-        ship->setOnUpdate ([this] (cg::Item const & item) {
-            if (!handle.keyboard_sink.has_value()) return;
+        ship->setOnUpdate ([this] (cg::Item const & item) -> kj::Promise <void> {
+            if (!handle.keyboard_sink.has_value()) return kj::READY_NOW;
             auto request = handle.keyboard_sink->sendItemRequest ();
             item.initialise (request.initItem ());
-            request.send ().wait (waitscope);
+            return request.send().ignoreResult();
         });
-        ship->setOnDone ([this] () {
+        ship->setOnDone ([this] () -> kj::Promise <void> {
             actors.localShip = nullptr;
-            if (!handle.keyboard_sink.has_value()) return;
-            handle.keyboard_sink->doneRequest().send().wait (waitscope);
+            if (!handle.keyboard_sink.has_value()) return kj::READY_NOW;
+            auto promise = handle.keyboard_sink->doneRequest().send().ignoreResult();
+            handle.keyboard_sink.reset();
+            return promise;
         });
 
         // Configure dialog to open on pressing Escape
@@ -86,7 +88,7 @@ namespace kt {
 
         // Create the keyboard-controlled spaceship with ID = 0
         Spaceship::resetCounter();
-        actors.localShip = new KeyboardSpaceship (* world, & gameResources, MenuScene::getUsername());
+        actors.localShip = new KeyboardSpaceship (* world, & gameResources, MenuScene::getUsername(), waitscope);
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
@@ -111,7 +113,7 @@ namespace kt {
                 // Case 2b: Create a new remote ship connected to the given handle
                 spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
                 actors.remoteShips.emplace (username, ship);
-                ship->setOnDone ([](){});
+                ship->setOnDone ([](){ return kj::READY_NOW; });
                 ship->setData (data);
                 ship->setHandle (std::move (handle));
                 return ship->getSink ();
@@ -147,9 +149,10 @@ namespace kt {
 
     GameScene::~GameScene() noexcept {
         // Destroy KeyboardSpaceship
-        if (auto ship = actors.localShip) ship->destroy();
+        if (auto ship = actors.localShip) ship->destroy().wait (waitscope);
 
         // Destroy RemoteSpaceships
+        for (auto ship : actors.remoteShips) ship.second->destroy().wait (waitscope);
         actors.remoteShips.clear();
 
         // Free all game assets

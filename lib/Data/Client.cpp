@@ -1,25 +1,26 @@
 #include "Client.h"
 
 namespace cg {
-    void Client::erase (ShipName const & username) {
+    kj::Promise <void> Client::erase (ShipName const & username) {
         // Remove the ship handle, if existing
         ships.erase (username);
 
         // Tell the sink the ship got destroyed, then remove it
-        if (sinks.contains (username)) {
-            auto sink = std::move (sinks.at (username));
-            sinks.erase (username);
-            sink.doneRequest().send().detach ([username](kj::Exception && e) {
-                KJ_DLOG (WARNING, "Exception on closing sink to " + username, e.getDescription());
-            });
-        }
+        if (!sinks.contains (username)) return kj::READY_NOW;
+
+        auto promise = sinks.at (username).doneRequest().send().ignoreResult();
+        sinks.erase (username);
+        return promise;
     }
 
-    void Client::destroy () {
+    kj::Promise <void> Client::destroy () {
         ships.clear();
-        for (auto const & sink : sinks) {
-            erase (sink.first);
+
+        auto promises = kj::heapArrayBuilder <kj::Promise <void>> (sinks.size());
+        for (auto & sink : sinks) {
+            promises.add (erase (sink.first));
         }
+        return kj::joinPromises (promises.finish());
     }
 }
 
