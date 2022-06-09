@@ -49,8 +49,8 @@ SCENARIO ("A backend handles basic requests") {
                 CHECK (ship.health == HEALTH_VALUE);
 
                 auto sink = kj::heap <cg::ShipSinkImpl> ();
-                sink->setOnDone ([](){ return kj::READY_NOW; });
-                sink->setOnSendItem ([] (cg::Item const & item) {
+                sink->setOnDone ([]() -> kj::Promise <void> { return kj::READY_NOW; });
+                sink->setOnSendItem ([] (cg::Item const & item) -> kj::Promise <void> {
                     auto const & [time, dir, data] = item;
 
                     CHECK (dir.accelerate  == -1);
@@ -80,7 +80,9 @@ SCENARIO ("A backend handles basic requests") {
                     auto registerShipRequest = registrar.registerShipRequest();
                     registerShipRequest.initShip().setHealth (HEALTH_VALUE);
                     registerShipRequest.getShip().setUsername (USERNAME);
-                    registerShipRequest.setHandle (kj::heap <::Backend::ShipHandle::Server>());
+                    auto handle = kj::heap <cg::ShipHandleImpl>();
+                    handle->setOnGetShip ([]() { return cg::Spaceship (USERNAME, {}, {}, {}, HEALTH_VALUE); });
+                    registerShipRequest.setHandle (kj::mv (handle));
 
                     THEN ("It returns a valid ShipHandle") {
                         auto registerShipResult = registerShipRequest.send().wait (waitScope);

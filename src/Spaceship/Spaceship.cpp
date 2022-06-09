@@ -80,7 +80,9 @@ namespace kt {
             // Update health and then the scoreboard
             --health;
             updatePing();
-            if (health <= 0) destroy();
+            if (health <= 0) destroy().detach ([] (kj::Exception && e) {
+                logs::warning (e.getDescription().cStr());
+            });
         }));
     }
 
@@ -101,11 +103,6 @@ namespace kt {
     Spaceship::~Spaceship() noexcept {
         if (isDestroyed) return;
         isDestroyed = true;
-        try {
-            onDone();
-        } catch (std::bad_function_call & e) {
-            logs::warning ("Spaceship destroyed without done callback registered");
-        }
 
         // Stop listening to anything
         for (auto listener: listeners) getStage ()->removeEventListener (listener);
@@ -117,18 +114,21 @@ namespace kt {
         // Update ship status
         updateScoreboard ("dead");
 
-        logs::messageln ("Putting ship to sleep");
-        // Put ship to sleep
-
-        logs::messageln ("Spaceship done - destroying body now:");
         // Remove the physical body and detach the ship from the game
         if (body) body->GetUserData().pointer = 0;
         body = nullptr;
         detach ();
     }
 
-    void Spaceship::destroy () {
+    kj::Promise <void> Spaceship::destroy () {
+        if (isDestroyed) return kj::READY_NOW;
+
         Spaceship::~Spaceship();
+        try {
+            return onDone();
+        } catch (std::bad_function_call & e) {
+            logs::warning ("Spaceship destroyed without done callback registered");
+        }
     }
 
     void Spaceship::updateScoreboard (std::string const & msg, long ping) {
@@ -234,10 +234,14 @@ namespace kt {
     kj::Own <cg::ShipSinkImpl> Spaceship::getSink () {
         auto sink = kj::heap <cg::ShipSinkImpl> ();
         setAwake (true);
-        sink->setOnDone (LAMBDA (destroy));
+        sink->setOnDone ([this] () {
+            destroy();
+            return kj::READY_NOW;
+        });
         sink->setOnSendItem ([this] (cg::Item const & item) {
             updateDirection (item.direction);
             setData (item.spaceship);
+            return kj::READY_NOW;
         });
         sink->setOnGetShip (LAMBDA (getData));
         return sink;

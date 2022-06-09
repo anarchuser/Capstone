@@ -24,9 +24,11 @@ namespace kt {
         /// The directions queried by the user
         cg::Direction queried;
 
+        kj::WaitScope & waitscope;
+
     public:
         /// Creates a new human-controllable spaceship. Only one such ship may exist in a game
-        KeyboardSpaceship (World & world, Resources * res, std::string const & username);
+        KeyboardSpaceship (World & world, Resources * res, std::string const & username, kj::WaitScope & waitscope);
 
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);

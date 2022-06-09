@@ -53,12 +53,16 @@ namespace cg {
         log ("Join request received from " + remoteID);
         KJ_REQUIRE (remoteID != ID, remoteID, "Remote client cannot have our own identifier");
 
+        auto promises = kj::heapArrayBuilder <kj::Promise <void>> (2);
+
         // Share our own synchro callback to new connection
         KJ_REQUIRE (params.hasRemote());
-        synchro.shareConnections (remoteID, params.getRemote());
+        promises.add (synchro.shareConnections (remoteID, params.getRemote()));
 
-        /// Connect back to received synchro
-        return synchro.connectTo (remoteID, params.getRemote());
+        // Connect back to received synchro
+        promises.add (synchro.connectTo (remoteID, params.getRemote()));
+
+        return kj::joinPromises (promises.finish());
     }
 }
 

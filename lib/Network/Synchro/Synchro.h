@@ -28,22 +28,24 @@ namespace cg {
 
         /// Return raw pointer to Client if id was in remote or local. Nullptr otherwise
         Client * findClient (ClientID const & id);
+        /// Remove the client if it exists, regardless of if it is local or remote
+        kj::Promise <void> removeClient (ClientID const & id);
         /// Disconnect the client with this id, if exists
-        void disconnect (ClientID const & id);
+        kj::Promise <void> disconnect (ClientID const & id);
 
         /* Ship registration functions */
         /// Configure the newly registered spaceship and return a sink to it. Registrar callback
         kj::Own <ShipSinkImpl> registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t);
         /// Distribute spaceship to every client
-        void broadcastSpaceship (Spaceship const & ship, ShipHandle_t handle, bool isRemote);
+        kj::Promise <void> broadcastSpaceship (Spaceship const & ship, ShipHandle_t handle, bool isRemote);
         /// Hand out spaceship to the specified client
         kj::Promise <void> distributeSpaceship (Spaceship const & ship, ShipHandle_t handle, Client & receiver);
 
         /* ShipSink callback functions */
         /// Callback on closing sink; propagate to sink of all clients
-        void doneCallback (ShipName const & username);
+        kj::Promise <void> doneCallback (ShipName const & username);
         /// Callback on item received; propagate to sink of all clients
-        void sendItemCallback (Item const & item, ClientID const & id);
+        kj::Promise <void> sendItemCallback (Item const & item, ClientID const & id);
         /// Helper to propagate item to sink of one specific client
         kj::Promise <void> sendItemToClient (Item const & item, ShipHandle_t handle, Client & receiver);
 
@@ -62,7 +64,7 @@ namespace cg {
 
         /* Client connection functions */
         /// Share all our remote clients with the given remote
-        void shareConnections (ClientID const & id, Synchro_t remote);
+        kj::Promise <void> shareConnections (ClientID const & id, Synchro_t remote);
         /// Connect to a remote and store the resulting new client
         kj::Promise <void> connectTo (ClientID const & id, Synchro_t remote);
 

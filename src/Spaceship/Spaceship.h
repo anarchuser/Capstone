@@ -93,7 +93,7 @@ namespace kt {
         void updateDirection (cg::Direction new_dir);
 
         /// Destroy this spaceship and remove from the world
-        void destroy ();
+        kj::Promise <void> destroy ();
 
         /// Return current position in physical coordinates
         b2Vec2 getPhysicalPosition () const;

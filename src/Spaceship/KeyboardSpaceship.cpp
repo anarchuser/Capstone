@@ -1,8 +1,9 @@
 #include "KeyboardSpaceship.h"
 
 namespace kt {
-    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, std::string const & username)
+    KeyboardSpaceship::KeyboardSpaceship (World & world, Resources * res, std::string const & username, kj::WaitScope & waitScope)
             : Spaceship (world, res, username)
+            , waitscope {waitScope}
             {
                 setAddColor (KEYBOARD_SPACESHIP_COLOR);
 
@@ -43,7 +44,7 @@ namespace kt {
 
     void KeyboardSpaceship::update (UpdateState const & updateState) {
         try {
-            onUpdate ({updateState.time, queried, getData()});
+            onUpdate ({updateState.time, queried, getData()}).wait (waitscope);
         } catch (std::bad_function_call & e) {
             logs::warning ("KeyboardSpaceship::onUpdate not configured");
         }

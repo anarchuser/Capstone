@@ -6,8 +6,8 @@
 #include <functional>
 
 namespace cg {
-    using DoneCallback = std::function <void ()>;
-    using SendItemCallback = std::function <void (Item const &)>;
+    using DoneCallback = std::function <kj::Promise <void> ()>;
+    using SendItemCallback = std::function <kj::Promise <void> (Item const &)>;
     using GetShipPromiseCallback = std::function <kj::Promise <Spaceship> ()>;
 
     /// Implementation of the ShipSink::Server interface
