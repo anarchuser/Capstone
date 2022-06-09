@@ -189,10 +189,15 @@ namespace cg {
             local->ships.erase (username);
             if (local->ships.empty()) {
                 log ("Local client has no ships anymore - disconnecting");
-                auto promise = local->destroy();
+
+                promises.add (local->destroy());
                 local.reset();
+
+                for (auto & client : remotes) {
+                    promises.add (client.second.destroy());
+                }
                 remotes.clear();
-                return promise;
+                return kj::joinPromises (promises.releaseAsArray());
             }
             promises.add (local->erase (username));
         }
