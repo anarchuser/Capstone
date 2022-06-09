@@ -2,6 +2,7 @@
 #include <catch2/catch_approx.hpp>
 
 #include "Spaceship/Spaceship.h"
+#include "Game.h"
 
 #define WINDOW_SIZE 100
 #define TIME_STEPS 300
@@ -15,6 +16,7 @@ SCENARIO ("Time passes in a near-empty world") {
 
         b2Vec2 const world_size = {10, 10};
         kt::World world (nullptr, world_size);
+
         b2Vec2 const ship_pos = 0.5 * world_size;
         auto & ship = * new kt::Spaceship (world, nullptr, "");
         auto const ship_angle = ship.getRotation ();

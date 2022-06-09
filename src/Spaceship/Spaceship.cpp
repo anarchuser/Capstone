@@ -99,6 +99,7 @@ namespace kt {
     }
 
     Spaceship::~Spaceship() noexcept {
+        if (isDestroyed) return;
         isDestroyed = true;
         try {
             onDone();
@@ -110,14 +111,16 @@ namespace kt {
         for (auto listener: listeners) getStage ()->removeEventListener (listener);
         listeners.clear();
 
+        // Remove reference to remote so the ship cannot request a ping
         remote.reset();
 
         // Update ship status
         updateScoreboard ("dead");
 
+        logs::messageln ("Putting ship to sleep");
         // Put ship to sleep
-        setAwake (false);
 
+        logs::messageln ("Spaceship done - destroying body now:");
         // Remove the physical body and detach the ship from the game
         if (body) body->GetUserData().pointer = 0;
         body = nullptr;
@@ -125,7 +128,6 @@ namespace kt {
     }
 
     void Spaceship::destroy () {
-        if (isDestroyed) return;
         Spaceship::~Spaceship();
     }
 
@@ -143,6 +145,8 @@ namespace kt {
     }
 
     void Spaceship::setAwake (bool awake) {
+        if (!body) return;
+
         // Make every fixture a sensor -> remove collision from the body
         auto * part = body->GetFixtureList();
         while (part) {
