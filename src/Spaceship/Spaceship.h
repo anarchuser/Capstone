@@ -55,6 +55,8 @@ namespace kt {
         /// Remote, mainly used to check if the ship is still connected
         std::optional <cg::ShipHandle_t> remote;
 
+        bool isDestroyed = false;
+
     protected:
         /// Callback to send directions & state to the backend
         cg::SendItemCallback onUpdate;

@@ -33,9 +33,6 @@ namespace kt {
 
         /// Send directions queried by the user to the callback
         void update (UpdateState const & updateState) override;
-
-        /// Override the ShipSink implementation to ignore onDone events - we caused them originally anyways
-        kj::Own <cg::ShipSinkImpl> getSink() override;
     };
     DECLARE_SMART(KeyboardSpaceship, spKeyboardSpaceship);
 }

@@ -99,6 +99,7 @@ namespace kt {
     }
 
     Spaceship::~Spaceship() noexcept {
+        isDestroyed = true;
         try {
             onDone();
         } catch (std::bad_function_call & e) {
@@ -124,6 +125,7 @@ namespace kt {
     }
 
     void Spaceship::destroy () {
+        if (isDestroyed) return;
         Spaceship::~Spaceship();
     }
 
