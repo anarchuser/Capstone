@@ -14,6 +14,8 @@
 #include <string>
 #include <thread>
 
+#include <kj/async-io.h>
+
 namespace kt {
     using namespace oxygine;
 

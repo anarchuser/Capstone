@@ -97,15 +97,15 @@ namespace cg {
         return kj::heap <SynchroImpl> (id, local, remotes);
     }
 
-    kj::Promise <void> SynchroImpl::disconnect (ClientID const & id) {
-        log ("Disconnecting client " + id);
+    void SynchroImpl::disconnect (ClientID const & id) {
         auto * client = findClient (id);
-        if (!client) return kj::READY_NOW;
+        if (!client) return;
 
-        // TODO: tie each promise in the loop to the returned promise
-        for (auto const & sink : client->sinks) {
-            detach (client->erase (sink.first));
+        log ("Disconnecting " + id);
+        for (auto & ship : client->ships) {
+            doneCallback (ship.first);
         }
+        client->destroy();
         remotes.erase (id);
     }
 
@@ -113,7 +113,6 @@ namespace cg {
         if (remotes.contains (id)) return & remotes.at (id);
         if (id == ID) {
             if (local.has_value()) return & local.value();
-
             KJ_LOG (WARNING, "Local client requested but it does not exist (yet)");
         }
         return nullptr;
@@ -179,9 +178,19 @@ namespace cg {
     }
     void SynchroImpl::doneCallback (ShipName const & username) {
         log ("Ship " + username + " is done");
+        // TODO: propagate done request
+        if (local.has_value()) {
+            local->erase (username);
+            local->ships.erase (username);
+            if (local->ships.empty()) {
+                log ("Local client has no ships anymore - disconnecting");
+                local.reset();
+                remotes.clear();
+                return;
+            }
+        }
         for (auto & client : remotes) {
-            detach (client.second.erase (username)
-                            .then ([this, id = client.first] () {disconnect (id);}));
+            client.second.erase (username);
         }
     }
     void SynchroImpl::sendItemCallback (Item const & item, ClientID const & id) {

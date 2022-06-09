@@ -8,6 +8,7 @@
 /// Resource folder. Specifically, points to the resource XML file containing the relevant information
 #define GAME_RESOURCES  (PROJECT_ROOT "/src/data/res.xml")
 
+#define HOSTNAME_AS_USERNAME true
 #define SERVER_ADDRESS  "*"
 #define REMOTE_ADDRESS  "azazel"
 #define SERVER_PORT     44444

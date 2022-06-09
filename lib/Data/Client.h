@@ -4,6 +4,7 @@
 #include "Network/config.h"
 
 #include <unordered_map>
+#include <thread>
 
 namespace cg {
     /// Struct holding all kinds of information about things connected
@@ -11,7 +12,10 @@ namespace cg {
         inline explicit Client (Registrar_t registrar): registrar {std::move (registrar)} {}
 
         /// Send a done request to the sink of the given ship, then remove it from the list
-        kj::Promise <void> erase (ShipName const & username);
+        void erase (ShipName const & username);
+
+        /// Ensure every sink has been deleted
+        void destroy();
 
         /// Thing used to update the client (e.g., new ship spawned)
         Registrar_t registrar;

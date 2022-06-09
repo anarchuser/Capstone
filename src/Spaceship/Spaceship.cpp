@@ -77,34 +77,58 @@ namespace kt {
 
         listeners.push_back (addEventListener (CollisionEvent::BEGIN, [this] (Event * event) {
             if (!body->IsAwake()) return;
-//            spSprite other = safeCast <CollisionEvent *> (event)->other;
             // Update health and then the scoreboard
-            // TODO: update scoreboard automatically on health changes
             --health;
             updatePing();
             if (health <= 0) destroy();
         }));
     }
 
+    void Spaceship::setOnUpdate (cg::SendItemCallback && onUpdate) {
+        this->onUpdate = std::move (onUpdate);
+
+        // OnUpdate must be set before the ship can receive updates, so wake them up then
+        setAwake (true);
+    }
+    void Spaceship::setOnDone (cg::DoneCallback && onDone) {
+        this->onDone = std::move (onDone);
+    }
+
     void Spaceship::updateDirection (cg::Direction new_dir) {
         direction = new_dir;
-    };
+    }
 
-    void Spaceship::destroy () {
+    Spaceship::~Spaceship() noexcept {
+        if (isDestroyed) return;
+        isDestroyed = true;
+        try {
+            onDone();
+        } catch (std::bad_function_call & e) {
+            logs::warning ("Spaceship destroyed without done callback registered");
+        }
+
         // Stop listening to anything
-        for (auto listener: listeners)
-            getStage ()->removeEventListener (listener);
+        for (auto listener: listeners) getStage ()->removeEventListener (listener);
+        listeners.clear();
+
+        // Remove reference to remote so the ship cannot request a ping
+        remote.reset();
 
         // Update ship status
         updateScoreboard ("dead");
 
+        logs::messageln ("Putting ship to sleep");
         // Put ship to sleep
-        setAwake (false);
 
+        logs::messageln ("Spaceship done - destroying body now:");
         // Remove the physical body and detach the ship from the game
         if (body) body->GetUserData().pointer = 0;
         body = nullptr;
         detach ();
+    }
+
+    void Spaceship::destroy () {
+        Spaceship::~Spaceship();
     }
 
     void Spaceship::updateScoreboard (std::string const & msg, long ping) {
@@ -121,6 +145,8 @@ namespace kt {
     }
 
     void Spaceship::setAwake (bool awake) {
+        if (!body) return;
+
         // Make every fixture a sensor -> remove collision from the body
         auto * part = body->GetFixtureList();
         while (part) {
@@ -225,7 +251,7 @@ namespace kt {
         return handle;
     }
     void Spaceship::setHandle (cg::ShipHandle_t && handle) {
-        remote = handle;
+        remote = std::move (handle);
     }
 
     void Spaceship::updatePing () {

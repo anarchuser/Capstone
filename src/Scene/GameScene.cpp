@@ -24,30 +24,11 @@ namespace kt {
                 return Handle {result.getRegistrar(), result.getSynchro()};
             }()}
             {
-
         logs::messageln ("Seed: %lu", rng.seed);
-
-        // Load all required game assets
-        gameResources.loadXML (GAME_RESOURCES);
-
-        // Create the world
-        auto & world = actors.world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
-        addChild (world);
-
-        // Generate a couple of planets, number based on world size
-        auto planetAnimation = gameResources.getResAnim ("venus");
-        for (std::size_t i = 0; i < PLANETS_PER_PIXEL * world->world_size.x * world->world_size.y; i++) {
-            actors.planets.emplace_back (new Planet (* world, planetAnimation, {
-                    float (rng.random ({100, world->getSize().x - 100})),
-                    float (rng.random ({100, world->getSize().y - 100}))
-            }, float (rng.random ({0.3, 0.7}))));
-        }
-
-        // Create the keyboard-controlled spaceship with ID = 0
-        Spaceship::resetCounter();
-        auto & ship = actors.localShip = new KeyboardSpaceship (* world, & gameResources, MenuScene::getUsername());
+        initWorld();
 
         // Register the keyboard-controlled spaceship to the backend
+        auto & ship = actors.localShip;
         auto request = handle.registrar.registerShipRequest();
         ship->getData().initialise (request.initShip());
         request.setHandle (ship->getHandle());
@@ -85,6 +66,29 @@ namespace kt {
         });
     }
 
+    void GameScene::initWorld () {
+        // Load all required game assets
+        gameResources.loadXML (GAME_RESOURCES);
+
+        // Create the world
+        auto & world = actors.world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
+        addChild (world);
+
+        // Generate a couple of planets, number based on world size
+        auto planetAnimation = gameResources.getResAnim ("venus");
+        int const number_of_planets = PLANETS_PER_PIXEL * getSize().x * getSize().y;
+        for (std::size_t i = 0; i < number_of_planets; i++) {
+            actors.planets.push_back (new Planet (* world, planetAnimation, {
+                    float (rng.random ({100, world->getSize().x - 100})),
+                    float (rng.random ({100, world->getSize().y - 100}))
+            }, float (rng.random ({0.3, 0.7}))));
+        }
+
+        // Create the keyboard-controlled spaceship with ID = 0
+        Spaceship::resetCounter();
+        actors.localShip = new KeyboardSpaceship (* world, & gameResources, MenuScene::getUsername());
+    }
+
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
         auto registrar = kj::heap <cg::RegistrarImpl> (hostname());
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
@@ -93,7 +97,7 @@ namespace kt {
                 OX_ASSERT (username != "Planet");
 
                 // Case 1: the registered ship is the keyboard-controlled original one
-                if (auto ship = actors.localShip) {
+                if (auto & ship = actors.localShip) {
                     if (ship->getName () == username) {
                         ship->setData (data);
                         ship->setHandle (std::move (handle));
@@ -101,13 +105,13 @@ namespace kt {
                     }
                 }
                 // Case 2a: A remote ship with the given name is already registered -> destroy the existing one
-                std::remove_if (actors.remoteShips.begin(), actors.remoteShips.end(), [username] (spRemoteSpaceship const & ship) {
-                    return ship && ship->getName() == username;
-                });
+                std::lock_guard<std::mutex> guard (actors.mx);
+                actors.remoteShips.erase (username);
 
                 // Case 2b: Create a new remote ship connected to the given handle
                 spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
-                actors.remoteShips.push_back (ship);
+                actors.remoteShips.emplace (username, ship);
+                ship->setOnDone ([](){});
                 ship->setData (data);
                 ship->setHandle (std::move (handle));
                 return ship->getSink ();
@@ -142,18 +146,17 @@ namespace kt {
     }
 
     GameScene::~GameScene() noexcept {
+        // Destroy KeyboardSpaceship
+        if (auto ship = actors.localShip) ship->destroy();
+
+        // Destroy RemoteSpaceships
+        actors.remoteShips.clear();
+
         // Free all game assets
         gameResources.free();
 
-        // Destroy the keyboard-controlled ship if it still exists
-        if (auto & ship = actors.localShip) ship->destroy();
-        actors.localShip = nullptr;
-
-        // Destroy all remote ships
-        for (auto & ship : actors.remoteShips) if (ship) ship->destroy();
-        actors.remoteShips.clear();
-
         // Remove this scene including all its listeners
+        removeChildren();
         detach();
         getStage()->removeAllEventListeners();
     }

@@ -9,7 +9,7 @@
 #include "src/World/World.h"
 
 /// Number of planets per pixel
-#define PLANETS_PER_PIXEL   5e-2
+#define PLANETS_PER_PIXEL   5e-6
 
 /// Determines gravitational pull and inertia based on planet size
 #define PLANET_DENSITY      1e3

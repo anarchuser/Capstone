@@ -10,7 +10,7 @@
 #define TEST_RANDOM_SEED 1
 
 SCENARIO ("World handles objects as expected") {
-    auto rng = HashedRNG (TEST_RANDOM_SEED);
+    auto rng = RNG (TEST_RANDOM_SEED);
 
     GIVEN ("An empty world") {
         Stage::instance = new Stage;

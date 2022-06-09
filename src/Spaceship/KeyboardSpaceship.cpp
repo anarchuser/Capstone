@@ -16,15 +16,6 @@ namespace kt {
                 }));
             }
 
-    void KeyboardSpaceship::setOnUpdate (cg::SendItemCallback && onUpdate) {
-        // Before onUpdate callback has been provided, the spaceship has not received updates anyway
-        setAwake (true);
-        this->onUpdate = onUpdate;
-    }
-    void KeyboardSpaceship::setOnDone (cg::DoneCallback && onDone) {
-        this->onDone = onDone;
-    }
-
     void KeyboardSpaceship::onSteeringEvent (ox::KeyEvent * event) {
         auto keysym = event->data->keysym;
         bool key_is_down = event->type == ox::KeyEvent::KEY_DOWN;
@@ -57,21 +48,6 @@ namespace kt {
             logs::warning ("KeyboardSpaceship::onUpdate not configured");
         }
         Spaceship::update (updateState);
-    }
-
-    void KeyboardSpaceship::destroy () {
-        try {
-            onDone();
-        } catch (std::bad_function_call & e) {
-            logs::warning ("KeyboardSpaceship::onDone not configured");
-        }
-        Spaceship::destroy ();
-    }
-
-    kj::Own <cg::ShipSinkImpl> KeyboardSpaceship::getSink () {
-        auto sink = Spaceship::getSink();
-        sink->setOnDone ([]() { return kj::READY_NOW; });
-        return sink;
     }
 }
 

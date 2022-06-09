@@ -7,7 +7,7 @@
 
 #include "distribution/uniform/uniform.h"
 #include "bounds.h"
-#include "RNG/HashedRNG.h"
+#include "RNG.h"
 
 #endif //CAPSTONE_RANDOM_H
 

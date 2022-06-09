@@ -21,11 +21,6 @@ namespace kt {
     /// Spaceship instance controllable using WASD or arrow keys
     class KeyboardSpaceship: public Spaceship {
     private:
-        /// Callback to send directions & state to the backend
-        cg::SendItemCallback onUpdate;
-        /// Callback to tell the backend that we died
-        cg::DoneCallback onDone;
-
         /// The directions queried by the user
         cg::Direction queried;
 
@@ -36,18 +31,8 @@ namespace kt {
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
 
-        /// Update how to behave on update
-        void setOnUpdate (cg::SendItemCallback && onUpdate);
         /// Send directions queried by the user to the callback
         void update (UpdateState const & updateState) override;
-
-        /// Update the callback for when we crash
-        void setOnDone (cg::DoneCallback && onDone);
-        /// Tell the backend we died before we destroy ourselves
-        void destroy () override;
-
-        /// Override the ShipSink implementation to ignore onDone events - we caused them originally anyways
-        kj::Own <cg::ShipSinkImpl> getSink() override;
     };
     DECLARE_SMART(KeyboardSpaceship, spKeyboardSpaceship);
 }

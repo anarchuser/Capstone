@@ -10,6 +10,7 @@
 
 #include <thread>
 #include <memory>
+#include <mutex>
 
 #include "UI/Dialog.h"
 #include "Planet/Planet.h"
@@ -36,7 +37,7 @@ namespace kt {
         /// Resources used throughout the game (font, background, sprites)
         Resources gameResources;
         /// Random number generator based on the seed given. Ensures every random number used depends on this seed
-        HashedRNG rng;
+        RNG rng;
 
         /* All objects related to the connection to the backend */
         /// A wrapper around the running backend, stopping it on destruction
@@ -61,12 +62,14 @@ namespace kt {
         /* References to all objects stored in the world */
         /// A struct holding the different actors in one game
         struct Actors {
+            std::mutex mx;
+
             /// The world holding all things and updating physics
             spWorld world;
             /// The ship controlled by WASD / arrow keys
             spKeyboardSpaceship localShip;
             /// The list of all remote ships registered by the backend
-            std::vector <spRemoteSpaceship> remoteShips;
+            std::unordered_map <cg::ShipName, spRemoteSpaceship> remoteShips;
             /// All planets in the game
             std::vector <spPlanet> planets;
         } actors;
@@ -78,6 +81,9 @@ namespace kt {
         static std::size_t requestSeed (std::string const & ip, unsigned short port) ;
         /// Request connection to a remote client
         void joinGame (std::string const & ip, unsigned short port);
+
+        /// Helper function to inialise the world
+        void initWorld ();
 
         /// Helper function to create a registrar, handling new ships joining the game
         kj::Own <cg::RegistrarImpl> getRegistrarImpl ();

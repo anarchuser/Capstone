@@ -1,10 +1,10 @@
-#include "HashedRNG.h"
+#include "RNG.h"
 
-HashedRNG::HashedRNG (): HashedRNG (generateSeed ()) {}
+RNG::RNG (): RNG (generateSeed ()) {}
 
-HashedRNG::HashedRNG (unsigned int seed): seed {seed} {}
+RNG::RNG (unsigned int seed): seed {seed} {}
 
-double HashedRNG::random (Bounds bounds) {
+double RNG::random (Bounds bounds) {
     if (!generators.contains (bounds)) {
         // Add corresponding generator
         generators.emplace (bounds, Uniform (bounds, seed));

@@ -11,8 +11,8 @@
 #define NUMBER_RNG 10
 
 SCENARIO ("RNGs with same seed produce the same values") {
-    HashedRNG random_seed;
-    HashedRNG same_seed (random_seed.seed);
+    RNG random_seed;
+    RNG same_seed (random_seed.seed);
 
     WHEN ("The boundaries are real") {
         std::vector <Bounds> bounds = {
@@ -55,7 +55,7 @@ SCENARIO ("RNGs with same seed produce the same values") {
 }
 
 SCENARIO ("RNGs with different seeds provide different values") {
-    std::array <HashedRNG, NUMBER_RNG> rngs;
+    std::array <RNG, NUMBER_RNG> rngs;
 
     WHEN ("The boundaries are real") {
         WHEN ("Lower and upper boundary are not the same") {
