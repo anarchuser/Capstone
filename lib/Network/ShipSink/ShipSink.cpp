@@ -14,7 +14,9 @@ namespace cg {
         log ("Ship closed stream");
 
         try {
-            return onDone();
+            auto promise = onDone();
+            log ("Done, returning");
+            return kj::mv (promise);
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipSink::done called without valid callback registered");
         }

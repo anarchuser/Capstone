@@ -8,19 +8,20 @@ namespace cg {
         // Tell the sink the ship got destroyed, then remove it
         if (!sinks.contains (username)) return kj::READY_NOW;
 
-        auto promise = sinks.at (username).doneRequest().send().ignoreResult();
-        sinks.erase (username);
-        return promise;
+        // Close the sink and then remove it from the map
+        return sinks.at (username).doneRequest().send().ignoreResult().then ([this, username] () {
+            sinks.erase (username);
+        });
     }
 
     kj::Promise <void> Client::destroy () {
         ships.clear();
 
-        auto promises = kj::heapArrayBuilder <kj::Promise <void>> (sinks.size());
+        kj::Vector <kj::Promise <void>> promises;
         for (auto & sink : sinks) {
             promises.add (erase (sink.first));
         }
-        return kj::joinPromises (promises.finish());
+        return kj::joinPromises (promises.releaseAsArray());
     }
 }
 
