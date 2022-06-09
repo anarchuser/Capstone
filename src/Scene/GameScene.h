@@ -10,6 +10,7 @@
 
 #include <thread>
 #include <memory>
+#include <mutex>
 
 #include "UI/Dialog.h"
 #include "Planet/Planet.h"
