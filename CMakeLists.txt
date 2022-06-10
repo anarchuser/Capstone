@@ -66,7 +66,7 @@ find_package(box2d REQUIRED)
 include_directories(box2d/include/box2d)
 target_link_libraries(Capstone box2d)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS} -fconcepts -w")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OXYGINE_CXX_FLAGS} -fconcepts -w -fsanitize=address")
 
 if (EMSCRIPTEN)
     SET(CMAKE_EXECUTABLE_SUFFIX ".html")

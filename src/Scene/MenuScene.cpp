@@ -33,7 +33,7 @@ namespace kt {
 
     void MenuScene::onNewGame (Event * event) {
         MenuScene::~MenuScene();
-        new GameScene (RANDOM_SEED);
+        instance = kj::heap <GameScene> (RANDOM_SEED);
     }
     void MenuScene::onJoinGame (Event * event) {
         // Request entering an address to connect to
@@ -44,7 +44,7 @@ namespace kt {
         // Ping the address; if it resolves start a new game and connect to it
         if (Backend::ping (address, SERVER_PORT)) {
             MenuScene::~MenuScene();
-            new GameScene (address, SERVER_PORT);
+            instance = kj::heap <GameScene> (address, SERVER_PORT);
         }
     }
     void MenuScene::onRequestExit (Event * event) {

@@ -14,6 +14,8 @@ namespace kt {
         /// Construct a new Scene. Injects itself into the stage. Should be the only scene there
         Scene ();
         ~Scene() override = 0;
+
+        static kj::Own <Scene> instance;
     };
     DECLARE_SMART (Scene, spScene);
 

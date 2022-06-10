@@ -176,22 +176,21 @@ namespace kt {
         // Remove this scene including all its listeners
         removeChildren();
         detach();
-        getStage()->removeAllEventListeners();
     }
 
     void GameScene::onRestart (Event * event) {
         GameScene::~GameScene();
-        new GameScene (rng.seed);
+        instance = kj::heap <GameScene> (rng.seed);
     }
 
     void GameScene::onNewGame (Event * event) {
         GameScene::~GameScene();
-        new GameScene (RANDOM_SEED);
+        instance = kj::heap <GameScene> (RANDOM_SEED);
     }
 
     void GameScene::onDisconnect (Event * event) {
         GameScene::~GameScene();
-        new MenuScene();
+        instance = kj::heap <MenuScene> ();
     }
 
     void GameScene::onQuit (Event * event) {

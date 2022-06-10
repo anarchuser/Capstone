@@ -54,7 +54,7 @@ namespace kt {
 #endif
 
         // Create main menu scene
-        new MenuScene ();
+        Scene::instance = kj::heap <MenuScene>();
         logs::messageln ("Scene initialisation complete");
 
         // Main game loop. Returns true if done
@@ -62,6 +62,8 @@ namespace kt {
         do {
             done = loop ();
         } while (!done);
+
+        Scene::instance = nullptr;
 
         // Release all internal components and the stage
         core::release();
