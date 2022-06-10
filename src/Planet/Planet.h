@@ -32,6 +32,7 @@ namespace kt {
     public:
         /// Create a new planet with given sprite in the given world at the given position with the given size.
         Planet (World & world, ResAnim * animation, Vector2 const & pos, float scale = 1);
+        ~Planet () noexcept override;
 
         /// Exert gravitational force on non-planet objects based on mass and distance
         void update (UpdateState const & updateState) override;

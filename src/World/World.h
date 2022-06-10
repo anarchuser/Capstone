@@ -37,6 +37,7 @@ namespace kt {
 
         /// Construct a new world with the given background and size
         World (ResAnim * background, b2Vec2 size);
+        ~World() noexcept override;
 
         /// Update all physical bodies and their corresponding sprites
         void update (UpdateState const & updateState) override;

@@ -101,8 +101,18 @@ namespace kt {
     }
 
     Spaceship::~Spaceship() noexcept {
-        if (isDestroyed) return;
+        detach ();
+    }
+
+    kj::Promise <void> Spaceship::destroy () {
+        if (isDestroyed) return kj::READY_NOW;
         isDestroyed = true;
+
+        try {
+            return onDone();
+        } catch (std::bad_function_call & e) {
+            logs::warning ("Spaceship destroyed without done callback registered");
+        }
 
         // Stop listening to anything
         for (auto listener: listeners) getStage ()->removeEventListener (listener);
@@ -117,18 +127,6 @@ namespace kt {
         // Remove the physical body and detach the ship from the game
         if (body) body->GetUserData().pointer = 0;
         body = nullptr;
-        detach ();
-    }
-
-    kj::Promise <void> Spaceship::destroy () {
-        if (isDestroyed) return kj::READY_NOW;
-
-        Spaceship::~Spaceship();
-        try {
-            return onDone();
-        } catch (std::bad_function_call & e) {
-            logs::warning ("Spaceship destroyed without done callback registered");
-        }
     }
 
     void Spaceship::updateScoreboard (std::string const & msg, long ping) {
