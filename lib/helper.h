@@ -4,7 +4,7 @@
 #include <iostream>
 
 /// If this is defined, backend debug output will be more fine-grained
-#define DEBUG_MINOR
+//#define DEBUG_MINOR
 
 /// Output function printing to stdout if debug mode is enabled
 inline void debug_stdout (std::string const & message) {
