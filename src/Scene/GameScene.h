@@ -66,20 +66,20 @@ namespace kt {
             std::mutex mx;
 
             /// The world holding all things and updating physics
-            spWorld world;
+            kj::Own <World> world;
             /// The ship controlled by WASD / arrow keys
-            spKeyboardSpaceship localShip;
+            kj::Own <KeyboardSpaceship> localShip;
             /// The list of all remote ships registered by the backend
-            std::unordered_map <cg::ShipName, spRemoteSpaceship> remoteShips;
+            std::unordered_map <cg::ShipName, kj::Own <RemoteSpaceship>> remoteShips;
             /// All planets in the game
-            std::vector <spPlanet> planets;
+            std::vector <kj::Own <Planet>> planets;
         } actors;
 
         /// Menu opened on pressing Escape in-game
-        spDialog onMenuDialog;
+        kj::Own <Dialog> onMenuDialog;
 
         /// clock window
-        spText clock;
+        kj::Own <Text> clock;
         /// Update the clock
         void updateTime ();
 

@@ -27,7 +27,7 @@ namespace kt {
         logs::messageln ("Seed: %lu", rng.seed);
         initWorld();
 
-        clock = new Text (gameResources.getResFont ("kt-liberation"));
+        clock = kj::heap <Text> (gameResources.getResFont ("kt-liberation"));
         clock->setPosition (0.78 * getSize().x, 0.95 * getSize().y);
         addChild (clock);
 
@@ -53,7 +53,7 @@ namespace kt {
 
         // Configure dialog to open on pressing Escape
         auto size = getSize();
-        onMenuDialog = new Dialog ({size.x / 4, size.y / 5}, {size.x / 2, size.y / 2}, "Exit the game?");
+        onMenuDialog = kj::heap <Dialog> (Vector2 (size.x / 4, size.y / 5), Vector2 (size.x / 2, size.y / 2), "Exit the game?");
         onMenuDialog->addButton ("Restart", CLOSURE (this, & GameScene::onRestart));
         onMenuDialog->addButton ("New game", CLOSURE (this, & GameScene::onNewGame));
         onMenuDialog->addButton ("Disconnect", CLOSURE (this, & GameScene::onDisconnect));
@@ -77,22 +77,22 @@ namespace kt {
         gameResources.loadXML (GAME_RESOURCES);
 
         // Create the world
-        auto & world = actors.world = new World (gameResources.getResAnim ("sky"), WORLD_SIZE);
+        auto & world = actors.world = kj::heap <World> (gameResources.getResAnim ("sky"), WORLD_SIZE);
         addChild (world);
 
         // Generate a couple of planets, number based on world size
         auto planetAnimation = gameResources.getResAnim ("venus");
         int const number_of_planets = PLANETS_PER_PIXEL * getSize().x * getSize().y;
         for (std::size_t i = 0; i < number_of_planets; i++) {
-            actors.planets.push_back (new Planet (* world, planetAnimation, {
+            actors.planets.push_back (kj::heap <Planet> (* world, planetAnimation, Vector2 (
                     float (rng.random ({100, world->getSize().x - 100})),
                     float (rng.random ({100, world->getSize().y - 100}))
-            }, float (rng.random ({0.3, 0.7}))));
+            ), float (rng.random ({0.3, 0.7}))));
         }
 
         // Create the keyboard-controlled spaceship with ID = 0
         Spaceship::resetCounter();
-        actors.localShip = new KeyboardSpaceship (* world, & gameResources, MenuScene::getUsername(), waitscope);
+        actors.localShip = kj::heap <KeyboardSpaceship> (* world, & gameResources, MenuScene::getUsername(), waitscope);
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
@@ -115,12 +115,13 @@ namespace kt {
                 actors.remoteShips.erase (username);
 
                 // Case 2b: Create a new remote ship connected to the given handle
-                spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
-                actors.remoteShips.emplace (username, ship);
-                ship->setOnDone ([](){ return kj::READY_NOW; });
-                ship->setData (data);
-                ship->setHandle (std::move (handle));
-                return ship->getSink ();
+                auto owned_ship = kj::heap <RemoteSpaceship> (* actors.world, & gameResources, username);
+                actors.remoteShips.emplace (username, kj::mv (owned_ship));
+                auto & ship = * actors.remoteShips.at (username);
+                ship.setOnDone ([](){ return kj::READY_NOW; });
+                ship.setData (data);
+                ship.setHandle (std::move (handle));
+                return ship.getSink ();
             } catch (std::exception & e) {
                 logs::warning ("Error on registering new spaceship");
                 return {};
@@ -158,16 +159,16 @@ namespace kt {
 
     void GameScene::onMenu (Event * event) {
         // Open a dialog with options to join a remote game or restart or quit the current one
-        if (getLastChild() == onMenuDialog) removeChild (onMenuDialog);
-        else addChild (onMenuDialog);
+        if (getLastChild().get() == onMenuDialog.get()) removeChild (onMenuDialog.get());
+        else addChild (onMenuDialog.get());
     }
 
     GameScene::~GameScene() noexcept {
         // Destroy KeyboardSpaceship
-        if (auto ship = actors.localShip) ship->destroy().wait (waitscope);
+        if (auto & ship = actors.localShip) ship->destroy().wait (waitscope);
 
         // Destroy RemoteSpaceships
-        for (auto ship : actors.remoteShips) ship.second->destroy().wait (waitscope);
+        for (auto & ship : actors.remoteShips) ship.second->destroy().wait (waitscope);
         actors.remoteShips.clear();
 
         // Free all game assets
@@ -176,22 +177,21 @@ namespace kt {
         // Remove this scene including all its listeners
         removeChildren();
         detach();
-        getStage()->removeAllEventListeners();
     }
 
     void GameScene::onRestart (Event * event) {
         GameScene::~GameScene();
-        new GameScene (rng.seed);
+        instance = kj::heap <GameScene> (rng.seed);
     }
 
     void GameScene::onNewGame (Event * event) {
         GameScene::~GameScene();
-        new GameScene (RANDOM_SEED);
+        instance = kj::heap <GameScene> (RANDOM_SEED);
     }
 
     void GameScene::onDisconnect (Event * event) {
         GameScene::~GameScene();
-        new MenuScene();
+        instance = kj::heap <MenuScene> ();
     }
 
     void GameScene::onQuit (Event * event) {

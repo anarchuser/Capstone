@@ -125,6 +125,10 @@ namespace kt {
         // Forward call to parent class
         Actor::addChild (child);
     }
+
+    World::~World () noexcept {
+        detach();
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

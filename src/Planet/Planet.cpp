@@ -74,6 +74,10 @@ namespace kt {
 
         Actor::update (updateState);
     }
+
+    Planet::~Planet () noexcept {
+        detach();
+    }
 }
 
 /* Copyright © 2022 Aaron Alef */

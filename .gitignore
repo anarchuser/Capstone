@@ -2,10 +2,11 @@
 /.idea
 
 # Exclude temporary / build / auto-generated directories
-/*Remote*
+/*Release*
 /*Debug*
 /*build*
 /*tmp*
 *generated*
 /docs
+/vgcore*
 
