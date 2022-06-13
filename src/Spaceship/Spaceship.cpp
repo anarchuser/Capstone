@@ -128,6 +128,8 @@ namespace kt {
             return onDone();
         } catch (std::bad_function_call & e) {
             logs::warning ("Spaceship destroyed without done callback registered");
+        } catch (std::exception & e) {
+            logs::warning ("Unknown exception on Spaceship::destroy:\n%s", e.what());
         }
     }
 
