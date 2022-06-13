@@ -98,33 +98,33 @@ namespace kt {
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
         auto registrar = kj::heap <cg::RegistrarImpl> (hostname());
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
-            try {
-                auto & username = data.username;
-                OX_ASSERT (username != "Planet");
+            auto & username = data.username;
+            OX_ASSERT (username != "Planet");
 
-                // Case 1: the registered ship is the keyboard-controlled original one
-                if (auto & ship = actors.localShip) {
-                    if (ship->getName () == username) {
-                        ship->setData (data);
-                        ship->setHandle (std::move (handle));
-                        return ship->getSink ();
-                    }
+            // Case 1: the registered ship is the keyboard-controlled original one
+            if (auto & ship = actors.localShip) {
+                if (ship->getName () == username) {
+                    ship->setData (data);
+                    ship->setHandle (std::move (handle));
+                    return ship->getSink ();
                 }
-                // Case 2a: A remote ship with the given name is already registered -> destroy the existing one
-                std::lock_guard<std::mutex> guard (actors.mx);
-                actors.remoteShips.erase (username);
+            }
+            static std::mutex mx;
+            std::lock_guard<std::mutex> guard (mx);
 
-                // Case 2b: Create a new remote ship connected to the given handle
-                spRemoteSpaceship ship = new RemoteSpaceship (* actors.world, & gameResources, username);
+            spRemoteSpaceship ship;
+            if (actors.remoteShips.contains (username)) {
+                // Case 2a: Ship exists already; retrieve and update it
+                ship = actors.remoteShips.at (username);
+            } else {
+                // Case 2b: Ship does not exist yet; create a new one
+                ship = new RemoteSpaceship (* actors.world, & gameResources, username);
                 actors.remoteShips.emplace (username, ship);
                 ship->setOnDone ([](){ return kj::READY_NOW; });
-                ship->setData (data);
-                ship->setHandle (std::move (handle));
-                return ship->getSink ();
-            } catch (std::exception & e) {
-                logs::warning ("Error on registering new spaceship");
-                return {};
             }
+            ship->setData (data);
+            ship->setHandle (std::move (handle));
+            return ship->getSink ();
         });
         return registrar;
     }
