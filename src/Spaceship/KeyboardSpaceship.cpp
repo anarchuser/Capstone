@@ -47,6 +47,9 @@ namespace kt {
             onUpdate ({updateState.time, queried, getData()}).wait (waitscope);
         } catch (std::bad_function_call & e) {
             logs::warning ("KeyboardSpaceship::onUpdate not configured");
+        } catch (std::exception & e) {
+            logs::warning ("Unknown exception on KeyboardSpaceship::update:\n%s", e.what());
+            destroy();
         }
         Spaceship::update (updateState);
     }
