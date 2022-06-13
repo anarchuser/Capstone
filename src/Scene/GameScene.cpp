@@ -109,7 +109,9 @@ namespace kt {
                     return ship->getSink ();
                 }
             }
-            std::lock_guard<std::mutex> guard (actors.mx);
+            static std::mutex mx;
+            std::lock_guard<std::mutex> guard (mx);
+
             spRemoteSpaceship ship;
             if (actors.remoteShips.contains (username)) {
                 // Case 2a: Ship exists already; retrieve and update it
