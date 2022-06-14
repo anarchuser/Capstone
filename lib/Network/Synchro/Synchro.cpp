@@ -220,21 +220,19 @@ namespace cg {
             auto estimate = estimateShipData (data);
             return estimate.then ([this, handle = handle, item = item] (Spaceship const & data) mutable {
                 item.spaceship = data;
-                kj::Vector <kj::Promise <void>> promises;
 
                 // Distribute item to all remote clients
                 for (auto & client : remotes) {
-                    promises.add (sendItemToClient (item, handle, client.second).catch_ (
+                    sendItemToClient (item, handle, client.second).detach (
                             [this, id = client.first] (kj::Exception && e) {
                                 KJ_DLOG (WARNING, "Sending item to remote client " + id + " failed", e.getDescription());
                                 disconnect (id);
-                            }));
+                            });
                 }
                 // Distribute item to local client
                 if (local.has_value()) {
-                    promises.add (sendItemToClient (item, handle, local.value()));
+                    return sendItemToClient (item, handle, local.value());
                 }
-                return kj::joinPromises (promises.releaseAsArray());
             });
         } // Item came from remote client -> distribute to local client only
         if (local.has_value()) {
