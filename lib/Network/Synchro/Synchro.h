@@ -4,8 +4,8 @@
 #include "Network/Registrar/Registrar.h"
 #include "Network/ShipSink/ShipSink.h"
 #include "Network/ShipHandle/ShipHandle.h"
+#include "Network/Client.h"
 
-#include "Data/Client.h"
 #include "Data/Item.h"
 
 #include <functional>

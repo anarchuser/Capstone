@@ -1,7 +1,7 @@
 #include "Client.h"
 
 namespace cg {
-    kj::Promise <void> Client::distributeSpaceship (Spaceship const & ship, ShipHandle_t handle) {
+    kj::Promise <void> Client::registerShip (Spaceship const & ship, ShipHandle_t handle) {
         auto & username = ship.username;
         if (sinks.contains (username)) return kj::READY_NOW;
 
@@ -15,7 +15,7 @@ namespace cg {
         });
     }
 
-    kj::Promise <void> Client::sendItemToClient (Item const & item, ShipHandle_t handle) {
+    kj::Promise <void> Client::sendItem (Item const & item, ShipHandle_t handle) {
         auto const & [time, direction, data] = item;
         auto const & username = data.username;
 
@@ -23,7 +23,7 @@ namespace cg {
             // No sink exists yet -> request one
             return handle.getShipRequest().send()
                     .then ([this, handle] (auto results) mutable {
-                        return distributeSpaceship (Spaceship (results.getShip()), handle);
+                        return registerShip (Spaceship (results.getShip ()), handle);
                     });
         }
 

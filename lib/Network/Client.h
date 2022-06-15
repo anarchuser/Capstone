@@ -8,7 +8,7 @@
 #include <thread>
 
 namespace cg {
-    /// This struct holds everything necessary to manage one connected client
+    /// This struct manages the data flow to and from one connected client
     struct Client {
         /// Construct a new client reference to the given Registrar
         inline explicit Client (Registrar_t registrar): registrar {std::move (registrar)} {}
@@ -22,11 +22,11 @@ namespace cg {
         /// List of all known ship sinks to redirect
         std::unordered_map <ShipName, ShipSink_t> sinks;
 
-        /// Hand out spaceship to the specified client
-        kj::Promise <void> distributeSpaceship (Spaceship const & ship, ShipHandle_t handle);
+        /// Register the given ship using this client's registrar
+        kj::Promise <void> registerShip (Spaceship const & ship, ShipHandle_t handle);
 
         /// Helper to propagate item to sink of one specific client
-        kj::Promise <void> sendItemToClient (Item const & item, ShipHandle_t handle);
+        kj::Promise <void> sendItem (Item const & item, ShipHandle_t handle);
 
         /// Close connection to the given ship. Send a done request and delete its sink and handle, if available
         kj::Promise<void> erase (ShipName const & username);

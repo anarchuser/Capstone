@@ -138,7 +138,7 @@ namespace cg {
 
         if (local.has_value()) {
             log ("Register ship to local client");
-            detach (local->distributeSpaceship (ship, handle));
+            detach (local->registerShip (ship, handle));
         }
         if (id == ID) {
             log ("Register ship to remote clients");
@@ -168,7 +168,7 @@ namespace cg {
         kj::Vector <kj::Promise <void>> promises;
         for (auto & client : remotes) {
             log ("Broadcast ship " + ship.username + " to remote client " + client.first);
-            promises.add (client.second.distributeSpaceship (ship, handle));
+            promises.add (client.second.registerShip (ship, handle));
         }
         return kj::joinPromises (promises.releaseAsArray());
     }
@@ -210,7 +210,7 @@ namespace cg {
         if (id == ID) {
             // Item came from local client -> distribute to all remote clients
             for (auto & client : remotes) {
-                client.second.sendItemToClient (item, handle)
+                client.second.sendItem (item, handle)
                         .detach ([this, id = client.first] (kj::Exception && e) {
                             KJ_DLOG (WARNING, "Sending item to remote client " + id + " failed", e.getDescription());
                             disconnect (id);
@@ -219,7 +219,7 @@ namespace cg {
         }
         if (local.has_value()) {
             // Distribute to local client
-            return local->sendItemToClient (item, handle);
+            return local->sendItem (item, handle);
         }
         /* All cases should have been handled */
         KJ_UNREACHABLE
