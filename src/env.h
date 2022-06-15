@@ -10,11 +10,14 @@
 #include "oxygine-framework.h"
 
 #define MAX_HOSTNAME_SIZE 256
+#define DEFAULT_USERNAME "username"
 
+/// Try to read out the currently logged in username. Defaults to DEFAULT_USERNAME
 static inline std::string const & username () {
-    static const std::string username = std::getenv ("USER") ?: "username";
+    static const std::string username = std::getenv ("USER") ?: DEFAULT_USERNAME;
     return username;
 }
+/// Try to read out this machine's hostname, else return the username
 static inline std::string const & hostname () {
     static const auto hostname = [] () ->std::string {
         char buffer [MAX_HOSTNAME_SIZE] = {0};
