@@ -21,9 +21,9 @@ namespace cg {
         GetShipPromiseCallback onGetShip;
 
     public:
-        inline void setOnDone (DoneCallback && callback) { onDone = callback; };
-        inline void setOnSendItem (SendItemCallback && callback) { onSendItem = callback; };
-        inline void setOnGetShip (GetShipPromiseCallback && callback) { onGetShip = callback; };
+        inline void setOnDone (DoneCallback && callback) { onDone = std::move (callback); };
+        inline void setOnSendItem (SendItemCallback && callback) { onSendItem = std::move (callback); };
+        inline void setOnGetShip (GetShipPromiseCallback && callback) { onGetShip = std::move (callback); };
 
         ::kj::Promise <void> done     (DoneContext     context) override;
         ::kj::Promise <void> sendItem (SendItemContext context) override;

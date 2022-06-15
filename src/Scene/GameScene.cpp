@@ -100,6 +100,7 @@ namespace kt {
         registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
             auto & username = data.username;
             OX_ASSERT (username != "Planet");
+            logs::messageln ("Registered ship with username '%s'", username.c_str());
 
             // Case 1: the registered ship is the keyboard-controlled original one
             if (auto & ship = actors.localShip) {
