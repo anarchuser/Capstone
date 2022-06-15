@@ -24,7 +24,7 @@ namespace cg {
         /// Construct a new Registrar::Server implementation
         explicit RegistrarImpl (ClientID id);
 
-        inline void setOnRegisterShip (RegisterShipCallback && callback) { onRegisterShip = callback; }
+        inline void setOnRegisterShip (RegisterShipCallback && callback) { onRegisterShip = std::move (callback); }
 
         ::kj::Promise <void> registerShip (RegisterShipContext context) override;
     };

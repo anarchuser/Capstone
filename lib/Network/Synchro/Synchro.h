@@ -4,8 +4,8 @@
 #include "Network/Registrar/Registrar.h"
 #include "Network/ShipSink/ShipSink.h"
 #include "Network/ShipHandle/ShipHandle.h"
+#include "Network/Client.h"
 
-#include "Data/Client.h"
 #include "Data/Item.h"
 
 #include <functional>
@@ -36,21 +36,14 @@ namespace cg {
         /* Ship registration functions */
         /// Configure the newly registered spaceship and return a sink to it. Registrar callback
         kj::Own <ShipSinkImpl> registerShip (Spaceship const & ship, ClientID const & id, ShipHandle_t);
-        /// Distribute spaceship to every client
-        kj::Promise <void> broadcastSpaceship (Spaceship const & ship, ShipHandle_t handle, bool isRemote);
-        /// Hand out spaceship to the specified client
-        kj::Promise <void> distributeSpaceship (Spaceship const & ship, ShipHandle_t handle, Client & receiver);
+        /// Distribute spaceship to every remote client
+        kj::Promise <void> broadcastSpaceship (Spaceship const & ship, ShipHandle_t handle);
 
         /* ShipSink callback functions */
         /// Callback on closing sink; propagate to sink of all clients
         kj::Promise <void> doneCallback (ShipName const & username);
         /// Callback on item received; propagate to sink of all clients
         kj::Promise <void> sendItemCallback (Item const & item, ClientID const & id);
-        /// Helper to propagate item to sink of one specific client
-        kj::Promise <void> sendItemToClient (Item const & item, ShipHandle_t handle, Client & receiver);
-
-        /// Compare original ship to all remote clones and estimate their true status
-        kj::Promise <Spaceship> estimateShipData (Spaceship const & original);
 
     public:
         /// Constructs a new Synchro::Server implementation

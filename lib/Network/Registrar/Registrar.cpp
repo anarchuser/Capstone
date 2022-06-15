@@ -21,7 +21,8 @@ namespace cg {
         log ("Register ship requested: " + std::string (params.getShip().getUsername()));
 
         try {
-            context.getResults().setSink (onRegisterShip (Spaceship (params.getShip()), ID, params.getHandle()));
+            auto sink = onRegisterShip (Spaceship (params.getShip()), ID, params.getHandle());
+            context.initResults().setSink (kj::mv (sink));
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "RegistrarImpl::registerShip called without valid callback registered");
         }

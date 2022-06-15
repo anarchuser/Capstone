@@ -7,10 +7,10 @@
 #include "Registrar/Registrar.h"
 #include "ShipSink/ShipSink.h"
 #include "ShipHandle/ShipHandle.h"
+#include "Client.h"
 
 #include "Data/Direction.h"
 #include "Data/Spaceship.h"
-#include "Data/Client.h"
 
 #include <atomic>
 #include <functional>
