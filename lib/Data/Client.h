@@ -7,38 +7,41 @@
 #include <thread>
 
 namespace cg {
-    /// Struct holding all kinds of information about things connected
+    /// This struct holds everything necessary to manage one connected client
     struct Client {
-        inline explicit Client (Registrar_t registrar): registrar {std::move (registrar)} {}
+        /// Construct a new client reference to the given Registrar
+        inline explicit Client (Registrar_t && registrar): registrar {std::move (registrar)} {}
 
-        /// Send a done request to the sink of the given ship, then remove it from the list
-        kj::Promise<void> erase (ShipName const & username);
-
-        /// Ensure every sink has been deleted
-        kj::Promise<void> destroy();
-
-        /// Thing used to update the client (e.g., new ship spawned)
+        /// This registrar is used to tell the referenced client of new ships registered
         Registrar_t registrar;
 
-        /// List of handles to all ships in possession registered by this client
+        /// List of handles to all ships this client has registered and therefore owns
         std::unordered_map <ShipName, ShipHandle_t> ships;
 
-        /// List of all ship sinks this client needs to distribute incoming events to
+        /// List of all known ship sinks to redirect
         std::unordered_map <ShipName, ShipSink_t> sinks;
+
+        /// Close connection to the given ship. Send a done request and delete its sink and handle, if available
+        kj::Promise<void> erase (ShipName const & username);
+
+        /// Close connection to all registered ships
+        kj::Promise<void> destroy();
     };
 
-    /// Effectively the same as its parent; indicates a local client
+    /// A client that is connected directly, not via a remote Synchro instance
     struct LocalClient : public Client {
-        /// Constructs a new local client instance
-        inline explicit LocalClient(Registrar_t registrar): Client (registrar) {}
+        /// Construct a new local client instance
+        inline explicit LocalClient (Registrar_t && registrar): Client (std::forward <Registrar_t> (registrar)) {}
     };
 
     /// A client additionally holding a reference to a remote synchro
     struct RemoteClient : public Client {
-        /// Constructs a new remote client connected to the given synchro instance
-        inline RemoteClient (Registrar_t registrar, Synchro_t synchro): Client (registrar), synchro {std::move (synchro)} {}
+        /// Construct a new remote client connected to the given remote Synchro instance
+        inline RemoteClient (Registrar_t && registrar, Synchro_t && synchro)
+                : Client (std::forward <Registrar_t> (registrar))
+                , synchro {std::move (synchro)} {}
 
-        /// If the client is a remote backend use this to interact with it
+        /// The remote backend through which this client is accessed
         Synchro_t synchro;
     };
 

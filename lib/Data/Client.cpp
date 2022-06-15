@@ -9,9 +9,10 @@ namespace cg {
         if (!sinks.contains (username)) return kj::READY_NOW;
 
         // Close the sink and then remove it from the map
-        return sinks.at (username).doneRequest().send().ignoreResult().then ([this, username] () {
-            sinks.erase (username);
-        });
+        return sinks.at (username).doneRequest().send().ignoreResult()
+                .then ([this, username] () {
+                    sinks.erase (username);
+                });
     }
 
     kj::Promise <void> Client::destroy () {
