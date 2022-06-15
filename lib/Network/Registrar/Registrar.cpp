@@ -1,13 +1,9 @@
 #include "Registrar.h"
 
 namespace cg {
-    RegistrarImpl::RegistrarImpl (ClientID id)
-            : ID {std::move (id)}
-            {}
-
-    void RegistrarImpl::log (std::string const & msg) {
+    void RegistrarImpl::log (std::string const & msg) const {
         std::stringstream ss;
-        ss << "Registrar {" << ID << "} @" << this << ": '" << msg << "'";
+        ss << "Registrar @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
 #ifdef DEBUG_MINOR
         debug_stdout (ss.str());
@@ -21,7 +17,7 @@ namespace cg {
         log ("Register ship requested: " + std::string (params.getShip().getUsername()));
 
         try {
-            auto sink = onRegisterShip (Spaceship (params.getShip()), ID, params.getHandle());
+            auto sink = onRegisterShip (Spaceship (params.getShip()), params.getHandle());
             context.initResults().setSink (kj::mv (sink));
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "RegistrarImpl::registerShip called without valid callback registered");

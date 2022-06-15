@@ -8,7 +8,7 @@ namespace cg {
             , remotes {remotes}
             {}
 
-    void SynchroImpl::log (std::string const & msg) {
+    void SynchroImpl::log (std::string const & msg) const {
         std::stringstream ss;
         ss << "Synchro {" << ID << "} @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
@@ -87,8 +87,10 @@ namespace cg {
     }
 
     ::kj::Own <RegistrarImpl> SynchroImpl::newRegistrar (ClientID const & id) {
-        auto registrar = kj::heap <RegistrarImpl> (id);
-        registrar->setOnRegisterShip (LAMBDA (registerShip));
+        auto registrar = kj::heap <RegistrarImpl> ();
+        registrar->setOnRegisterShip ([this, id] (Spaceship const & ship, ShipHandle_t handle) {
+            return registerShip (ship, id, handle);
+        });
         return registrar;
     }
     ::kj::Own <SynchroImpl> SynchroImpl::newSynchro (ClientID const & id) {

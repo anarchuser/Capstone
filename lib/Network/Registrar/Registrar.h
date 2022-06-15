@@ -8,22 +8,17 @@
 #include <string>
 
 namespace cg {
-    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, ClientID const &, ShipHandle_t)>;
+    using RegisterShipCallback = std::function <kj::Own <ShipSinkImpl> (Spaceship, ShipHandle_t)>;
 
     class RegistrarImpl final: public Backend::Registrar::Server {
     private:
         /// Log function of this implementation
-        void log (std::string const & msg);
+        void log (std::string const & msg) const;
 
         RegisterShipCallback onRegisterShip;
 
-        /// The identifier of this instance
-        ClientID const ID;
-
     public:
-        /// Construct a new Registrar::Server implementation
-        explicit RegistrarImpl (ClientID id);
-
+        /// Tell this registrar how to handle registerShip requests
         inline void setOnRegisterShip (RegisterShipCallback && callback) { onRegisterShip = std::move (callback); }
 
         ::kj::Promise <void> registerShip (RegisterShipContext context) override;
