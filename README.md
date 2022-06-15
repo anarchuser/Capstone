@@ -56,7 +56,7 @@ Pressing `Escape` in-game opens a menu that allows you to restart, disconnect, a
   * [x] Run game over player 1's local backend
   * [x] Run game over each player's local backend
   * [x] Share all existing connections back
-  * [ ] Handle disconnects smoothly
+  * [x] Handle disconnects smoothly
 * [ ] Synchronisation
   * [x] Transmit initial spaceship data on join
   * [x] Continuously synchronise spaceships per server across clients *
