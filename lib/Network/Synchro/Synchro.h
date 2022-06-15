@@ -17,15 +17,18 @@ namespace cg {
     /// Implementation of the Synchro::Server interface
     class SynchroImpl final: public Backend::Synchro::Server {
     private:
-        /// Log function of this implementation
-        void log (std::string const & msg);
-
         /// The identifier of this instance
         ClientID const ID;
 
-        std::optional <LocalClient> & local;                   /// The one allowed *local* client connected
-        std::unordered_map <ClientID, RemoteClient> & remotes; /// List of all *remotes* clients connected
+        /// Reference to the one allowed *local* client connected. Owned by the Backend
+        std::optional <LocalClient> & local;
+        /// Reference to the list of all *remotes* clients connected. Owned by the Backend
+        std::unordered_map <ClientID, RemoteClient> & remotes;
 
+        /// Log function of this implementation
+        void log (std::string const & msg) const;
+
+        /* Client management functions */
         /// Return raw pointer to Client if id was in remote or local. Nullptr otherwise
         Client * findClient (ClientID const & id);
         /// Remove the client if it exists, regardless of if it is local or remote
@@ -61,6 +64,7 @@ namespace cg {
         /// Connect to a remote and store the resulting new client
         kj::Promise <void> connectTo (ClientID const & id, Synchro_t remote);
 
+        /* RPC function call implementations */
         ::kj::Promise <void> connect (ConnectContext context) override;
         ::kj::Promise <void> share   (ShareContext   context) override;
     };

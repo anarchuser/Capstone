@@ -1,7 +1,7 @@
 #include "ShipHandle.h"
 
 namespace cg {
-    void ShipHandleImpl::log (std::string const & msg) {
+    void ShipHandleImpl::log (std::string const & msg) const {
         std::stringstream ss;
         ss << "ShipHandle @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str ());
@@ -17,6 +17,7 @@ namespace cg {
     ::kj::Promise <void> ShipHandleImpl::getSink (GetSinkContext context) {
         log ("Sink requested");
         auto results = context.getResults();
+
         try {
             results.setSink (onGetSink());
         } catch (std::bad_function_call & e) {
@@ -28,20 +29,23 @@ namespace cg {
     ::kj::Promise <void> ShipHandleImpl::getShip (GetShipContext context) {
         auto results = context.getResults();
         try {
-            onGetShip().initialise (results.getShip());
+            auto spaceship = onGetShip();
+            log ("Data requested for ship " + spaceship.username);
+            spaceship.initialise (results.initShip());
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipHandle::getShip called without valid callback registered");
         }
-        log ("Returning requested ship " + std::string (results.getShip().getUsername().asReader()));
         return kj::READY_NOW;
     }
 
     ::kj::Promise <void> ShipHandleImpl::setShip (SetShipContext context) {
-        log ("Ship change requested");
         auto params = context.getParams();
         KJ_REQUIRE (params.hasShip());
+        Spaceship spaceship (params.getShip());
+        log ("Change requested to ship " + spaceship.username);
+
         try {
-            onSetShip (Spaceship (params.getShip()));
+            onSetShip (spaceship);
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipHandle::setShip called without valid callback registered");
         }

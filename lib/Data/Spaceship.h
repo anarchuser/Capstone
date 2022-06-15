@@ -23,13 +23,11 @@ namespace cg {
         vector2 position;
         /// The velocity of the spaceship
         vector2 velocity;
-        /// The direction the spaceship was looking
+        /// The direction the spaceship is looking, in radians
         float angle;
         /// The amount of remaining hit points of the spaceship
         int health;
 
-        /// Construct a new spaceship from the given Spaceship::Reader
-        explicit Spaceship (Backend::Spaceship::Reader reader);
         /// Construct a new spaceship from the given parameters
         explicit Spaceship (
                 std::string username,
@@ -37,6 +35,8 @@ namespace cg {
                 vector2 velocity = {0},
                 float angle = 0,
                 int health = 100);
+        /// Construct a new spaceship from the given Spaceship::Reader
+        explicit Spaceship (Backend::Spaceship::Reader reader);
 
         /// Use this spaceship to initialise the given Spaceship::Builder
         void initialise (Backend::Spaceship::Builder builder) const;

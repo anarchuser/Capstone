@@ -9,7 +9,7 @@ namespace cg {
             , synchro (ID, local, remotes)
             {}
 
-    void BackendImpl::log (std::string const & msg) {
+    void BackendImpl::log (std::string const & msg) const {
         std::ostringstream ss;
         ss << "Backend {" << ID << "} @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());
@@ -30,12 +30,12 @@ namespace cg {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasId());
         ClientID const & remoteID = params.getId();
+
         log ("Connect request received from local client " + ClientID (params.getId()));
         KJ_REQUIRE (remoteID == ID, remoteID, "Local client ID must have our backend ID");
         KJ_REQUIRE (!local, "A local client is registered already");
 
         KJ_REQUIRE (params.hasRegistrar());
-
         local.emplace (params.getRegistrar());
 
         auto results = context.getResults();
@@ -50,10 +50,13 @@ namespace cg {
         auto params = context.getParams();
         KJ_REQUIRE (params.hasId());
         ClientID const & remoteID = params.getId();
+
         log ("Join request received from " + remoteID);
         KJ_REQUIRE (remoteID != ID, remoteID, "Remote client cannot have our own identifier");
+        KJ_REQUIRE (!remotes.contains (remoteID), remoteID, "A remote client with this ID is already registered");
 
-        auto promises = kj::heapArrayBuilder <kj::Promise <void>> (2);
+        // Amalgamation of all asynchronous call results
+        kj::Vector <kj::Promise <void>> promises;
 
         // Share our own synchro callback to new connection
         KJ_REQUIRE (params.hasRemote());
@@ -62,7 +65,7 @@ namespace cg {
         // Connect back to received synchro
         promises.add (synchro.connectTo (remoteID, params.getRemote()));
 
-        return kj::joinPromises (promises.finish());
+        return kj::joinPromises (promises.releaseAsArray());
     }
 }
 

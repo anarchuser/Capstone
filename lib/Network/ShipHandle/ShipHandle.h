@@ -14,15 +14,18 @@ namespace cg {
     class ShipHandleImpl final: public Backend::ShipHandle::Server {
     private:
         /// Log function of this implementation
-        void log (std::string const & msg);
+        void log (std::string const & msg) const;
 
         GetSinkCallback onGetSink;
         GetShipCallback onGetShip;
         SetShipCallback onSetShip;
 
     public:
+        /// Tell this handle how to handle getSink requests
         inline void setOnGetSink (GetSinkCallback && callback) { onGetSink = std::move (callback); };
+        /// Tell this handle how to handle getShip requests
         inline void setOnGetShip (GetShipCallback && callback) { onGetShip = std::move (callback); };
+        /// Tell this handle how to handle setShip requests
         inline void setOnSetShip (SetShipCallback && callback) { onSetShip = std::move (callback); };
 
         ::kj::Promise <void> getSink (GetSinkContext context) override;

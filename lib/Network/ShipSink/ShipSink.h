@@ -14,15 +14,18 @@ namespace cg {
     class ShipSinkImpl final: public Backend::ShipSink::Server {
     private:
         /// Log function of this implementation
-        void log (std::string const & msg);
+        void log (std::string const & msg) const;
 
         DoneCallback onDone;
         SendItemCallback onSendItem;
         GetShipPromiseCallback onGetShip;
 
     public:
+        /// Tell the sink hwo to handle done requests
         inline void setOnDone (DoneCallback && callback) { onDone = std::move (callback); };
+        /// Tell the sink hwo to handle sendItem requests
         inline void setOnSendItem (SendItemCallback && callback) { onSendItem = std::move (callback); };
+        /// Tell the sink hwo to handle getShip requests
         inline void setOnGetShip (GetShipPromiseCallback && callback) { onGetShip = std::move (callback); };
 
         ::kj::Promise <void> done     (DoneContext     context) override;

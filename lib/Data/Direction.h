@@ -4,18 +4,18 @@
 #include "Network/config.h"
 
 namespace cg {
-    /// Stores directional data in one byte
+    /// Stores directional data in one byte.
     struct Direction {
-        /// Acceleration flag. Negative means do not update
+        /// Tell an entity to accelerate
         char accelerate: 2 = false;
-        /// Deceleration flag. Negative means do not update
+        /// Tell an entity to decelerate
         char decelerate: 2 = false;
-        /// Rotate left flag. Negative means do not update
+        /// Tell an entity to rotate left
         char rotateLeft: 2 = false;
-        /// Rotate right flag. Negative means do not update
+        /// Tell en entity to rotate right
         char rotateRight: 2 = false;
 
-        /// Default constructor initialising all values to false
+        /// Construct a direction with all values set to false
         Direction() = default;
         /// Construct a new Direction struct from the given Direction::Reader
         explicit Direction (Backend::Direction::Reader reader);

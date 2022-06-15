@@ -13,8 +13,8 @@ inline void debug_stdout (std::string const & message) {
 #endif
 }
 
-/// Generic macro for converting a member function into a lambda
-#define LAMBDA(func) [this] (auto ...args) { return func (args...); }
+/// Generic macro for converting a member function into a lambda. Use with caution
+#define LAMBDA(func) [this] (auto ... args) { return func (args ...); }
 
 #endif //CAPSTONE_HELPER_H
 

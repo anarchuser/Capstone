@@ -96,8 +96,8 @@ namespace kt {
     }
 
     kj::Own <cg::RegistrarImpl> GameScene::getRegistrarImpl () {
-        auto registrar = kj::heap <cg::RegistrarImpl> (hostname());
-        registrar->setOnRegisterShip ([this] (cg::Spaceship const & data, cg::ClientID const & id, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
+        auto registrar = kj::heap <cg::RegistrarImpl> ();
+        registrar->setOnRegisterShip ([this, id = hostname()] (cg::Spaceship const & data, cg::ShipHandle_t handle) -> kj::Own <cg::ShipSinkImpl> {
             auto & username = data.username;
             OX_ASSERT (username != "Planet");
             logs::messageln ("Registered ship with username '%s'", username.c_str());

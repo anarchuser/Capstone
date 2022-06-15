@@ -42,8 +42,8 @@ SCENARIO ("A backend handles basic requests") {
             auto registerClientRequest = main.connectRequest();
             registerClientRequest.setId (USERNAME);
 
-            auto registrar = kj::heap <cg::RegistrarImpl> (USERNAME);
-            registrar->setOnRegisterShip ([] (cg::Spaceship const & ship, cg::ClientID const & id, cg::ShipHandle_t const & handle) {
+            auto registrar = kj::heap <cg::RegistrarImpl> ();
+            registrar->setOnRegisterShip ([id = USERNAME] (cg::Spaceship const & ship, cg::ShipHandle_t const & handle) {
                 CHECK (id == USERNAME);
 
                 CHECK (ship.health == HEALTH_VALUE);

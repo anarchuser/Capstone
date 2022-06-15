@@ -27,8 +27,6 @@ namespace kt {
         /// Turn debug view on or off. Invoked by pressing `` ` ``
         void toggleDebugDraw ();
 
-        /// Flag to tell the game when the game has been fully destroyed
-
     public:
         /// Physical world, i.e., box2d world responsible for the physics in the game
         b2World world {b2Vec2_zero};
@@ -41,7 +39,7 @@ namespace kt {
         /// Update all physical bodies and their corresponding sprites
         void update (UpdateState const & updateState) override;
 
-        /// Modulates the given vector to be within [0, world_size], i.e., ensures no object leaves the world
+        /// Modulates the given vector to be within [0, world_size), i.e., ensures no object leaves the world
         b2Vec2 wrap (b2Vec2 pos) const;
 
         /// Convert an oxygine vector to a box2d vector
