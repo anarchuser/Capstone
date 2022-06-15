@@ -11,7 +11,7 @@ namespace cg {
     }
 
     ::kj::Promise <void> ShipSinkImpl::done (DoneContext context) {
-        log ("Ship closed stream");
+        log ("Ship closed item stream");
 
         try {
             return onDone();
@@ -44,9 +44,10 @@ namespace cg {
         auto results = context.getResults();
 
         try {
-            return onGetShip().then ([results] (Spaceship const & ship) mutable {
-                return ship.initialise (results.initShip());
-            });
+            return onGetShip()
+                    .then ([&] (Spaceship const & ship) {
+                        ship.initialise (results.initShip());
+                    });
         } catch (std::bad_function_call & e) {
             KJ_DLOG (WARNING, "ShipSink::getShip called without valid callback registered");
         }
