@@ -29,15 +29,19 @@ namespace cg {
     /// Implementation of the Backend::Server interface
     class BackendImpl final: public Backend::Server {
     private:
-        /* Member variables */
-        ClientID const ID;                                   /// Our own identifier to send other backends
-        std::size_t const rng_seed;                          /// Seed for the random number generator
-        std::optional <LocalClient> local;                   /// The one allowed *local* client connected
-        std::unordered_map <ClientID, RemoteClient> remotes; /// List of all *remote* clients connected
+        /// Our own identifier to send other backends
+        ClientID const ID;
+        /// Seed for the random number generator
+        std::size_t const rng_seed;
+        /// The one allowed *local* client connected
+        std::optional <LocalClient> local;
+        /// List of all *remote* clients connected
+        std::unordered_map <ClientID, RemoteClient> remotes;
+        /// Our own synchro instance handling game synchronisation
         SynchroImpl synchro;
 
         /// Log function of this implementation
-        void log (std::string const & msg);
+        void log (std::string const & msg) const;
 
     public:
         /// Construct a new Backend::Server implementation

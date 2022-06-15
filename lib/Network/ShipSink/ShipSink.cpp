@@ -1,7 +1,7 @@
 #include "ShipSink.h"
 
 namespace cg {
-    void ShipSinkImpl::log (std::string const & msg) {
+    void ShipSinkImpl::log (std::string const & msg) const {
         std::stringstream ss;
         ss << "ShipSink @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str ());

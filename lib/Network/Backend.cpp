@@ -9,7 +9,7 @@ namespace cg {
             , synchro (ID, local, remotes)
             {}
 
-    void BackendImpl::log (std::string const & msg) {
+    void BackendImpl::log (std::string const & msg) const {
         std::ostringstream ss;
         ss << "Backend {" << ID << "} @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str());

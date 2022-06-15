@@ -1,7 +1,7 @@
 #include "ShipHandle.h"
 
 namespace cg {
-    void ShipHandleImpl::log (std::string const & msg) {
+    void ShipHandleImpl::log (std::string const & msg) const {
         std::stringstream ss;
         ss << "ShipHandle @" << this << ": '" << msg << "'";
         KJ_DLOG (INFO, ss.str ());
