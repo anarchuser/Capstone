@@ -108,7 +108,7 @@ namespace kt {
         GameScene ();
         /// Inject a new Game instance with given seed into the stage
         explicit GameScene (std::size_t seed);
-        /// Directly ping to an existing Game remotely
+        /// Directly connect to an existing Game remotely
         GameScene (std::string const & ip, unsigned short port);
         ~GameScene() noexcept override;
 
