@@ -55,6 +55,10 @@ namespace kt {
         /// Remote, mainly used to check if the ship is still connected
         std::optional <cg::ShipHandle_t> remote;
 
+        /// Physical body representing this spaceship in the physical world
+        b2Body * body = nullptr;
+
+        /// Flag to prevent duplicate destruction
         bool isDestroyed = false;
 
     protected:
@@ -68,9 +72,6 @@ namespace kt {
 
         /// Health of this particular instance
         int health = SPACESHIP_HEALTH;
-
-        /// Physical body representing this spaceship in the physical world
-        b2Body * body = nullptr;
 
         /// Update personal scoreboard based on current health
         void updateScoreboard (std::string const & msg = "", long ping = -1);

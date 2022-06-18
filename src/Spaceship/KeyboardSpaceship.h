@@ -24,14 +24,15 @@ namespace kt {
         /// The directions queried by the user
         cg::Direction queried;
 
+        /// Client scope needed to wait on callback promises
         kj::WaitScope & waitscope;
-
-    public:
-        /// Creates a new human-controllable spaceship. Only one such ship may exist in a game
-        KeyboardSpaceship (World & world, Resources * res, std::string const & username, kj::WaitScope & waitscope);
 
         /// When issuing commands, update Spaceship-specific flags
         void onSteeringEvent (ox::KeyEvent * event);
+
+    public:
+        /// Creates a new human-controllable spaceship. Only one such ship is supposed to exist in a game
+        KeyboardSpaceship (World & world, Resources * res, std::string const & username, kj::WaitScope & waitscope);
 
         /// Send directions queried by the user to the callback
         void update (UpdateState const & updateState) override;
