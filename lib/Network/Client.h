@@ -29,10 +29,10 @@ namespace cg {
         kj::Promise <void> sendItem (Item const & item, ShipHandle_t handle);
 
         /// Close connection to the given ship. Send a done request and delete its sink and handle, if available
-        kj::Promise<void> erase (ShipName const & username);
+        kj::Promise <void> erase (ShipName const & username);
 
         /// Close connection to all registered ships
-        kj::Promise<void> destroy();
+        kj::Promise <void> destroy();
     };
 
     /// A client that is connected directly, not via a remote Synchro instance
